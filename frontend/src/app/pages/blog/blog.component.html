@@ -1,0 +1,37 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Our Blog</h1>
+      <p class="hp-hero-sub">Stories about renting smart, making the most of what you own, and life on Rentify PK.</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/blog-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ COMING SOON ══ -->
+  <div class="hp-section">
+    <div class="hp-status-card">
+      <div class="hp-status-ic">📝</div>
+      <h2 class="hp-status-title">Coming Soon</h2>
+      <p class="hp-status-text">
+        We're working on it! Leave your email and we'll let you know the moment our first posts go live.
+      </p>
+
+      <div *ngIf="!subscribed">
+        <div class="hp-nl-form" [class.err]="error">
+          <input type="email" class="hp-nl-input" placeholder="Enter your email" [(ngModel)]="email" [disabled]="subscribing" (keyup.enter)="notifyMe()">
+          <button class="hp-nl-btn" (click)="notifyMe()" [disabled]="subscribing">{{ subscribing ? 'Saving…' : 'Notify Me' }}</button>
+        </div>
+        <p *ngIf="error" class="hp-nl-error">{{ error }}</p>
+      </div>
+
+      <div *ngIf="subscribed" class="hp-nl-success">
+        Thanks! We'll email you as soon as the blog is live.
+      </div>
+    </div>
+  </div>
+
+</div>

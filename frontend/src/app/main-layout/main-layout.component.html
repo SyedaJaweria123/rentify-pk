@@ -1,0 +1,46 @@
+<div class="layout-wrapper">
+
+  <!-- Global Loading Bar -->
+  <div *ngIf="loading" class="loading-bar-wrapper">
+    <div class="loading-bar"></div>
+  </div>
+
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <!-- Page Content -->
+  <main class="layout-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <app-footer *ngIf="!hideFooter"></app-footer>
+
+  <!-- Chatbot -->
+  <app-chatbot></app-chatbot>
+
+  <!-- Global Cart Drawer — opens only from the navbar cart icon -->
+  <app-cart-drawer></app-cart-drawer>
+
+  <!-- Global Video/Voice Call Modals — works on ANY page, not just /messages -->
+  <ng-container *ngIf="socketSvc.callState()?.incoming">
+    <app-video-call-modal
+      mode="incoming"
+      [callerName]="socketSvc.callState()!.callerName"
+      [roomId]="socketSvc.callState()!.roomId"
+      [callType]="socketSvc.callState()!.callType"
+      (onAccept)="acceptIncomingCall()"
+      (onDecline)="declineIncomingCall()">
+    </app-video-call-modal>
+  </ng-container>
+  <ng-container *ngIf="socketSvc.callState()?.active && !socketSvc.callState()?.incoming">
+    <app-video-call-modal
+      mode="active"
+      [roomId]="socketSvc.callState()!.roomId"
+      [callerName]="socketSvc.callState()!.callerName"
+      [callType]="socketSvc.callState()!.callType"
+      (onEnd)="endActiveCall()">
+    </app-video-call-modal>
+  </ng-container>
+
+</div>

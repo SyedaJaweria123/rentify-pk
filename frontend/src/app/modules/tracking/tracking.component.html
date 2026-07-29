@@ -1,0 +1,177 @@
+<!-- Rider: rider sidebar -->
+<app-rider-layout *ngIf="isRider">
+  <ng-container *ngTemplateOutlet="trackContent"></ng-container>
+</app-rider-layout>
+
+<!-- Renter: renter sidebar (with navbar) -->
+<app-renter-layout *ngIf="!isRider" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="trackContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #trackContent>
+<div class="tk-root">
+
+  <!-- Hero: title + search + illustration -->
+  <div class="tk-hero">
+    <div class="tk-hero-left">
+      <h1 class="tk-title">Track Your Delivery</h1>
+      <p class="tk-sub">Enter your booking ID to get the latest status of your rental delivery.</p>
+
+      <div class="tk-search-box">
+        <div class="tk-input-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+          <input type="text" [(ngModel)]="trackingInput" (keyup.enter)="track()"
+                 placeholder="Booking ID darain (e.g. 64abc...)">
+        </div>
+        <button class="tk-track-btn" (click)="track()" [disabled]="loading()">
+          <svg *ngIf="!loading()" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          {{ loading() ? 'Tracking...' : 'Track' }}
+        </button>
+        <p class="tk-hint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Apna booking ID enter karein
+        </p>
+      </div>
+    </div>
+    <div class="tk-hero-illus">
+      <img src="/track-illustration.png" alt="Track delivery" class="tk-illus-img">
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="tk-error" *ngIf="error()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    {{ error() }}
+  </div>
+
+  <!-- Results -->
+  <ng-container *ngIf="booking() as b">
+
+    <!-- Delivery Status Stepper -->
+    <div class="tk-card">
+      <div class="tk-card-head">
+        <h2 class="tk-card-title">Delivery Status</h2>
+        <span class="tk-eta" *ngIf="b.estimatedDelivery || b.deliveredAt">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          {{ b.deliveredAt ? 'Delivered' : 'Estimated Delivery' }}
+        </span>
+      </div>
+
+      <div class="tk-stepper">
+        <div class="tk-step" *ngFor="let step of timeline(b); let i = index; let last = last"
+             [class.done]="step.done" [class.current]="step.current">
+          <div class="tk-step-line" *ngIf="i > 0" [class.done]="step.done"></div>
+          <div class="tk-step-dot">
+            <svg *ngIf="step.done" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span *ngIf="!step.done" class="tk-step-num">{{ i + 1 }}</span>
+          </div>
+          <p class="tk-step-title">{{ step.title }}</p>
+          <p class="tk-step-time" *ngIf="step.time">{{ step.time }}</p>
+          <p class="tk-step-time tk-pending" *ngIf="!step.time">—</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Details -->
+    <div class="tk-card">
+      <h2 class="tk-card-title">Booking Details</h2>
+      <div class="tk-details">
+        <div class="tk-detail-thumb">
+          <img *ngIf="b.listing?.image || b.listing?.images?.[0]?.url" [src]="b.listing?.image || b.listing?.images?.[0]?.url" alt="">
+          <div *ngIf="!b.listing?.image && !b.listing?.images?.[0]?.url" class="tk-thumb-ph">📦</div>
+        </div>
+        <div class="tk-detail-main">
+          <h3 class="tk-item-name">{{ listingTitle(b) }}</h3>
+          <div class="tk-bid">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+            <span class="tk-bid-label">Booking ID</span>
+            <span class="tk-bid-val">{{ b.trackingNumber || b._id }}</span>
+          </div>
+          <div class="tk-status-line">
+            <span class="tk-delivery-type">
+              {{ b.deliveryMethod === 'delivery' ? '🛵 Doorstep Delivery' : '🏠 Self Pickup' }}
+            </span>
+          </div>
+        </div>
+        <div class="tk-detail-side">
+          <div class="tk-side-row">
+            <span class="tk-side-label">Booking Date</span>
+            <span class="tk-side-val">{{ b.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="tk-side-row">
+            <span class="tk-side-label">Payment Method</span>
+            <span class="tk-side-val">{{ b.paymentMethod || 'Wallet' | titlecase }}</span>
+          </div>
+          <div class="tk-side-row">
+            <span class="tk-side-label">Payment Status</span>
+            <span class="tk-pay-badge" [ngClass]="'pay-' + (b.paymentStatus || 'unpaid')">{{ payStatusLabel(b.paymentStatus) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment breakdown -->
+      <div class="tk-payment">
+        <div class="tk-pay-item">
+          <span class="tk-pay-label">Total Amount</span>
+          <span class="tk-pay-val">Rs. {{ b.totalAmount | number:'1.0-0' }}</span>
+        </div>
+        <div class="tk-pay-item" *ngIf="b.advanceAmount">
+          <span class="tk-pay-label">Advance Paid <small>({{ b.advancePercent }}%)</small></span>
+          <span class="tk-pay-val tk-pay-green">Rs. {{ b.advanceAmount | number:'1.0-0' }}</span>
+        </div>
+        <div class="tk-pay-item" *ngIf="b.remainingAmount">
+          <span class="tk-pay-label">Remaining {{ b.remainingCollectedAt ? '(Collected)' : '(Due)' }}</span>
+          <span class="tk-pay-val" [class.tk-pay-green]="b.remainingCollectedAt" [class.tk-pay-amber]="!b.remainingCollectedAt">Rs. {{ b.remainingAmount | number:'1.0-0' }}</span>
+        </div>
+        <div class="tk-pay-item" *ngIf="b.depositAmount">
+          <span class="tk-pay-label">Security Deposit</span>
+          <span class="tk-pay-val">Rs. {{ b.depositAmount | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rider + Delivery Info -->
+    <div class="tk-info-grid">
+      <div class="tk-card" *ngIf="b.rider">
+        <h2 class="tk-card-title">Rider Information</h2>
+        <div class="tk-rider">
+          <div class="tk-rider-avatar">
+            <img *ngIf="b.rider?.avatar" [src]="b.rider.avatar" alt="">
+            <span *ngIf="!b.rider?.avatar">{{ (b.rider?.name || 'R')[0] }}</span>
+          </div>
+          <div class="tk-rider-info">
+            <p class="tk-rider-name">{{ b.rider?.name || 'Rider' }}</p>
+            <p class="tk-rider-meta" *ngIf="b.rider?.phone">📞 {{ b.rider.phone }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tk-card">
+        <h2 class="tk-card-title">Delivery Information</h2>
+        <div class="tk-dinfo-row">
+          <span class="tk-dinfo-label">Item Type</span>
+          <span class="tk-dinfo-val">{{ b.listing?.category || 'Rental' }}</span>
+        </div>
+        <div class="tk-dinfo-row">
+          <span class="tk-dinfo-label">Delivery Type</span>
+          <span class="tk-dinfo-val">{{ b.deliveryMethod === 'delivery' ? 'Standard Delivery' : 'Self Pickup' }}</span>
+        </div>
+        <div class="tk-dinfo-row" *ngIf="b.trackingNumber">
+          <span class="tk-dinfo-label">Tracking ID</span>
+          <span class="tk-dinfo-val tk-mono">{{ b.trackingNumber }}</span>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- Empty (no search yet) -->
+  <div class="tk-empty" *ngIf="!booking() && !loading() && !error()">
+    <div class="tk-empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <p>Enter a booking ID to track your delivery</p>
+  </div>
+
+</div>
+</ng-template>

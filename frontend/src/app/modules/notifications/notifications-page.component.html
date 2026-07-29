@@ -1,0 +1,138 @@
+<!-- Rider: rider sidebar -->
+<app-rider-layout *ngIf="isRider">
+  <ng-container *ngTemplateOutlet="notifContent"></ng-container>
+</app-rider-layout>
+
+<!-- Owner: owner sidebar -->
+<app-owner-layout *ngIf="!isRider && isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="notifContent"></ng-container>
+</app-owner-layout>
+
+<!-- Renter: renter sidebar -->
+<app-renter-layout *ngIf="!isRider && !isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="notifContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #notifContent>
+<div class="nt-root">
+
+  <!-- Hero -->
+  <div class="nt-hero">
+    <div class="nt-hero-left">
+      <div class="nt-hero-titlerow">
+        <h1 class="nt-title">Notifications</h1>
+        <span class="nt-unread-pill" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
+      </div>
+      <p class="nt-sub">Stay updated with your bookings, deliveries, messages and more.</p>
+    </div>
+    <div class="nt-hero-illus">
+      <img src="/notifications-illustration.png" alt="Notifications" class="nt-illus-img">
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="nt-toolbar">
+    <button class="nt-markall" (click)="markAllRead()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Mark all read
+    </button>
+    <div class="nt-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search notifications..." [(ngModel)]="search" (ngModelChange)="onSearch()">
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="nt-filters">
+    <button class="nt-filter-btn" [class.active]="typeFilter === ''" (click)="typeFilter = ''">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+      All
+    </button>
+    <button class="nt-filter-btn" [class.active]="typeFilter === 'support'" (click)="typeFilter = 'support'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      Support
+    </button>
+    <button class="nt-filter-btn" [class.active]="typeFilter === 'booking'" (click)="typeFilter = 'booking'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+      Booking
+    </button>
+    <button class="nt-filter-btn" [class.active]="typeFilter === 'payment'" (click)="typeFilter = 'payment'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Payment
+    </button>
+    <button class="nt-filter-btn" [class.active]="typeFilter === 'message'" (click)="typeFilter = 'message'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Messages
+    </button>
+    <button class="nt-filter-btn" [class.active]="typeFilter === 'system'" (click)="typeFilter = 'system'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      System
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="nt-loading"><mat-spinner diameter="40"></mat-spinner></div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && filteredNotifications.length === 0" class="nt-empty">
+    <div class="nt-empty-icon">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <p>No notifications</p>
+    <span>You're all caught up!</span>
+  </div>
+
+  <!-- List -->
+  <div *ngIf="!loading && filteredNotifications.length > 0" class="nt-list">
+    <div class="nt-item" *ngFor="let n of filteredNotifications; trackBy: trackById; let i = index"
+      [class.nt-unread]="!n.isRead" [style.animation-delay]="(i * 0.03) + 's'"
+      (click)="handleClick(n)">
+
+      <div class="nt-icon" [ngClass]="iconTone(n.type, n.title)">
+        <!-- rider -->
+        <svg *ngIf="iconKey(n.type, n.title)==='rider'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M9 17h5l3-6h-2l-2-3H7l2 5H6"/></svg>
+        <!-- delivery -->
+        <svg *ngIf="iconKey(n.type, n.title)==='delivery'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="14" height="12" rx="1"/><path d="M15 10h4l3 3.5V18h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>
+        <!-- claim (damage claim) -->
+        <svg *ngIf="iconKey(n.type, n.title)==='claim'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+        <!-- box (listing status) -->
+        <svg *ngIf="iconKey(n.type, n.title)==='box'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+        <!-- booking -->
+        <svg *ngIf="iconKey(n.type, n.title)==='booking'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+        <!-- payment -->
+        <svg *ngIf="iconKey(n.type, n.title)==='payment'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <!-- message -->
+        <svg *ngIf="iconKey(n.type, n.title)==='message'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <!-- star -->
+        <svg *ngIf="iconKey(n.type, n.title)==='star'" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+        <!-- support -->
+        <svg *ngIf="iconKey(n.type, n.title)==='support'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        <!-- alert -->
+        <svg *ngIf="iconKey(n.type, n.title)==='alert'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <!-- shield -->
+        <svg *ngIf="iconKey(n.type, n.title)==='shield'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <!-- bell (fallback) -->
+        <svg *ngIf="iconKey(n.type, n.title)==='bell'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+
+      <div class="nt-content">
+        <p class="nt-item-title">{{ n.title }}</p>
+        <p class="nt-item-msg">{{ n.body }}</p>
+      </div>
+
+      <div class="nt-right">
+        <span class="nt-time">{{ timeAgo(n.createdAt) }}</span>
+        <span class="nt-dot" *ngIf="!n.isRead"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="nt-pagination">
+    <button class="nt-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+    <span class="nt-page-info">Page {{ page }} of {{ totalPages }}</span>
+    <button class="nt-page-btn" [disabled]="page >= totalPages" (click)="changePage(page + 1)">Next →</button>
+  </div>
+
+</div>
+</ng-template>

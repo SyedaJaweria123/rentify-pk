@@ -1,0 +1,291 @@
+<app-owner-layout *ngIf="isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="bdContent"></ng-container>
+</app-owner-layout>
+
+<app-renter-layout *ngIf="!isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="bdContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #bdContent>
+<div class="bd-root">
+  <div class="bd-container">
+
+    <!-- Back -->
+    <button (click)="goBack()" class="bd-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to Bookings
+    </button>
+
+    <!-- Loading -->
+    <div class="bd-loading" *ngIf="loading">
+      <div class="bd-spin"></div><p>Loading booking…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="bd-alert" *ngIf="error">{{ error }}</div>
+
+    <ng-container *ngIf="!loading && booking">
+
+      <!-- Header -->
+      <div class="bd-header">
+        <div>
+          <h1 class="bd-title">Booking #{{ bookingId.slice(-8).toUpperCase() }}</h1>
+          <p class="bd-sub">Created {{ booking.createdAt | date:'mediumDate' }}</p>
+        </div>
+        <span class="bd-status-badge" [ngClass]="'st-' + booking.status">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+          {{ statusLabel }}
+        </span>
+      </div>
+
+      <div class="bd-grid">
+
+        <!-- Row 1: Listing | Renter/Owner Details — same height -->
+        <div class="bd-row-pair">
+          <div class="bd-card bd-listing-card">
+            <img [src]="listingImage" [alt]="listingTitle" class="bd-listing-img">
+            <div class="bd-listing-body">
+              <h2 class="bd-listing-title">{{ listingTitle }}</h2>
+              <p class="bd-listing-cat">{{ listingCategory }}</p>
+              <span class="bd-price-badge">Rs {{ listing?.price || booking.pricePerUnit | number }} {{ priceUnitLabel }}</span>
+            </div>
+            <div class="bd-listing-ic">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+            </div>
+          </div>
+
+          <div class="bd-card">
+            <h3 class="bd-card-title"><span class="bd-card-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> {{ isOwner ? 'Renter' : 'Owner' }} Details</h3>
+            <div class="bd-party-row" [class.clickable]="isRenter" (click)="isRenter && goToOwnerProfile()">
+              <div class="bd-party-avatar">
+                <img *ngIf="otherPartyAvatar" [src]="otherPartyAvatar" alt="">
+                <span *ngIf="!otherPartyAvatar">{{ otherPartyInitial }}</span>
+              </div>
+              <div>
+                <p class="bd-party-name">{{ otherPartyName }}</p>
+                <p class="bd-party-email">{{ otherPartyEmail }}</p>
+              </div>
+            </div>
+            <button *ngIf="isRenter" (click)="goToOwnerProfile()" class="bd-view-profile">View full profile →</button>
+          </div>
+        </div>
+
+        <!-- Row 2: Rental Period | Pricing — same height -->
+        <div class="bd-row-pair">
+          <div class="bd-card">
+            <h3 class="bd-card-title"><span class="bd-card-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></span> Rental Period</h3>
+
+            <div class="bd-dates-row">
+              <div class="bd-date-box">
+                <p class="bd-date-label">Start Date</p>
+                <p class="bd-date-val">{{ booking.startDate | date:'MMM d, y' }}</p>
+              </div>
+              <div class="bd-duration">
+                <p class="bd-duration-label">Duration</p>
+                <p class="bd-duration-val">{{ booking.totalDays }}</p>
+                <p class="bd-duration-label">days</p>
+              </div>
+              <div class="bd-date-box">
+                <p class="bd-date-label">End Date</p>
+                <p class="bd-date-val">{{ booking.endDate | date:'MMM d, y' }}</p>
+              </div>
+            </div>
+
+            <div class="bd-delivery-row">
+              Delivery: <strong>{{ booking.deliveryMethod }}</strong>
+            </div>
+
+            <!-- Delivery deadline -->
+            <div class="bd-info-box bd-info-amber" *ngIf="booking.deliveryDeadline && booking.status === 'confirmed'">
+              <p class="bd-info-title">⏰ Delivery deadline</p>
+              <p class="bd-info-text">
+                {{ isOwner ? 'Deliver by' : 'Expected by' }} {{ booking.deliveryDeadline | date:'medium' }}.
+                <span *ngIf="isOwner"> Missing this auto-cancels the booking and refunds the renter.</span>
+              </p>
+            </div>
+
+            <!-- Delivery address -->
+            <div class="bd-info-box bd-info-green" *ngIf="booking.deliveryMethod === 'delivery' && (booking.deliveryAddress || booking.deliveryPhone)">
+              <p class="bd-info-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                Delivery Details
+              </p>
+              <p class="bd-info-text" *ngIf="booking.deliveryAddress"><strong>Address:</strong> {{ booking.deliveryAddress }}</p>
+              <p class="bd-info-text" *ngIf="booking.deliveryPhone"><strong>Phone:</strong> {{ booking.deliveryPhone }}</p>
+            </div>
+
+            <!-- Tracking number -->
+            <div class="bd-tracking-box" *ngIf="$any(booking).trackingNumber && ['in_delivery','delivered','completed'].includes(booking.status)">
+              <div>
+                <p class="bd-tracking-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+                  Tracking Number
+                </p>
+                <p class="bd-tracking-val">{{ $any(booking).trackingNumber }}</p>
+              </div>
+              <a [routerLink]="['/track']" [queryParams]="{ id: $any(booking).trackingNumber }" class="bd-track-btn">
+                Track Order
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <p class="bd-message-note" *ngIf="booking.message"><strong>Message:</strong> {{ booking.message }}</p>
+          </div>
+
+          <div class="bd-card bd-pricing-card">
+            <h3 class="bd-card-title"><span class="bd-card-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> Pricing</h3>
+            <div class="bd-price-lines">
+              <div class="bd-price-line"><span>{{ booking.totalDays }} days × Rs {{ booking.pricePerUnit | number }}</span><span>Rs {{ booking.subtotal | number }}</span></div>
+              <div class="bd-price-line"><span>Service Fee (5%)</span><span>Rs {{ booking.serviceFee | number }}</span></div>
+              <div class="bd-price-line" *ngIf="booking.deliveryFee"><span>Delivery Fee</span><span>Rs {{ booking.deliveryFee | number }}</span></div>
+              <div class="bd-price-line" *ngIf="booking.depositAmount"><span>Security Deposit</span><span>Rs {{ booking.depositAmount | number }}</span></div>
+              <div class="bd-price-total"><span>Total</span><span>Rs {{ booking.totalAmount | number }}</span></div>
+            </div>
+
+            <!-- Advance/remaining split -->
+            <div class="bd-advance-block" *ngIf="hasAdvanceSplit">
+              <div class="bd-price-line"><span>{{ isOwner ? 'Advance received' : 'Paid in advance' }} ({{ booking.advancePercent }}%)</span><span class="bd-advance-amt">Rs {{ booking.advanceAmount | number }}</span></div>
+              <div class="bd-price-line"><span>{{ remainingLabel }}</span><span [class.bd-settled]="remainingIsSettled">Rs {{ booking.remainingAmount | number }}</span></div>
+              <p class="bd-advance-note bd-note-red" *ngIf="booking.remainingRefused">⚠ Renter refused to pay the remaining balance — booking flagged for dispute.</p>
+              <p class="bd-advance-note bd-note-green" *ngIf="remainingIsSettled && !booking.remainingRefused">✓ Collected via {{ booking.remainingPaymentMethod === 'wallet' ? 'wallet' : 'cash' }} on delivery.</p>
+              <p class="bd-advance-note" *ngIf="!remainingIsSettled && !booking.remainingRefused">{{ isOwner ? 'Rider will collect this from the renter at handover.' : 'Pay this to the rider at handover (cash or wallet).' }}</p>
+            </div>
+
+            <div class="bd-payment-row">
+              <span class="pay-status">Payment: </span>
+              <span class="bd-payment-badge" [ngClass]="'pay-' + (booking.paymentStatus || 'pending')">{{ paymentStatusLabel }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ Main column (remaining) ══ -->
+        <div class="bd-main">
+
+          <!-- Cancellation -->
+          <div class="bd-card bd-cancel-card" *ngIf="booking.cancellation">
+            <h3 class="bd-card-title bd-cancel-title">Cancellation Details</h3>
+            <p class="bd-cancel-text"><strong>Reason:</strong> {{ booking.cancellation.reason }}</p>
+            <p class="bd-cancel-date">{{ booking.cancellation.at | date:'medium' }}</p>
+          </div>
+
+          <!-- Leave a review -->
+          <div class="bd-card bd-review-cta" *ngIf="canReview || canReviewRider">
+            <div>
+              <h3 class="bd-card-title">Leave a Review</h3>
+              <p class="bd-review-sub">Rate {{ isOwner ? 'the renter' : 'the owner' }}{{ riderInfo ? ' and your rider' : '' }}.</p>
+            </div>
+            <a [routerLink]="['/bookings', bookingId, 'review']" class="bd-review-btn">Leave a Review →</a>
+          </div>
+
+        </div>
+
+        <!-- ══ Side column (remaining) ══ -->
+        <div class="bd-side">
+
+          <!-- Rider card -->
+          <div class="bd-card bd-rider-card" *ngIf="riderInfo">
+            <p class="bd-rider-label">Your Rider</p>
+            <button (click)="goRiderProfile()" class="bd-rider-row">
+              <div class="bd-rider-avatar-wrap">
+                <img *ngIf="riderInfo.avatar" [src]="riderInfo.avatar" alt="rider" class="bd-rider-avatar">
+                <div *ngIf="!riderInfo.avatar" class="bd-rider-avatar bd-rider-avatar-fallback">{{ riderInfo.name?.[0] || 'R' }}</div>
+                <span class="bd-rider-online"></span>
+              </div>
+              <div class="bd-rider-info">
+                <p class="bd-rider-name">{{ riderInfo.name }}</p>
+                <div class="bd-rider-meta">
+                  <span class="bd-rider-rating" *ngIf="riderInfo.riderRating > 0">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+                    {{ riderInfo.riderRating | number:'1.1-1' }}
+                  </span>
+                  <span class="bd-rider-badge bd-badge-platinum" *ngIf="riderInfo.riderBadge === 'Platinum'">💎 Platinum</span>
+                  <span class="bd-rider-badge bd-badge-gold" *ngIf="riderInfo.riderBadge === 'Gold'">🥇 Gold</span>
+                  <span class="bd-rider-badge bd-badge-silver" *ngIf="riderInfo.riderBadge === 'Silver'">🥈 Silver</span>
+                  <span class="bd-rider-badge bd-badge-bronze" *ngIf="riderInfo.riderBadge === 'Bronze'">🥉 Bronze</span>
+                </div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="bd-rider-arrow"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <!-- Handover QR -->
+          <div class="bd-card bd-qr-card" *ngIf="showQR">
+            <h3 class="bd-card-title">🛵 Rider Handover Code</h3>
+            <p class="bd-qr-sub">Show this to the rider for pickup/delivery confirmation.</p>
+            <img class="bd-qr-img" [src]="qrImageUrl" alt="Handover QR" width="200" height="200">
+            <div class="bd-qr-code">{{ qrCode }}</div>
+            <button (click)="copyQR()" class="bd-qr-copy">{{ qrCopied ? '✓ Copied!' : '📋 Copy code' }}</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Actions — full width, not confined to the narrow side column -->
+      <div class="bd-card bd-actions-full">
+        <h3 class="bd-card-title">Actions</h3>
+
+        <div class="bd-action-row-top">
+          <ng-container *ngIf="isOwner">
+            <button *ngIf="booking.status === 'pending'" (click)="confirmBooking()" [disabled]="actionLoading" class="bd-action-btn bd-btn-green">✓ Confirm Booking</button>
+            <button *ngIf="booking.status === 'pending'" (click)="openReject()" [disabled]="actionLoading" class="bd-action-btn bd-btn-red-light">✗ Reject</button>
+            <button *ngIf="isOwner && (booking.status === 'confirmed' || booking.status === 'active') && booking.remainingAmount > 0 && !remainingIsSettled && !booking.remainingRefused" (click)="collectCash()" [disabled]="actionLoading" class="bd-action-btn bd-btn-green">💵 Mark Cash Collected (Rs {{ booking.remainingAmount | number }})</button>
+            <button *ngIf="booking.status === 'confirmed'" (click)="completeBooking()" [disabled]="actionLoading" class="bd-action-btn bd-btn-forest">✓ Mark Completed</button>
+          </ng-container>
+
+          <button *ngIf="showPayNow" (click)="goToPayment()" [disabled]="actionLoading" class="bd-action-btn bd-btn-pay">
+            💳 Pay Now — Rs {{ booking.advanceAmount || booking.pricing?.totalAmount || booking.totalAmount }}
+          </button>
+
+          <button *ngIf="canRequestReturn" (click)="requestReturnPickup()" [disabled]="actionLoading" class="bd-action-btn bd-btn-forest">🚚 Request Return Pickup</button>
+
+          <button *ngIf="canCancel" (click)="openCancel()" [disabled]="actionLoading" class="bd-action-btn bd-btn-gray">Cancel Booking</button>
+          <button *ngIf="booking.status === 'active' || booking.status === 'confirmed'" (click)="openDispute()" [disabled]="actionLoading" class="bd-action-btn bd-btn-orange">⚠ Raise Dispute</button>
+
+          <button (click)="messageOtherParty()" class="bd-action-btn bd-btn-message">💬 Message {{ isOwner ? 'Renter' : 'Owner' }}</button>
+        </div>
+
+        <!-- Inspection + Damage Claim -->
+        <ng-container *ngIf="showItemChecks">
+          <div class="bd-divider"></div>
+          <p class="bd-section-label">Condition &amp; Inspection</p>
+
+          <div class="bd-action-row">
+            <button (click)="goInspection('delivery')" class="bd-action-btn" [ngClass]="hasDeliveryInspection ? 'bd-btn-done' : 'bd-btn-pending'">
+              {{ hasDeliveryInspection ? '✅ Delivery Photos Submitted' : '📸 Delivery Photos' }}
+            </button>
+
+            <button (click)="goInspection('return')" [disabled]="!hasDeliveryInspection" class="bd-action-btn"
+              [ngClass]="hasReturnInspection ? 'bd-btn-done' : (hasDeliveryInspection ? 'bd-btn-pending' : 'bd-btn-disabled')">
+              {{ hasReturnInspection ? '✅ Return Photos Submitted' : '📸 Return Photos' }}
+            </button>
+
+            <button (click)="goComparison()" [disabled]="!hasDeliveryInspection || !hasReturnInspection" class="bd-action-btn"
+              [ngClass]="(hasDeliveryInspection && hasReturnInspection) ? 'bd-btn-outline' : 'bd-btn-disabled'">
+              🔍 View AI Comparison
+            </button>
+
+            <ng-container *ngIf="existingClaim; else noClaimYet">
+              <button (click)="goViewClaim()" class="bd-action-btn bd-claim-btn" [ngClass]="'claim-' + existingClaim.status">
+                ⚠ View Damage Claim
+                <span class="bd-claim-pill">{{ existingClaim.status }}</span>
+              </button>
+            </ng-container>
+            <ng-template #noClaimYet>
+              <button *ngIf="isOwner" (click)="goDamageClaim()" [disabled]="!hasReturnInspection" class="bd-action-btn" [ngClass]="hasReturnInspection ? 'bd-btn-danger' : 'bd-btn-disabled'">
+                ⚠ File Damage Claim
+              </button>
+            </ng-template>
+          </div>
+          <p class="bd-hint" *ngIf="!hasDeliveryInspection && inspectionStatusLoaded">Submit delivery photos first.</p>
+          <p class="bd-hint" *ngIf="isOwner && !existingClaim && hasDeliveryInspection && !hasReturnInspection">Submit return photos before filing a damage claim.</p>
+        </ng-container>
+
+        <p class="bd-warning-banner" *ngIf="showItemChecks && !hasReturnInspection">⚠ A return inspection is required before this booking can be completed.</p>
+
+        <div class="bd-action-loading" *ngIf="actionLoading"><div class="bd-spin bd-spin-sm"></div></div>
+        <p class="bd-action-error" *ngIf="actionError">{{ actionError }}</p>
+      </div>
+    </ng-container>
+  </div>
+</div>
+</ng-template>

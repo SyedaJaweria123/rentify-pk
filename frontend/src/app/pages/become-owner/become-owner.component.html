@@ -1,0 +1,177 @@
+<div class="bo-page">
+<div class="bo-root">
+
+  <!-- ═══ HERO ═══ -->
+  <section class="bo-hero">
+    <div class="bo-orb bo-orb-1"></div>
+    <div class="bo-orb bo-orb-2"></div>
+    <div class="bo-hero-in">
+      <span class="bo-badge">Become a Rentify Owner</span>
+      <h1 class="bo-title">Turn your stuff into <span class="hl">income</span></h1>
+      <p class="bo-sub">List the things you already own — cars, cameras, tools, gadgets — and earn money when people rent them. Safe, simple, and on your schedule.</p>
+      <div class="bo-hero-btns">
+        <button class="bo-btn-primary" routerLink="/auth/register">Start Earning Free</button>
+        <button class="bo-btn-ghost" routerLink="/listings/add">List an Item</button>
+      </div>
+    </div>
+    <div class="bo-hero-img-wrap">
+      <img src="/become-owner-hero.png" alt="" class="bo-hero-img">
+    </div>
+  </section>
+
+  <!-- ═══ UPGRADE FORM (logged-in renters) ═══ -->
+  <section class="bo-upgrade" *ngIf="isRenter">
+    <div class="bo-upgrade-card">
+      <h2 class="bo-upgrade-title">Become an Owner now</h2>
+      <p class="bo-upgrade-sub">Add your phone and CNIC to unlock owner features. One CNIC can be linked to one account.</p>
+
+      <div class="bo-form" *ngIf="!upgSuccess">
+        <label class="bo-label">
+          Phone number
+          <input class="bo-input" type="tel" [(ngModel)]="upgPhone" placeholder="03001234567" maxlength="11">
+        </label>
+        <label class="bo-label">
+          CNIC number
+          <input class="bo-input" type="text" [(ngModel)]="upgCnic" placeholder="42101-1234567-1" maxlength="15">
+        </label>
+
+        <p class="bo-form-err" *ngIf="upgError">{{ upgError }}</p>
+
+        <button class="bo-btn-primary bo-btn-full" (click)="submitUpgrade()" [disabled]="upgLoading">
+          {{ upgLoading ? 'Submitting…' : 'Become an Owner' }}
+        </button>
+      </div>
+
+      <div class="bo-success" *ngIf="upgSuccess">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        <h3>You're now an Owner! 🎉</h3>
+        <p>Redirecting you to your dashboard…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Already an owner -->
+  <section class="bo-upgrade" *ngIf="isAlreadyOwner">
+    <div class="bo-upgrade-card bo-already">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      <h3>You're already an Owner</h3>
+      <button class="bo-btn-primary" routerLink="/listings/add">List an Item</button>
+    </div>
+  </section>
+
+  <section class="bo-section">
+    <h2 class="sec-h">Why list on Rentify?</h2>
+    <p class="sec-sub">Everything you need to earn with confidence.</p>
+    <div class="ben-grid">
+      <div class="ben-card" *ngFor="let b of benefits; let i = index" [style.animation-delay]="i * 0.05 + 's'">
+        <div class="ben-ic" [ngSwitch]="b.icon">
+          <svg *ngSwitchCase="'income'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M15 9.5a3 3 0 0 0-3-1.5c-1.5 0-2.5.8-2.5 2s1 1.8 2.5 2 2.5.8 2.5 2-1 2-2.5 2a3 3 0 0 1-3-1.5"/></svg>
+          <svg *ngSwitchCase="'lock'"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg *ngSwitchCase="'verified'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          <svg *ngSwitchCase="'shield'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          <svg *ngSwitchCase="'phone'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          <svg *ngSwitchCase="'chart'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="7"/><rect x="12" y="7" width="3" height="11"/><rect x="17" y="13" width="3" height="5"/></svg>
+        </div>
+        <h3 class="ben-title">{{ b.title }}</h3>
+        <p class="ben-desc">{{ b.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ EARNINGS CALCULATOR ═══ -->
+  <section class="bo-section bo-calc-sec">
+    <h2 class="sec-h">Estimate your earnings</h2>
+    <p class="sec-sub">Adjust the values to see what you could make.</p>
+
+    <div class="calc-wrap">
+      <div class="calc-controls">
+        <div class="calc-field">
+          <label>What will you rent out?</label>
+          <select [(ngModel)]="calcCategory" (ngModelChange)="onCategoryChange()" class="calc-select">
+            <option *ngFor="let k of categoryKeys" [value]="k">{{ categoryPresets[k].label }}</option>
+          </select>
+        </div>
+
+        <div class="calc-field">
+          <label>Price per day: <strong>Rs {{ calcPricePerDay | number }}</strong></label>
+          <input type="range" min="200" max="10000" step="100" [(ngModel)]="calcPricePerDay" class="calc-range"/>
+        </div>
+
+        <div class="calc-field">
+          <label>Rented days per month: <strong>{{ calcDaysPerMonth }}</strong></label>
+          <input type="range" min="1" max="30" step="1" [(ngModel)]="calcDaysPerMonth" class="calc-range"/>
+        </div>
+      </div>
+
+      <div class="calc-result">
+        <span class="cr-label">Estimated monthly earnings</span>
+        <span class="cr-amount">Rs {{ netEarning | number }}</span>
+        <div class="cr-rows">
+          <div class="cr-row"><span>Gross</span><span>Rs {{ grossEarning | number }}</span></div>
+          <div class="cr-row"><span>Platform fee (5%)</span><span>− Rs {{ platformFee | number }}</span></div>
+          <div class="cr-row cr-total"><span>You keep</span><span>Rs {{ netEarning | number }}</span></div>
+        </div>
+        <div class="cr-yearly">~ Rs {{ yearlyEarning | number }} / year</div>
+        <p class="cr-note">Estimate only. Actual earnings depend on demand and bookings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STEPS ═══ -->
+  <section class="bo-section">
+    <h2 class="sec-h">How to get started</h2>
+    <p class="sec-sub">Five simple steps to your first booking.</p>
+    <div class="bo-steps">
+      <div class="bo-step" *ngFor="let s of steps; let i = index" [style.animation-delay]="i * 0.06 + 's'">
+        <div class="bo-step-ic" [ngSwitch]="s.icon">
+          <svg *ngSwitchCase="'edit'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+          <svg *ngSwitchCase="'id'"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.2"/><path d="M13 10h5M13 14h5M5 16c.6-1.5 4.4-1.5 5 0"/></svg>
+          <svg *ngSwitchCase="'live'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>
+          <svg *ngSwitchCase="'check'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+          <svg *ngSwitchCase="'wallet'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><circle cx="17" cy="14" r="1.2"/></svg>
+        </div>
+        <span class="bo-step-num">{{ s.num }}</span>
+        <h3 class="bo-step-title">{{ s.title }}</h3>
+        <p class="bo-step-desc">{{ s.desc }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ OWNER STORIES (real data) ═══ -->
+  <section class="bo-section bo-stories-sec" *ngIf="storiesLoading || ownerStories.length">
+    <h2 class="sec-h">Owners earning with Rentify</h2>
+    <p class="sec-sub">Real owners, real listings.</p>
+
+    <div class="stories-grid" *ngIf="storiesLoading">
+      <div class="story-card sk" *ngFor="let s of [1,2,3]">
+        <div class="story-sk-av shimmer"></div>
+        <div class="story-sk-line shimmer"></div>
+        <div class="story-sk-line shimmer" style="width:60%"></div>
+      </div>
+    </div>
+
+    <div class="stories-grid" *ngIf="!storiesLoading">
+      <div class="story-card" *ngFor="let s of ownerStories">
+        <div class="story-av">
+          <img *ngIf="s.avatar" [src]="s.avatar" [alt]="s.name"/>
+          <span *ngIf="!s.avatar">{{ s.avatarInitials }}</span>
+        </div>
+        <h3 class="story-name">{{ s.name }}</h3>
+        <span class="story-city">{{ s.city }}</span>
+        <p class="story-item">Rents out: <strong>{{ s.itemListed }}</strong></p>
+        <div class="story-earn">Rs {{ s.monthlyEarning | number }}<span>/month</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section class="bo-cta">
+    <div class="bo-cta-in">
+      <h2>Start earning today</h2>
+      <p>It's free to list. Join Rentify and put your idle items to work.</p>
+      <button class="bo-btn-primary" routerLink="/auth/register">Create Free Account</button>
+    </div>
+  </section>
+
+</div>
+</div>

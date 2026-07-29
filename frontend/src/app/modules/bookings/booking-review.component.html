@@ -1,0 +1,71 @@
+<div class="br-root">
+  <div class="br-container">
+
+    <!-- Loading -->
+    <div class="br-loading" *ngIf="loading">
+      <div class="br-spin"></div><p>Loading booking…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="br-error" *ngIf="!loading && error">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <p>{{ error }}</p>
+      <a routerLink="/bookings" class="br-back-link">Go to My Bookings</a>
+    </div>
+
+    <ng-container *ngIf="!loading && !error && booking">
+
+      <!-- Header / booking summary -->
+      <div class="br-hero">
+        <img *ngIf="listingImage" [src]="listingImage" alt="" class="br-hero-img">
+        <div class="br-hero-body">
+          <span class="br-hero-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            Delivery Complete
+          </span>
+          <h1 class="br-title">{{ listingTitle }}</h1>
+          <p class="br-sub">Rented from {{ booking.startDate | date:'mediumDate' }} to {{ booking.endDate | date:'mediumDate' }}</p>
+        </div>
+      </div>
+
+      <!-- All caught up -->
+      <div class="br-done" *ngIf="allDone">
+        <p class="br-done-emoji">🎉</p>
+        <p class="br-done-title">You're all caught up!</p>
+        <p class="br-done-sub">Thanks for sharing your feedback on this booking.</p>
+        <button class="br-done-btn" (click)="goToBooking()">View Booking</button>
+      </div>
+
+      <!-- Review the other party -->
+      <div class="br-card" *ngIf="canReview">
+        <h3 class="br-card-title">Review the {{ otherPartyLabel }}</h3>
+        <p class="br-card-sub">How was your experience with {{ otherPartyName }}?</p>
+        <app-write-review (reviewSubmitted)="onReviewSubmitted($event)"></app-write-review>
+      </div>
+      <div class="br-submitted" *ngIf="reviewSubmitted && !canReview">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        You've reviewed the {{ otherPartyLabel.toLowerCase() }}. Thank you!
+      </div>
+
+      <!-- Rate the rider -->
+      <div class="br-card" *ngIf="canReviewRider">
+        <h3 class="br-card-title">Rate Your Rider</h3>
+        <p class="br-card-sub">{{ riderInfo?.name }} delivered this item — how was the delivery?</p>
+        <div class="br-rider-form">
+          <app-star-rating [value]="riderRatingValue" size="lg" (ratingChange)="riderRatingValue = $event"></app-star-rating>
+          <textarea [(ngModel)]="riderCommentValue" rows="3" maxlength="1000"
+            placeholder="On time, careful with the item, polite — how was it?"></textarea>
+          <p class="br-field-err" *ngIf="riderReviewError">{{ riderReviewError }}</p>
+          <button type="button" class="br-submit-btn" [disabled]="submittingRiderReview" (click)="submitRiderReview()">
+            {{ submittingRiderReview ? 'Submitting…' : 'Submit Rider Review' }}
+          </button>
+        </div>
+      </div>
+      <div class="br-submitted" *ngIf="riderReviewSubmitted && !canReviewRider && riderInfo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        You've rated your rider. Thank you!
+      </div>
+
+    </ng-container>
+  </div>
+</div>

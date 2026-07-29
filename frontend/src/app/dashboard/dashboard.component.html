@@ -1,0 +1,415 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  DASHBOARD — Rentify PK
+  Design: Professional dark-sidebar layout
+  ─────────────────────────────────────────────────────────────────────────
+  Structure:
+    ┌────────────┬──────────────────────────────────────────┐
+    │  SIDEBAR   │  TOPBAR (greeting + wallet + user)        │
+    │  (dark)    ├──────────────────────────────────────────┤
+    │            │  CONTENT (tab-based)                      │
+    │  • Logo    │   • Overview: stats + actions + recent    │
+    │  • Nav     │   • My Listings: table                    │
+    │  • Role    │   • Login History: table                  │
+    │  • Logout  │   • Permissions: role + security          │
+    └────────────┴──────────────────────────────────────────┘
+
+  Logic preserved from original:
+    activeTab switching, real listing stats (getMyListings),
+    login history, permissions, logout modal.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+
+<div class="dash-shell">
+
+  <!-- ════════════════════════ SIDEBAR (dark) ════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <a routerLink="/" class="sb-logo">
+      <span class="sb-logo-icon">🔑</span>
+      <span class="sb-logo-text">Rentify</span>
+    </a>
+
+    <!-- Navigation tabs -->
+    <nav class="sb-nav">
+      <button class="sb-link" [class.sb-active]="activeTab==='overview'"
+              (click)="activeTab='overview'">
+        <span class="sb-link-icon">📊</span>
+        <span>Overview</span>
+      </button>
+      <button class="sb-link" [class.sb-active]="activeTab==='listings'"
+              (click)="activeTab='listings'">
+        <span class="sb-link-icon">📦</span>
+        <span>My Listings</span>
+        <span class="sb-badge" *ngIf="totalListingsCount > 0">{{ totalListingsCount }}</span>
+      </button>
+      <button class="sb-link" [class.sb-active]="activeTab==='history'"
+              (click)="activeTab='history'">
+        <span class="sb-link-icon">🕐</span>
+        <span>Login History</span>
+      </button>
+      <button class="sb-link" [class.sb-active]="activeTab==='permissions'"
+              (click)="activeTab='permissions'">
+        <span class="sb-link-icon">🔐</span>
+        <span>Permissions</span>
+      </button>
+    </nav>
+
+    <!-- Quick links (external pages) -->
+    <div class="sb-section-label">SHORTCUTS</div>
+    <nav class="sb-nav">
+      <button class="sb-link" (click)="navigate('/listings')">
+        <span class="sb-link-icon">🔍</span><span>Browse Items</span>
+      </button>
+      <button class="sb-link" *ngIf="isOwner" (click)="navigate('/listings/add')">
+        <span class="sb-link-icon">➕</span><span>List New Item</span>
+      </button>
+    </nav>
+
+    <!-- Bottom: role chip + logout -->
+    <div class="sb-footer" *ngIf="user">
+      <div class="sb-role-chip" [class.sb-role-owner]="isOwner">
+        {{ isOwner ? '🏠 Owner Account' : '🔑 Renter Account' }}
+      </div>
+      <button class="sb-logout" (click)="showLogoutModal=true">
+        <span>🚪</span> Logout
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════ MAIN AREA ════════════════════════ -->
+  <div class="main-area">
+
+    <!-- ── TOPBAR ── -->
+    <header class="topbar" *ngIf="user">
+      <div class="topbar-greeting">
+        <h1 class="tb-title">
+          {{ activeTab === 'overview'    ? 'Dashboard' :
+             activeTab === 'listings'    ? 'My Listings' :
+             activeTab === 'history'     ? 'Login History' : 'Permissions' }}
+        </h1>
+        <p class="tb-sub">Khush amdeed wapas, {{ user.name }} 👋</p>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Wallet pill -->
+        <div class="wallet-pill">
+          <span class="wp-icon">💰</span>
+          <div class="wp-body">
+            <span class="wp-label">Wallet</span>
+            <span class="wp-amount">Rs. {{ (user.walletBalance || 0) | number }}</span>
+          </div>
+        </div>
+        <!-- User avatar -->
+        <div class="topbar-user">
+          <div class="tu-avatar">{{ userFirstLetter }}</div>
+          <div class="tu-body">
+            <span class="tu-name">{{ user.name }}</span>
+            <span class="tu-provider">{{ providerIcon }} {{ providerLabel }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── CONTENT ── -->
+    <div class="content">
+
+      <!-- ═══════════ OVERVIEW TAB ═══════════ -->
+      <div *ngIf="activeTab==='overview'" class="tab-pane">
+
+        <!-- Verification status row -->
+        <div class="verify-row">
+          <div class="verify-chip"
+               [class.v-good]="user?.isEmailVerified"
+               [class.v-bad]="!user?.isEmailVerified">
+            {{ user?.isEmailVerified ? '✅ Email Verified' : '❌ Email Not Verified' }}
+          </div>
+          <div class="verify-chip" *ngIf="isOwner"
+               [class.v-good]="user?.cnicVerified"
+               [class.v-warn]="!user?.cnicVerified">
+            {{ user?.cnicVerified ? '✅ CNIC Verified' : '⏳ CNIC Pending' }}
+          </div>
+          <div class="verify-chip v-good" *ngIf="user?.lastLoginAt">
+            🕐 Last login: {{ user?.lastLoginAt | date:'dd/MM/yy hh:mm a' }}
+          </div>
+        </div>
+
+        <!-- ── STAT CARDS ── -->
+        <div class="stats-grid">
+          <!-- Active listings -->
+          <div class="stat-card" (click)="activeTab='listings'">
+            <div class="sc-top">
+              <span class="sc-icon sc-icon-green">📋</span>
+              <span class="sc-trend sc-trend-up">●</span>
+            </div>
+            <div class="sc-value">{{ listingsLoading ? '…' : activeListingsCount }}</div>
+            <div class="sc-label">{{ isOwner ? 'Active Listings' : 'Active Rentals' }}</div>
+          </div>
+
+          <!-- Rating -->
+          <div class="stat-card">
+            <div class="sc-top">
+              <span class="sc-icon sc-icon-amber">⭐</span>
+            </div>
+            <div class="sc-value">N/A</div>
+            <div class="sc-label">Average Rating</div>
+          </div>
+
+          <!-- Total listings -->
+          <div class="stat-card" (click)="activeTab='listings'">
+            <div class="sc-top">
+              <span class="sc-icon sc-icon-blue">📦</span>
+            </div>
+            <div class="sc-value">{{ listingsLoading ? '…' : totalListingsCount }}</div>
+            <div class="sc-label">Total Listings</div>
+          </div>
+
+          <!-- Earnings / spent -->
+          <div class="stat-card">
+            <div class="sc-top">
+              <span class="sc-icon" [class.sc-icon-gold]="isOwner" [class.sc-icon-teal]="!isOwner">
+                {{ isOwner ? '💰' : '🛒' }}
+              </span>
+            </div>
+            <div class="sc-value">Rs. 0</div>
+            <div class="sc-label">{{ isOwner ? 'Total Earned' : 'Amount Spent' }}</div>
+          </div>
+        </div>
+
+        <!-- ── QUICK ACTIONS ── -->
+        <h2 class="section-title">⚡ Quick Actions</h2>
+        <div class="actions-grid">
+          <button class="action-card" *ngIf="isOwner" (click)="navigate('/listings/add')">
+            <span class="ac-icon">➕</span><span class="ac-label">List New Item</span>
+          </button>
+          <button class="action-card" (click)="navigate('/listings')">
+            <span class="ac-icon">🔍</span><span class="ac-label">Browse Items</span>
+          </button>
+          <button class="action-card" (click)="activeTab='listings'">
+            <span class="ac-icon">📦</span><span class="ac-label">My Listings</span>
+          </button>
+          <button class="action-card" (click)="navigate('/messages')">
+            <span class="ac-icon">💬</span><span class="ac-label">Messages</span>
+          </button>
+          <button class="action-card" *ngIf="isOwner">
+            <span class="ac-icon">📊</span><span class="ac-label">Analytics</span>
+          </button>
+          <button class="action-card" *ngIf="isOwner">
+            <span class="ac-icon">💸</span><span class="ac-label">Withdraw</span>
+          </button>
+          <button class="action-card" (click)="navigate('/profile')">
+            <span class="ac-icon">👤</span><span class="ac-label">Edit Profile</span>
+          </button>
+          <button class="action-card">
+            <span class="ac-icon">🔔</span><span class="ac-label">Notifications</span>
+          </button>
+        </div>
+
+        <!-- ── RECENT LISTINGS ── -->
+        <div *ngIf="myListings.length > 0">
+          <h2 class="section-title">
+            📋 Recent Listings
+            <button class="see-all-btn" (click)="activeTab='listings'">See All →</button>
+          </h2>
+          <div class="recent-grid">
+            <div class="recent-card" *ngFor="let l of myListings"
+                 (click)="viewListing(l._id || l.id)">
+              <div class="rc-img-wrap">
+                <img *ngIf="l.images?.length" [src]="l.images[0].url" [alt]="l.title" class="rc-img"/>
+                <div class="rc-no-img" *ngIf="!l.images?.length">📦</div>
+                <span class="rc-status" [class.rc-active]="l.status==='active'">
+                  {{ l.status === 'active' ? 'Active' : l.status }}
+                </span>
+              </div>
+              <div class="rc-body">
+                <div class="rc-title">{{ l.title }}</div>
+                <div class="rc-cat">{{ l.category }}</div>
+                <div class="rc-price">Rs. {{ l.price | number }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CNIC warning -->
+        <div class="warn-box" *ngIf="isOwner && !user?.cnicVerified">
+          <span class="warn-icon">🪪</span>
+          <div class="warn-body">
+            <strong>CNIC Verification Pending</strong>
+            <p>Submit your CNIC documents to unlock all owner features.</p>
+          </div>
+          <button class="warn-btn">Upload CNIC</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ MY LISTINGS TAB ═══════════ -->
+      <div *ngIf="activeTab==='listings'" class="tab-pane">
+        <div class="content-head">
+          <h2 class="section-title">📋 All My Listings</h2>
+          <button class="btn-add" (click)="navigate('/listings/add')">+ Add New</button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-row" *ngIf="listingsLoading">
+          <div class="mini-spinner"></div>
+          <span>Loading your listings…</span>
+        </div>
+
+        <!-- Empty -->
+        <div class="empty-state" *ngIf="!listingsLoading && myListings.length === 0">
+          <span class="empty-icon">📭</span>
+          <p class="empty-title">No listings yet</p>
+          <button class="btn-add" (click)="navigate('/listings/add')">
+            Create Your First Listing
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div class="data-table" *ngIf="!listingsLoading && myListings.length > 0">
+          <div class="dt-head dt-row-listings">
+            <span>Item</span><span>Category</span><span>Price</span>
+            <span>Status</span><span>Actions</span>
+          </div>
+          <div class="dt-row dt-row-listings" *ngFor="let l of myListings">
+            <span class="dt-item" (click)="viewListing(l._id || l.id)">
+              <img *ngIf="l.images?.length" [src]="l.images[0].url" class="dt-thumb" [alt]="l.title"/>
+              <span class="dt-no-img" *ngIf="!l.images?.length">📦</span>
+              <span class="dt-item-title">{{ l.title }}</span>
+            </span>
+            <span class="dt-muted">{{ l.category }}</span>
+            <span class="dt-price">Rs. {{ l.price | number }}</span>
+            <span>
+              <span class="dt-status" [class.dt-status-active]="l.status==='active'">
+                {{ l.status }}
+              </span>
+            </span>
+            <span class="dt-actions">
+              <button class="dt-btn dt-btn-edit" (click)="navigate('/listings/edit/' + (l._id || l.id))">Edit</button>
+              <button class="dt-btn dt-btn-view" (click)="viewListing(l._id || l.id)">View</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="browse-all-row">
+          <button class="btn-ghost" (click)="navigate('/listings')">
+            Browse All Public Listings →
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════ HISTORY TAB ═══════════ -->
+      <div *ngIf="activeTab==='history'" class="tab-pane">
+        <h2 class="section-title">🕐 Login History</h2>
+
+        <div class="empty-state" *ngIf="!history.length">
+          <span class="empty-icon">📭</span>
+          <p class="empty-title">No login history yet</p>
+        </div>
+
+        <div class="data-table" *ngIf="history.length">
+          <div class="dt-head dt-row-history">
+            <span>Status</span><span>Browser</span><span>Device</span>
+            <span>OS</span><span>IP</span><span>Time</span>
+          </div>
+          <div class="dt-row dt-row-history" *ngFor="let h of history"
+               [class.dt-row-failed]="h.status==='failed'">
+            <span>{{ h.status === 'success' ? '✅' : '❌' }}</span>
+            <span class="dt-muted">{{ h.browser }}</span>
+            <span class="dt-muted">{{ h.device }}</span>
+            <span class="dt-muted">{{ h.os }}</span>
+            <span class="dt-mono">{{ h.ip }}</span>
+            <span class="dt-muted">{{ h.at | date:'dd/MM hh:mm a' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PERMISSIONS TAB ═══════════ -->
+      <div *ngIf="activeTab==='permissions'" class="tab-pane">
+        <h2 class="section-title">🔐 Your Role & Permissions</h2>
+
+        <!-- Role card -->
+        <div class="role-banner" [class.role-banner-owner]="isOwner">
+          <div class="rb-icon">{{ isOwner ? '🏠' : '🔑' }}</div>
+          <div class="rb-body">
+            <div class="rb-role">{{ isOwner ? 'Owner' : 'Renter' }}</div>
+            <div class="rb-desc">
+              {{ isOwner
+                ? 'Highest priority role — list items, manage bookings, earn money, and access analytics.'
+                : 'Standard role — browse items, book rentals, and write reviews.' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Permission chips -->
+        <div class="perms-grid">
+          <div class="perm-chip" *ngFor="let p of (user?.permissions || [])">
+            <span class="perm-icon">✅</span>
+            <span>{{ formatPermission(p) }}</span>
+          </div>
+        </div>
+
+        <!-- Account security -->
+        <h2 class="section-title" style="margin-top:32px">🛡️ Account Security</h2>
+        <div class="sec-grid">
+          <div class="sec-item">
+            <span class="sec-icon">📧</span>
+            <div class="sec-text">
+              <div class="sec-label">Email</div>
+              <div class="sec-val">{{ user?.email }}</div>
+            </div>
+            <span class="sec-badge" [class.sec-good]="user?.isEmailVerified">
+              {{ emailVerifiedLabel }}
+            </span>
+          </div>
+
+          <div class="sec-item">
+            <span class="sec-icon">🔐</span>
+            <div class="sec-text">
+              <div class="sec-label">Login Method</div>
+              <div class="sec-val">{{ providerLabel }}</div>
+            </div>
+            <span class="sec-badge sec-good">Active</span>
+          </div>
+
+          <div class="sec-item" *ngIf="isOwner">
+            <span class="sec-icon">🪪</span>
+            <div class="sec-text">
+              <div class="sec-label">CNIC Verification</div>
+              <div class="sec-val">{{ cnicVerifiedLabel }}</div>
+            </div>
+            <span class="sec-badge"
+                  [class.sec-good]="user?.cnicVerified"
+                  [class.sec-warn]="!user?.cnicVerified">
+              {{ cnicBadgeLabel }}
+            </span>
+          </div>
+
+          <div class="sec-item">
+            <span class="sec-icon">📅</span>
+            <div class="sec-text">
+              <div class="sec-label">Member Since</div>
+              <div class="sec-val">{{ memberSince | date:'MMMM d, y' }}</div>
+            </div>
+            <span class="sec-badge sec-good">Active</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-area -->
+
+</div><!-- /dash-shell -->
+
+<!-- ════════════════════════ LOGOUT MODAL ════════════════════════ -->
+<div class="modal-overlay" *ngIf="showLogoutModal" (click)="showLogoutModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-icon">🚪</div>
+    <h3 class="modal-title">Logout Confirm</h3>
+    <p class="modal-text">Are you sure you want to logout from your Rentify account?</p>
+    <div class="modal-btns">
+      <button class="modal-cancel"  (click)="showLogoutModal=false">No, Stay</button>
+      <button class="modal-confirm" (click)="confirmLogout()">Yes, Logout</button>
+    </div>
+  </div>
+</div>

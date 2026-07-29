@@ -1,0 +1,29 @@
+.rp-root { max-width: 100%; font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
+
+.rp-header { margin-bottom: 20px; }
+.rp-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0; }
+.rp-sub { font-size: 13px; color: #6b7280; margin: 4px 0 0; }
+
+.rp-loading-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.rp-skel { height: 150px; border-radius: 14px; background: #f3f4f6; animation: rp-pulse 1.4s ease-in-out infinite; }
+@keyframes rp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+.rp-metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+@media (max-width: 900px) { .rp-metrics-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .rp-metrics-grid { grid-template-columns: 1fr; } }
+
+.rp-metric-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; }
+.rp-metric-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.rp-icon-green { background: #EAF3DE; color: #1F5435; }
+.rp-icon-amber { background: #fef3c7; color: #d97706; }
+.rp-icon-blue { background: #dbeafe; color: #2563eb; }
+.rp-icon-purple { background: #ede9fe; color: #7c3aed; }
+.rp-metric-val { font-size: 24px; font-weight: 800; color: #111827; margin: 0; }
+.rp-empty { color: #d1d5db; }
+.rp-metric-label { font-size: 13px; font-weight: 700; color: #374151; margin: 4px 0 6px; }
+.rp-metric-desc { font-size: 12px; color: #9ca3af; margin: 0; line-height: 1.5; }
+
+.rp-chart-card { background: #fff; border: 1px solid #e8efe8; border-radius: 16px; padding: 22px; box-shadow: 0 2px 16px rgba(0,0,0,.04); }
+.rp-chart-title { font-size: 14px; font-weight: 700; color: #111827; margin: 0 0 16px; }
+.rp-chart-box { height: 280px; position: relative; }
+.rp-chart-empty { display: flex; align-items: center; justify-content: center; height: 240px; color: #9ca3af; font-size: 13px; }

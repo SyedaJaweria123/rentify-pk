@@ -1,0 +1,14 @@
+<div class="admin-layout">
+  <!-- Navbar now spans the FULL width across the top, above everything else -->
+  <app-admin-navbar (toggleMobile)="toggleMobileMenu()"></app-admin-navbar>
+
+  <div class="admin-body">
+    <app-admin-sidebar
+      [mobileOpen]="mobileOpen"
+      (mobileClose)="mobileOpen.set(false)">
+    </app-admin-sidebar>
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,112 @@
+/* ═══ RENTER DASHBOARD · Rentify PK ═══ */
+.rd {
+  font-family: 'Poppins','Inter',system-ui,sans-serif;
+  color: #1a1f1c;
+}
+.rd-loading { padding: 80px 0; text-align: center; color: #6b7280; font-size: 15px; }
+.rd-wrap { display: flex; flex-direction: column; gap: 18px; animation: rdUp .4s ease both; }
+@keyframes rdUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Hero (rider-dashboard style) */
+.rd-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  flex-wrap: wrap;
+  background: #fff; border: 1px solid #ebeae4; border-radius: 22px; padding: 28px 34px;
+  box-shadow: 0 3px 18px rgba(0,0,0,.05); overflow: hidden;
+}
+.rd-hero-left { flex: 1; min-width: 260px; }
+.rd-hero-title { font-size: 30px; font-weight: 800; margin: 0 0 4px; letter-spacing: -.02em; color: #1a1f1c; }
+.rd-hero-sub { font-size: 14px; color: #6b7280; margin: 0 0 18px; }
+.rd-hero-search {
+  display: flex; align-items: center; gap: 10px; max-width: 420px;
+  padding: 0 16px; border: 1.5px solid #e5e7eb; border-radius: 12px; background: #fafafa;
+  transition: border .15s, background .15s;
+}
+.rd-hero-search:focus-within { border-color: #1F5435; background: #fff; }
+.rd-hero-search input {
+  flex: 1; border: none; outline: none; background: transparent;
+  padding: 13px 0; font-size: 14px; font-family: inherit; color: #1a1f1c;
+}
+.rd-hero-illus { flex-shrink: 0; }
+.rd-hero-img {
+  width: 240px; height: auto; object-fit: contain; display: block;
+  animation: rdFloat 4s ease-in-out infinite;
+}
+@keyframes rdFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (max-width: 700px) { .rd-hero-illus { display: none; } }
+
+/* Metrics */
+.rd-metrics { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 820px) { .rd-metrics { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .rd-metrics { grid-template-columns: 1fr; } }
+.rd-metric {
+  background: #fff; border: 1px solid #ebeae4; border-radius: 18px; padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.rd-metric-label { font-size: 12.5px; color: #6b7280; font-weight: 500; }
+.rd-metric-num { font-size: 25px; font-weight: 800; margin: 6px 0 2px; color: #1a1f1c; }
+.rd-metric-star { color: #E8A33D; font-size: 19px; margin-left: 3px; }
+.rd-metric-foot { font-size: 11.5px; color: #9ca3af; }
+.rd-metric-top { display: flex; align-items: center; justify-content: space-between; }
+.rd-metric-feature {
+  background: linear-gradient(140deg, #1F5435 0%, #143524 100%);
+  border-color: transparent; color: #fff;
+}
+.rd-metric-feature .rd-metric-label { color: rgba(255,255,255,.72); }
+.rd-metric-feature .rd-metric-top { color: rgba(255,255,255,.72); }
+.rd-metric-big { font-size: 29px; font-weight: 800; margin: 8px 0 12px; }
+.rd-metric-link {
+  align-self: flex-start; background: rgba(255,255,255,.16); color: #fff; border: none;
+  padding: 8px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: background .15s;
+}
+.rd-metric-link:hover { background: rgba(255,255,255,.26); }
+
+/* Panels */
+.rd-panel { background: #fff; border: 1px solid #ebeae4; border-radius: 20px; padding: 24px 26px; }
+.rd-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.rd-panel-title { font-size: 16px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
+.rd-panel-sub { font-size: 12.5px; color: #6b7280; margin: 3px 0 16px; }
+.rd-see-all { font-size: 13px; font-weight: 600; color: #1F5435; text-decoration: none; white-space: nowrap; }
+.rd-see-all:hover { text-decoration: underline; }
+
+/* Two columns */
+.rd-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 760px) { .rd-cols { grid-template-columns: 1fr; } }
+
+/* Bars */
+.rd-bars { display: flex; flex-direction: column; gap: 14px; }
+.rd-bar-row { display: flex; align-items: center; gap: 12px; }
+.rd-bar-name { font-size: 13px; color: #1a1f1c; font-weight: 500; width: 84px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-bar-track { flex: 1; height: 9px; background: #f2f1ec; border-radius: 99px; overflow: hidden; }
+.rd-bar-fill { display: block; height: 100%; border-radius: 99px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.rd-bar-green { background: #1F5435; }
+.rd-bar-count { font-size: 13px; font-weight: 700; color: #1a1f1c; width: 26px; text-align: right; flex-shrink: 0; }
+
+/* Recent bookings */
+.rd-bookings { display: flex; flex-direction: column; }
+.rd-booking {
+  display: flex; align-items: center; gap: 14px; padding: 13px 0;
+  border-bottom: 1px solid #ebeae4; cursor: pointer; transition: padding-left .18s;
+}
+.rd-booking:last-child { border-bottom: none; }
+.rd-booking:hover { padding-left: 6px; }
+.rd-booking-thumb { width: 48px; height: 48px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: #f4f3ee; display: flex; align-items: center; justify-content: center; }
+.rd-booking-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rd-booking-ph { font-size: 20px; }
+.rd-booking-info { flex: 1; min-width: 0; }
+.rd-booking-title { font-size: 14px; font-weight: 600; color: #1a1f1c; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-booking-meta { font-size: 12px; color: #6b7280; margin: 0; }
+.rd-booking-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.rd-booking-amt { font-size: 14.5px; font-weight: 800; color: #1a1f1c; }
+.rd-booking-status { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; }
+.st-pending   { background: #fdf1dc; color: #b5791b; }
+.st-confirmed { background: #e0edff; color: #2563eb; }
+.st-active    { background: #efe8ff; color: #7c3aed; }
+.st-completed { background: #EAF3DE; color: #1F5435; }
+.st-cancelled { background: #fde5e5; color: #dc2626; }
+
+/* Blank */
+.rd-blank { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 34px 16px; text-align: center; }
+.rd-blank p { font-size: 14px; font-weight: 600; color: #6b7280; margin: 0; }
+.rd-blank span { font-size: 12.5px; color: #9ca3af; }

@@ -1,0 +1,218 @@
+<app-owner-layout *ngIf="isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="walletContent"></ng-container>
+</app-owner-layout>
+
+<app-renter-layout *ngIf="!isOwner && !isRider" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="walletContent"></ng-container>
+</app-renter-layout>
+
+<!-- Rider reaches this component via the nested /rider/wallet route, which -->
+<!-- already renders inside app-rider-layout — render bare here to avoid a double sidebar. -->
+<ng-container *ngIf="isRider">
+  <ng-container *ngTemplateOutlet="walletContent"></ng-container>
+</ng-container>
+
+<ng-template #walletContent>
+<div class="wl-page">
+
+  <!-- ══ BALANCE CARD ══ -->
+  <div class="wl-card">
+    <div class="wl-card-left">
+      <p class="wl-label">Available Balance</p>
+      <div class="wl-balance">
+        Rs. {{ summary()?.balance | number:'1.0-0' }}
+      </div>
+      <button class="wl-withdraw-btn" (click)="showWithdraw = !showWithdraw">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        Withdraw
+      </button>
+    </div>
+    <div class="wl-card-right">
+      <div class="wl-img-wrap">
+        <img src="/wallet-img.png" alt="Wallet" class="wl-img"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS ROW ══ -->
+  <div class="wl-stats">
+    <div class="wl-stat">
+      <div class="wl-stat-ic wl-ic-green">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="wl-stat-body">
+        <p class="wl-stat-label">Total Earned</p>
+        <p class="wl-stat-val">Rs. {{ summary()?.totalEarned | number:'1.0-0' }}</p>
+      </div>
+      <svg class="wl-spark wl-spark-green" viewBox="0 0 80 32" fill="none">
+        <polyline points="0,28 15,20 28,24 40,12 55,16 68,8 80,4" stroke="#1F5435" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="wl-stat">
+      <div class="wl-stat-ic wl-ic-red">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+      </div>
+      <div class="wl-stat-body">
+        <p class="wl-stat-label">Total Withdrawn</p>
+        <p class="wl-stat-val" style="color:#DC2626">Rs. {{ summary()?.totalWithdrawn | number:'1.0-0' }}</p>
+      </div>
+      <svg class="wl-spark wl-spark-red" viewBox="0 0 80 32" fill="none">
+        <polyline points="0,4 15,10 28,6 40,18 55,14 68,22 80,28" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="wl-stat">
+      <div class="wl-stat-ic wl-ic-blue">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      </div>
+      <div class="wl-stat-body">
+        <p class="wl-stat-label">Transactions</p>
+        <p class="wl-stat-val" style="color:#2563EB">{{ summary()?.txCount || 0 }}</p>
+      </div>
+      <svg class="wl-spark wl-spark-blue" viewBox="0 0 80 32" fill="none">
+        <polyline points="0,20 15,14 28,18 40,10 55,14 68,8 80,12" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ══ WITHDRAW FORM (slide down) ══ -->
+  <div class="wl-withdraw-box" *ngIf="showWithdraw">
+    <div class="wl-withdraw-head">
+      <h3>Withdraw Funds</h3>
+      <button class="wl-close-btn" (click)="showWithdraw=false">✕</button>
+    </div>
+    <form [formGroup]="withdrawForm" (ngSubmit)="onWithdraw()">
+      <div class="wl-form-row">
+        <div class="wl-field">
+          <label>Amount (Rs.)</label>
+          <input type="number" formControlName="amount" placeholder="Min Rs. 100" min="100"/>
+          <span class="wl-err" *ngIf="withdrawForm.get('amount')?.touched && withdrawForm.get('amount')?.invalid">
+            Min Rs. 100 required
+          </span>
+        </div>
+        <div class="wl-field">
+          <label>Payment Method</label>
+          <select formControlName="method">
+            <option value="easypaisa">EasyPaisa</option>
+            <option value="jazzcash">JazzCash</option>
+            <option value="bank_transfer">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="wl-field wl-field-full">
+          <label>Account / Phone Number</label>
+          <input type="text" formControlName="accountNumber" placeholder="03XXXXXXXXX or IBAN"/>
+          <span class="wl-err" *ngIf="withdrawForm.get('accountNumber')?.touched && withdrawForm.get('accountNumber')?.invalid">
+            Account number required
+          </span>
+        </div>
+      </div>
+      <div class="wl-form-footer">
+        <p class="wl-note">⏱ Admin processes withdrawal within 1-3 business days</p>
+        <button type="submit" class="wl-submit-btn" [disabled]="withdrawForm.invalid || submitting()">
+          <mat-spinner *ngIf="submitting()" diameter="16"></mat-spinner>
+          {{ submitting() ? 'Processing...' : 'Request Withdrawal' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══ TRANSACTIONS ══ -->
+  <div class="wl-tx-section">
+    <div class="wl-tx-head">
+      <h3>Transaction History</h3>
+      <div class="wl-filters">
+        <button *ngFor="let f of txFilters"
+          class="wl-filter-btn"
+          [class.active]="activeTxFilter() === f.value"
+          (click)="onTxFilter(f.value)">
+          {{ f.label }}
+        </button>
+        <div class="wl-filter-icon-wrap">
+          <button class="wl-filter-icon-btn" title="Sort" (click)="showSortMenu = !showSortMenu">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          </button>
+          <div class="wl-sort-menu" *ngIf="showSortMenu">
+            <button class="wl-sort-item" [class.active]="activeSortFilter()==='latest'" (click)="onSortFilter('latest')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              Latest First
+            </button>
+            <button class="wl-sort-item" [class.active]="activeSortFilter()==='oldest'" (click)="onSortFilter('oldest')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              Oldest First
+            </button>
+            <div class="wl-sort-divider"></div>
+            <button class="wl-sort-item" [class.active]="activeSortFilter()==='highest'" (click)="onSortFilter('highest')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>
+              Highest Amount
+            </button>
+            <button class="wl-sort-item" [class.active]="activeSortFilter()==='lowest'" (click)="onSortFilter('lowest')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="6 14 12 20 18 14"/></svg>
+              Lowest Amount
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="wl-loading" *ngIf="loadingTx()">
+      <mat-spinner diameter="28"></mat-spinner>
+    </div>
+
+    <!-- Empty -->
+    <div class="wl-empty-state" *ngIf="!loadingTx() && transactions().length === 0">
+      <div class="wl-empty-img-wrap">
+        <div class="wl-empty-sparkle wl-sp1">✦</div>
+        <div class="wl-empty-sparkle wl-sp2">✦</div>
+        <img src="/wallet-empty.png" alt="Empty wallet" class="wl-empty-img"/>
+      </div>
+      <h3 class="wl-empty-title">No more transactions</h3>
+      <p class="wl-empty-sub">Your transaction history will appear here.</p>
+    </div>
+
+    <!-- List -->
+    <div class="wl-tx-list" *ngIf="!loadingTx() && transactions().length > 0">
+      <div class="wl-tx-row" *ngFor="let tx of transactions()">
+        <div class="wl-tx-left">
+          <div class="wl-tx-ic" [class.wl-ic-in]="tx.amount > 0" [class.wl-ic-out]="tx.amount < 0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <ng-container *ngIf="tx.amount > 0">
+                <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+              </ng-container>
+              <ng-container *ngIf="tx.amount <= 0">
+                <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+              </ng-container>
+            </svg>
+          </div>
+          <div>
+            <p class="wl-tx-desc">{{ tx.description }}</p>
+            <div class="wl-tx-meta">
+              <span class="wl-tx-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ tx.createdAt | date:'dd MMM yyyy' }}
+              </span>
+              <span class="wl-tx-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ tx.createdAt | date:'hh:mm a' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="wl-tx-right">
+          <span class="wl-tx-amt" [class.in]="tx.amount > 0" [class.out]="tx.amount < 0">
+            {{ tx.amount > 0 ? '+' : '' }}Rs. {{ tx.amount | number:'1.0-0' }}
+          </span>
+          <span class="wl-tx-bal">Bal: Rs. {{ tx.balance | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="wl-pager" *ngIf="txPagination() && txPagination().totalPages > 1">
+      <button [disabled]="txPage === 1" (click)="loadTx(txPage - 1)">← Prev</button>
+      <span>{{ txPage }} / {{ txPagination().totalPages }}</span>
+      <button [disabled]="!txPagination().hasNext" (click)="loadTx(txPage + 1)">Next →</button>
+    </div>
+  </div>
+
+</div>
+</ng-template>

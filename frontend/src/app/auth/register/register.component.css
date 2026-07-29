@@ -1,0 +1,478 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   REGISTER — Rentify PK
+   Design: matches login.component.css exactly — a single clean centered
+   white card popup (icon box → title → form → social → switch-link),
+   instead of the old two-panel branded-image + wizard-card split layout.
+   The multi-step flow (role → details → password → otp → done) is kept,
+   each step just renders inside this one simple card now.
+   ─────────────────────────────────────────────────────────────────────────
+   Sections:
+     1.  Popup wrapper (backdrop/modal/close) — copied 1:1 from login
+     2.  Card header + icon (role step opener, matches login's icon-wrap)
+     3.  Voice button
+     4.  Social buttons + divider
+     5.  Role grid
+     6.  Form fields (input, eye, hints, errors)
+     7.  CNIC camera scan
+     8.  Buttons (primary, back)
+     9.  Alerts
+     10. Success screen
+     11. OTP popup (already its own self-contained overlay)
+     12. Responsive
+═══════════════════════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; }
+
+/* ── 1. POPUP WRAPPER — identical to login.component.css's .lp-backdrop/.lp-modal ── */
+.rp-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: rpBdIn .2s ease;
+}
+@keyframes rpBdIn { from{opacity:0} to{opacity:1} }
+
+.rp-modal {
+  background: #fff; border-radius: 22px;
+  padding: 28px 26px 24px;
+  width: 100%; max-width: 420px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,.2);
+  animation: rpModalIn .25s cubic-bezier(.34,1.36,.64,1);
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes rpModalIn { from{opacity:0;transform:scale(.93) translateY(14px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.rp-modal::-webkit-scrollbar { display: none; }
+
+.rp-close {
+  position: absolute; top: 16px; right: 16px; z-index: 10;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid #e5e7eb; background: #fff;
+  color: #9ca3af; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .18s;
+}
+.rp-close:hover { border-color: #1F5435; color: #1F5435; }
+
+.auth-card { position: relative; width: 100%; }
+
+/* ── 2. CARD HEADER + ICON — matches login's .lp-icon-wrap / .lp-title / .lp-sub ── */
+.rp-icon-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: #EAF3DE;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.card-header { margin-bottom: 20px; }
+.card-header h2,
+.reg-title { font-size: 1.5rem; font-weight: 800; color: #111827; margin-bottom: 4px; }
+.dot { color: #1F5435; }
+.card-header p,
+.reg-sub { font-size: 13px; color: #6b7280; margin: 0; }
+
+/* ── 3. VOICE BUTTON ─────────────────────────────────────────────────── */
+.voice-btn {
+  position: absolute;
+  top: 0; right: 0;
+  display: flex; align-items: center; gap: 6px;
+  background: #fafafa;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 99px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.voice-btn.active { background: #EAF3DE; border-color: #1F5435; }
+.voice-waves { display: inline-flex; gap: 2px; align-items: center; }
+.voice-waves span {
+  width: 3px; height: 12px;
+  background: #1F5435;
+  border-radius: 2px;
+  animation: voiceWave 0.8s infinite ease-in-out;
+}
+.voice-waves span:nth-child(2) { animation-delay: 0.2s; }
+.voice-waves span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes voiceWave { 0%,100% { height: 6px; } 50% { height: 14px; } }
+
+/* ── 4. SOCIAL + DIVIDER — matches login's .lp-social / .lp-divider ──── */
+.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.social-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+  background: #fff; font-size: 13px; font-weight: 600; color: #374151;
+  cursor: pointer; min-height: 44px; font-family: inherit;
+  transition: all .18s;
+}
+.social-btn:hover { border-color: #1F5435; background: #f8faf8; }
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 14px 0; font-size: 12px; color: #9ca3af;
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+.divider span { padding: 0; }
+
+/* ── 5. ROLE GRID ────────────────────────────────────────────────────── */
+.role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.role-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 16px 8px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s;
+}
+.role-card:hover { border-color: #1F5435; background: #f8faf8; }
+.role-card.selected { border-color: #1F5435; background: #EAF3DE; }
+.role-emoji { font-size: 26px; }
+.role-card strong { font-size: 13px; color: #111827; font-weight: 700; }
+.role-card small { font-size: 10.5px; color: #6b7280; text-align: center; line-height: 1.3; }
+.role-check {
+  position: absolute; top: 6px; right: 6px;
+  width: 18px; height: 18px;
+  background: #1F5435; color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800;
+}
+
+/* ── 6. FORM FIELDS — matches login's .lp-field / .lp-input-wrap ─────── */
+.field-group { margin-bottom: 14px; }
+.field-group label {
+  display: block; font-size: 12.5px; font-weight: 600;
+  color: #374151; margin-bottom: 6px;
+}
+.opt { font-weight: 400; color: #9ca3af; }
+.input-wrap {
+  display: flex; align-items: center; gap: 9px;
+  border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 0 12px; background: #fafafa; transition: border-color .18s;
+}
+.input-wrap.has-error { border-color: #dc2626; }
+.input-wrap:focus-within { border-color: #1F5435; background: #fff; }
+.inp-icon { color: #9ca3af; flex-shrink: 0; }
+.input-wrap input {
+  flex: 1; border: none; outline: none; background: transparent;
+  padding: 11px 0; font-size: 13.5px; color: #111827; font-family: inherit;
+}
+.input-wrap input::placeholder { color: #9ca3af; }
+.eye-btn { background: none; border: none; cursor: pointer; color: #9ca3af; display: flex; align-items: center; padding: 4px; font-size: 15px; }
+.eye-btn:hover { color: #1F5435; }
+
+.field-err { display: block; font-size: 11.5px; color: #dc2626; margin-top: 5px; }
+.input-hint { display: block; font-size: 11.5px; color: #9ca3af; margin-top: 5px; }
+
+/* Email validation status */
+.email-status { display: flex; align-items: center; margin-top: 5px; }
+.checking-email { font-size: 11.5px; color: #6b7280; display: flex; align-items: center; gap: 6px; }
+.valid-email { font-size: 11.5px; color: #1F5435; font-weight: 700; }
+.check-spin {
+  width: 13px; height: 13px;
+  border: 2px solid #e5e7eb; border-top-color: #1F5435;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 7. CNIC CAMERA SCAN ─────────────────────────────────────────────── */
+.scan-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: #EAF3DE; border: 1.5px solid #1F5435; color: #1F5435;
+  border-radius: 8px; padding: 9px 14px; min-height: 40px;
+  font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.scan-btn:hover { background: #1F5435; color: #fff; }
+.scan-error { font-size: 11.5px; color: #dc2626; margin-top: 8px; display: block; }
+
+/* ══ Premium camera scanning overlay ══ */
+.camera-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(8,14,10,0.92);
+  backdrop-filter: blur(6px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 20px;
+  animation: overlayFadeIn .3s ease both;
+}
+@keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.camera-view { position: relative; width: 100%; max-width: 420px; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.camera-view video { width: 100%; display: block; }
+
+/* Real auto-capture flash */
+.capture-flash {
+  position: absolute; inset: 0; z-index: 5; background: #fff;
+  animation: flashPop .18s ease both;
+}
+@keyframes flashPop { from { opacity: .95; } to { opacity: 0; } }
+
+/* Document/face frame with animated corner brackets */
+.scan-frame { position: absolute; inset: 14% 10%; pointer-events: none; border-radius: 16px; }
+.scan-frame-circle { inset: 12% 22%; border-radius: 50%; }
+.corner {
+  position: absolute; width: 26px; height: 26px; border: 3px solid #16A34A;
+  filter: drop-shadow(0 0 6px rgba(22,163,74,.7));
+  animation: cornerPulse 1.8s ease-in-out infinite;
+}
+.corner-tl { top: -3px; left: -3px; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
+.corner-tr { top: -3px; right: -3px; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; }
+.corner-bl { bottom: -3px; left: -3px; border-right: none; border-top: none; border-radius: 0 0 0 12px; }
+.corner-br { bottom: -3px; right: -3px; border-left: none; border-top: none; border-radius: 0 0 12px 0; }
+@keyframes cornerPulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
+
+.scan-line {
+  position: absolute; left: 4%; right: 4%; height: 2.5px;
+  background: linear-gradient(90deg, transparent, #16A34A, transparent);
+  box-shadow: 0 0 16px 2px rgba(22,163,74,.8);
+  animation: scanMove 2.2s infinite ease-in-out;
+}
+@keyframes scanMove { 0%,100% { top: 4%; } 50% { top: 94%; } }
+
+.scan-instruction {
+  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+  color: #fff; font-size: 13.5px; font-weight: 600; text-align: center;
+  background: rgba(0,0,0,.5); padding: 8px 18px; border-radius: 999px;
+  backdrop-filter: blur(8px); white-space: nowrap; z-index: 4;
+  animation: instructionFade .3s ease both;
+}
+@keyframes instructionFade { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Liveness prompt */
+.liveness-prompt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 4; }
+.liveness-circle {
+  width: 84px; height: 84px; border-radius: 50%; border: 4px solid #16A34A;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 30px rgba(22,163,74,.6);
+  animation: livenessPulse 1s ease-in-out infinite;
+}
+@keyframes livenessPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.liveness-count { font-size: 34px; font-weight: 800; color: #fff; }
+.liveness-text { color: #fff; font-size: 14px; font-weight: 600; background: rgba(0,0,0,.5); padding: 8px 16px; border-radius: 999px; }
+.mini-spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,.25); border-top-color: #16A34A; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.cancel-btn {
+  position: absolute; top: 16px; right: 16px; z-index: 6;
+  padding: 9px 18px; border-radius: 10px; background: rgba(255,255,255,0.12);
+  color: #fff; border: 1px solid rgba(255,255,255,.2); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+  backdrop-filter: blur(8px); transition: background .18s;
+}
+.cancel-btn:hover { background: rgba(255,255,255,0.22); }
+
+/* Real OCR field reveal */
+.ocr-reveal { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.ocr-field {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px;
+  font-size: 12px; animation: ocrRevealIn .4s ease both;
+}
+@keyframes ocrRevealIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+.ocr-check { display: flex; color: #16A34A; flex-shrink: 0; }
+.ocr-label { color: #6b7280; font-weight: 600; flex-shrink: 0; }
+.ocr-value { color: #111827; font-weight: 700; margin-left: auto; text-align: right; }
+
+.cnic-rules { background: #fafafa; border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
+.cnic-rule { font-size: 11.5px; color: #6b7280; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.cnic-rule:last-child { margin-bottom: 0; }
+
+/* ══ Full-screen verification overlay (timeline + success/fail) ══ */
+.verify-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(8,14,10,0.94); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: overlayFadeIn .3s ease both;
+}
+.verify-card {
+  background: #fff; border-radius: 24px; padding: 36px 32px; width: 100%; max-width: 400px;
+  box-shadow: 0 40px 100px rgba(0,0,0,.5);
+  animation: verifyCardIn .35s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes verifyCardIn { from { opacity: 0; transform: translateY(20px) scale(.96); } to { opacity: 1; transform: none; } }
+
+.verify-title { font-size: 19px; font-weight: 800; color: #111827; margin: 0 0 4px; text-align: center; }
+.verify-subtitle { font-size: 13px; color: #6b7280; text-align: center; margin: 0 0 22px; }
+
+.verify-progress-track { height: 6px; background: #eef2ee; border-radius: 999px; overflow: hidden; margin-bottom: 6px; }
+.verify-progress-fill { height: 100%; background: linear-gradient(90deg, #16A34A, #14532D); border-radius: 999px; transition: width .4s ease; }
+.verify-progress-label { text-align: center; font-size: 12px; font-weight: 700; color: #14532D; margin: 0 0 20px; }
+
+.verify-timeline { display: flex; flex-direction: column; gap: 12px; }
+.verify-step { display: flex; align-items: center; gap: 10px; opacity: .4; transition: opacity .3s; }
+.verify-step.vs-active, .verify-step.vs-done { opacity: 1; }
+.vs-dot {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #eef2ee; color: #9ca3af; transition: all .3s;
+}
+.vs-done .vs-dot { background: #16A34A; color: #fff; }
+.vs-active .vs-dot { background: #14532D; }
+.vs-spinner { width: 11px; height: 11px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+.vs-label { font-size: 13.5px; font-weight: 600; color: #374151; }
+.vs-done .vs-label { color: #111827; font-weight: 700; }
+
+/* Success / fail result screens */
+.verify-result { text-align: center; }
+.success-glow {
+  width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 18px;
+  background: radial-gradient(circle, #16A34A, #14532D);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 0 rgba(22,163,74,.5);
+  animation: successGlowPulse 1.6s ease-out infinite;
+}
+@keyframes successGlowPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(22,163,74,.5); }
+  70%  { box-shadow: 0 0 0 22px rgba(22,163,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+}
+.fail-icon {
+  width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 16px;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  display: flex; align-items: center; justify-content: center;
+}
+.verify-result-line { font-size: 13.5px; color: #374151; margin: 4px 0; }
+.verify-result-line strong { color: #14532D; }
+
+/* ── 8. BUTTONS — matches login's .lp-btn ─────────────────────────────── */
+.btn-primary {
+  width: 100%; padding: 13px; min-height: 44px;
+  border-radius: 10px; background: #1F5435; color: #fff;
+  border: none; font-size: 14.5px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background .18s;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 4px;
+}
+.btn-primary:hover:not(:disabled) { background: #143524; }
+.btn-primary:disabled { opacity: .7; cursor: not-allowed; }
+.btn-spinner {
+  width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+
+.back-btn {
+  background: none; border: none; color: #6b7280;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  padding: 0; margin-bottom: 8px; font-family: inherit;
+}
+.back-btn:hover { color: #1F5435; }
+
+/* ── 9. ALERTS ───────────────────────────────────────────────────────── */
+.alert { border-radius: 10px; padding: 10px 14px; font-size: 12.5px; margin-bottom: 14px; line-height: 1.5; }
+.alert-error { background: #FEF2F2; border: 1px solid #FECACA; color: #dc2626; }
+.alert-success { background: #EAF3DE; border: 1px solid #B9FBD0; color: #143524; }
+.turnstile-wrap { margin: 14px 0; }
+.turnstile-err { font-size: 11.5px; color: #dc2626; margin-top: 6px; }
+
+/* ── 10. SUCCESS SCREEN ──────────────────────────────────────────────── */
+.success-screen { text-align: center; padding: 8px 0; }
+.success-icon {
+  width: 64px; height: 64px; background: #EAF3DE; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 0 auto 16px;
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-screen h2 { font-size: 1.4rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+.success-screen p { font-size: 13px; color: #6b7280; margin-bottom: 18px; }
+.email-display { display: block; font-weight: 700; color: #1F5435; margin-bottom: 18px; }
+.success-steps { text-align: left; background: #fafafa; border-radius: 12px; padding: 16px; margin-bottom: 18px; }
+.s-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #111827; margin-bottom: 10px; }
+.s-step:last-child { margin-bottom: 0; }
+
+/* Switch link — matches login's .lp-switch */
+.switch-link { text-align: center; font-size: 13px; color: #6b7280; }
+.switch-link a { color: #1F5435; font-weight: 700; text-decoration: none; }
+.switch-link a:hover { text-decoration: underline; }
+
+/* ── 11. OTP POPUP OVERLAY (kept as its own self-contained modal) ────── */
+.otp-backdrop {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: otpBdIn .2s ease;
+}
+@keyframes otpBdIn { from{opacity:0} to{opacity:1} }
+
+.otp-modal {
+  background: #fff; border-radius: 20px;
+  padding: 22px 24px 20px;
+  width: 100%; max-width: 300px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,.2);
+  animation: otpModalIn .25s cubic-bezier(.34,1.36,.64,1);
+}
+@keyframes otpModalIn { from{opacity:0;transform:scale(.93) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+.otp-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid #e5e7eb; background: #fff;
+  color: #9ca3af; cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.otp-close:hover { border-color: #1F5435; color: #1F5435; }
+
+.otp-logo { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #1F5435; margin-bottom: 16px; }
+.otp-icon-wrap {
+  width: 58px; height: 58px; border-radius: 50%; background: #EAF3DE;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+}
+.otp-title { font-size: 1.15rem; font-weight: 800; color: #111827; text-align: center; margin-bottom: 6px; }
+.otp-sub { font-size: 12.5px; color: #6b7280; text-align: center; line-height: 1.5; margin-bottom: 2px; }
+.otp-email { font-size: 13px; font-weight: 700; color: #1F5435; text-align: center; margin-bottom: 6px; }
+
+.otp-input-wrap { margin: 14px 0; }
+.otp-line-input {
+  width: 100%; border: none; border-bottom: 2.5px solid #374151;
+  border-radius: 0; text-align: center; font-size: 24px; font-weight: 700;
+  letter-spacing: 12px; color: #111827; outline: none; background: transparent;
+  padding: 8px 0; font-family: monospace; transition: border-color .18s; box-sizing: border-box;
+}
+.otp-line-input:focus { border-bottom-color: #1F5435; }
+.otp-line-input::placeholder { color: #d1d5db; letter-spacing: 10px; }
+.otp-line-input:disabled { opacity: .6; }
+
+.otp-countdown { font-size: 12px; color: #6b7280; text-align: center; margin: 8px 0 0; }
+.otp-countdown strong { color: #1F5435; }
+.otp-resend-btn {
+  background: none; border: none; color: #1F5435; font-weight: 600;
+  font-size: 13px; cursor: pointer; font-family: inherit; display: block;
+  margin: 8px auto 0; text-decoration: underline;
+}
+.otp-verify-btn {
+  width: 100%; padding: 11px; min-height: 44px; margin-top: 14px;
+  background: #1F5435; color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: background .18s;
+}
+.otp-verify-btn:hover:not(:disabled) { background: #143524; }
+.otp-verify-btn:disabled { opacity: .6; cursor: not-allowed; }
+.otp-back { display: block; text-align: center; margin-top: 14px; font-size: 12.5px; color: #6b7280; cursor: pointer; transition: color .18s; }
+.otp-back:hover { color: #1F5435; }
+.otp-loading { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; font-size: 13px; color: #6b7280; }
+.otp-spin {
+  width: 16px; height: 16px; border: 2px solid #e5e7eb; border-top-color: #1F5435;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+
+/* ── 12. RESPONSIVE ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .rp-modal { padding: 22px 18px 20px; max-width: 400px; }
+  .card-header h2, .reg-title { font-size: 1.3rem; }
+  .role-grid { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .role-card { padding: 12px 4px; }
+  .role-emoji { font-size: 22px; }
+  .social-row { grid-template-columns: 1fr; }
+}
+
+
+/* Genuine / fake CNIC authenticity badges (real Gemini vision check) */
+.cnic-authentic, .cnic-fake { display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:9px 13px; border-radius:10px; margin-top:8px; }
+.cnic-authentic { color:#0f7a3d; background:#E8F8EF; border:1px solid rgba(0,166,81,.28); }
+.cnic-fake { color:#c0243a; background:#FFECEC; border:1px solid #ffd0d0; }

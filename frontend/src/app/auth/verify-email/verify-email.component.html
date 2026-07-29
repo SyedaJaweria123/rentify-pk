@@ -1,0 +1,91 @@
+<div class="verify-page">
+
+  <!-- Decorations -->
+  <div class="deco-top"></div>
+  <div class="deco-bottom"></div>
+
+  <div class="verify-container">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-icon">🏠</div>
+      <span class="logo-name">Rent<span>Anything</span></span>
+    </div>
+
+    <!-- Card -->
+    <div class="verify-card">
+
+      <!-- Loading -->
+      <div *ngIf="state==='loading'" class="state-block">
+        <div class="loading-ring">
+          <div class="ring-spinner"></div>
+        </div>
+        <h2>Verifying your email...</h2>
+        <p>Please wait a moment</p>
+      </div>
+
+      <!-- Success -->
+      <div *ngIf="state==='success'" class="state-block">
+        <div class="state-icon success-glow">✅</div>
+        <h2>Email Verified!</h2>
+        <p>{{ message }}</p>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <p class="redirect-note">Redirecting to login in 4 seconds...</p>
+        <button class="btn-orange" (click)="goLogin()">Go to Login Now</button>
+      </div>
+
+      <!-- Already Verified -->
+      <div *ngIf="state==='already'" class="state-block">
+        <div class="state-icon">✅</div>
+        <h2>Already Verified!</h2>
+        <p>{{ message }}</p>
+        <button class="btn-orange" (click)="goLogin()">Sign In</button>
+      </div>
+
+      <!-- Expired -->
+      <div *ngIf="state==='expired'" class="state-block">
+        <div class="state-icon warn-glow">⏰</div>
+        <h2>Link Expired</h2>
+        <p>{{ message }}</p>
+        <button class="btn-orange" (click)="showResend=true">Request New Link</button>
+      </div>
+
+      <!-- Invalid -->
+      <div *ngIf="state==='invalid'" class="state-block">
+        <div class="state-icon error-glow">❌</div>
+        <h2>Invalid Link</h2>
+        <p>{{ message }}</p>
+        <button class="btn-outline" (click)="showResend=true">Resend Verification</button>
+        <button class="btn-orange" style="margin-top:10px" (click)="goLogin()">Back to Login</button>
+      </div>
+
+      <!-- Resend Form -->
+      <div *ngIf="showResend" class="resend-form">
+        <div class="divider"></div>
+        <h3>Resend Verification Email</h3>
+        <p>Enter your registered email to receive a new verification link.</p>
+
+        <div class="inp-wrap" [class.err]="resendError">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input type="email" [(ngModel)]="resendEmail" placeholder="your@email.com"
+            (keyup.enter)="resend()">
+        </div>
+        <span class="ferr" *ngIf="resendError">{{ resendError }}</span>
+
+        <div class="alert-success" *ngIf="resendMsg">✅ {{ resendMsg }}</div>
+
+        <button class="btn-orange" [disabled]="resending" (click)="resend()" style="margin-top:12px">
+          <span *ngIf="!resending">Send New Link</span>
+          <span *ngIf="resending" class="spin"></span>
+        </button>
+
+        <button class="link-btn" (click)="goLogin()">Back to Login</button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="footer-note">🔒 Secured by RentAnything PK</p>
+
+  </div>
+</div>

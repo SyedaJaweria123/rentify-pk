@@ -1,0 +1,101 @@
+/* ═══ RENTER LAYOUT — Sidebar + Top bar shell ═══ */
+.rn-root { display: flex; min-height: 100vh; background: #f7f8f6; font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
+
+/* ── Sidebar ── */
+.rn-sidebar {
+  width: 240px; flex-shrink: 0; background: #fff; border-right: 1px solid #e8efe8;
+  display: flex; flex-direction: column; padding: 14px 16px;
+  position: fixed; top: 68px; left: 0; height: calc(100vh - 68px); overflow-y: auto;
+  z-index: 50;
+}
+.rn-profile { display: flex; align-items: center; gap: 10px; padding: 6px 8px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 6px; }
+.rn-profile-link { text-decoration: none; border-radius: 12px; transition: background .15s; }
+.rn-profile-link:hover { background: #f7faf6; }
+.rn-avatar {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+  background: linear-gradient(135deg, #1F5435, #143524); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;
+}
+.rn-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.rn-profile-info { min-width: 0; }
+.rn-profile-name { font-size: 13.5px; font-weight: 700; color: #111827; margin: 0; }
+.rn-profile-status { font-size: 11.5px; color: #1F5435; margin: 2px 0 0; display: flex; align-items: center; gap: 5px; }
+.rn-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #1F5435; flex-shrink: 0; }
+.rn-profile-rating { font-size: 11px; color: #d97706; margin: 2px 0 0; display: flex; align-items: center; gap: 3px; }
+
+/* Rider tier badge wrapper in sidebar */
+.rn-badge-wrap { margin-top: 5px; }
+.rn-rider-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; margin-top: 5px; }
+.rn-badge-new      { background: #EAF3DE; color: #1F5435; border: 1px solid #d3e6c2; }
+
+/* Nav count bubble (for pending returns) */
+.rn-nav-count { margin-left: auto; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; min-width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
+
+.rn-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.rn-nav-item {
+  display: flex; align-items: center; gap: 11px; padding: 7px 10px; border-radius: 10px;
+  color: #6b7280; font-size: 13px; font-weight: 600; text-decoration: none; transition: all .15s;
+}
+.rn-nav-item:hover { background: #f7faf6; color: #1F5435; }
+.rn-nav-item.rn-nav-active { background: #EAF3DE; color: #1F5435; }
+.rn-nav-item svg { flex-shrink: 0; }
+
+.rn-logout {
+  display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px;
+  border: none; background: none; color: #dc2626; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit; margin-top: 12px;
+}
+.rn-logout:hover { background: #fef2f2; }
+
+/* ── Main column ── */
+.rn-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 240px; }
+
+.rn-content { flex: 1; padding: 24px; max-width: 1280px; width: 100%; margin: 0 auto; }
+
+/* The shared navbar's internal row is `max-width: 1280px; margin: 0 auto`,
+   designed for full-width pages. Inside this layout's narrower main column
+   (width minus the sidebar), that auto-margin visibly centers the whole
+   row instead of pinning the logo to the left like every other page —
+   override it here so it behaves the same as everywhere else. */
+:host ::ng-deep .nav-inner {
+  max-width: none;
+  margin: 0;
+}
+
+/* ── Mobile ── */
+@media (max-width: 900px) {
+  .rn-sidebar { display: none; }
+  .rn-main { margin-left: 0; }
+  .rn-content { padding: 16px; }
+}
+
+/* ── Logout Confirmation Modal ── */
+.rn-logout-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(15, 23, 42, .5); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: rlLogoutFade .18s ease;
+}
+@keyframes rlLogoutFade { from { opacity: 0; } to { opacity: 1; } }
+.rn-logout-modal {
+  background: #fff; border-radius: 18px; padding: 28px 26px 22px;
+  max-width: 340px; width: 100%; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: rlLogoutPop .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes rlLogoutPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.rn-logout-icon {
+  width: 54px; height: 54px; border-radius: 50%; background: #fef2f2;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+}
+.rn-logout-title { font-size: 18px; font-weight: 800; color: #111827; margin: 0 0 6px; }
+.rn-logout-text  { font-size: 13.5px; color: #6b7280; margin: 0 0 22px; line-height: 1.5; }
+.rn-logout-actions { display: flex; gap: 10px; }
+.rn-logout-cancel, .rn-logout-confirm {
+  flex: 1; padding: 11px; border-radius: 11px; font-size: 13.5px;
+  font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: all .15s;
+}
+.rn-logout-cancel { background: #f3f4f6; color: #374151; }
+.rn-logout-cancel:hover { background: #e5e7eb; }
+.rn-logout-confirm { background: #dc2626; color: #fff; }
+.rn-logout-confirm:hover { background: #b91c1c; }

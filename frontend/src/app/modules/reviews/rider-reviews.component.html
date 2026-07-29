@@ -1,0 +1,72 @@
+<div class="rr-root">
+  <div class="rr-container">
+
+    <!-- Hero -->
+    <div class="rr-hero">
+      <div class="rr-hero-left">
+        <h1 class="rr-title">Reviews</h1>
+        <p class="rr-sub">What renters are saying about your deliveries.</p>
+      </div>
+      <div class="rr-hero-stats">
+        <div class="rr-hero-stat">
+          <p class="rr-hero-stat-val">{{ stats.avgRating || 0 }}<span>/5</span></p>
+          <p class="rr-hero-stat-label">Average Rating</p>
+        </div>
+        <div class="rr-hero-divider"></div>
+        <div class="rr-hero-stat">
+          <p class="rr-hero-stat-val">{{ stats.totalCount || 0 }}</p>
+          <p class="rr-hero-stat-label">Total Reviews</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="rr-loading" *ngIf="loading">
+      <div class="rr-spin"></div><p>Loading reviews…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="rr-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <!-- Empty -->
+    <div class="rr-empty" *ngIf="!loading && !error && reviews.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+      <p class="rr-empty-title">No reviews yet</p>
+      <p class="rr-empty-sub">Once renters rate a delivery you completed, it'll show up here.</p>
+    </div>
+
+    <!-- Reviews list -->
+    <div class="rr-list" *ngIf="!loading && !error && reviews.length > 0">
+      <div class="rr-card" *ngFor="let r of reviews; let i = index" [style.animation-delay]="(i * 0.05) + 's'">
+        <div class="rr-card-head">
+          <div class="rr-reviewer">
+            <div class="rr-avatar">
+              <img *ngIf="r.reviewer?.avatar" [src]="r.reviewer.avatar" alt="">
+              <span *ngIf="!r.reviewer?.avatar">{{ (r.reviewer?.name || 'U').charAt(0).toUpperCase() }}</span>
+            </div>
+            <div>
+              <p class="rr-reviewer-name">{{ r.reviewer?.name || 'Renter' }}</p>
+              <p class="rr-reviewer-date">{{ r.createdAt | date:'mediumDate' }}</p>
+            </div>
+          </div>
+          <div class="rr-stars">
+            <svg *ngFor="let filled of starsArray(r.rating)" width="15" height="15" viewBox="0 0 24 24" [attr.fill]="filled ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          </div>
+        </div>
+        <p class="rr-listing-tag" *ngIf="r.listing?.title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+          {{ r.listing.title }}
+        </p>
+        <p class="rr-comment">{{ decodeComment(r.comment) }}</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="rr-pagination" *ngIf="!loading && pagination && pagination.totalPages > 1">
+      <button class="rr-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+      <span class="rr-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+      <button class="rr-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>

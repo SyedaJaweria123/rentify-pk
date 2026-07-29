@@ -1,0 +1,257 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Help Center</h1>
+      <p class="hp-hero-sub">We're here to help you! Find solutions, get support, and manage your account with ease.</p>
+      <div class="hp-search-box" [class.focused]="searchFocused">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search for help topics..."
+          [(ngModel)]="searchQuery"
+          (focus)="searchFocused=true"
+          (blur)="searchFocused=false"
+          (keyup.enter)="doSearch()"/>
+        <button class="hp-clear-btn" *ngIf="searchQuery" (click)="searchQuery=''; searchResults=[]">✕</button>
+      </div>
+
+      <!-- Search Results dropdown -->
+      <div class="hp-search-results" *ngIf="searchResults.length > 0">
+        <div class="hp-sr-item" *ngFor="let r of searchResults" (click)="openResult(r)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          <div>
+            <div class="hp-sr-q">{{ r.q }}</div>
+            <div class="hp-sr-cat">{{ r.cat }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="hp-no-results" *ngIf="searchQuery && searchResults.length === 0 && searchQuery.length > 1">
+        No results for "<strong>{{ searchQuery }}</strong>" — try different keywords
+      </div>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/help-agent.png" alt="Help Agent" class="hp-agent-img"/>
+    </div>
+  </div>
+
+  <!-- ══ GET HELP WITH ══ -->
+  <div class="hp-section">
+    <h2 class="hp-section-title">Get Help With</h2>
+    <div class="hp-topics-grid">
+      <div class="hp-topic-card" *ngFor="let t of helpTopics" (click)="goTopic(t.route)">
+        <div class="hp-topic-ic" [style.background]="t.bg">
+          <svg [attr.width]="22" [attr.height]="22" viewBox="0 0 24 24" fill="none" [attr.stroke]="t.color" stroke-width="1.8" [innerHTML]="t.svg | sanitize"></svg>
+        </div>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.desc }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM ROW ══ -->
+  <div class="hp-bottom-row">
+
+    <!-- Other Ways -->
+    <div class="hp-other-ways">
+      <h2 class="hp-section-title">Other Ways We Can Help</h2>
+
+      <div class="hp-way-card">
+        <div class="hp-way-ic">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="hp-way-body">
+          <h3>Contact Support</h3>
+          <p>Our support team is available 24/7 to assist you.</p>
+        </div>
+        <button class="hp-way-btn hp-way-btn-solid" (click)="goTicket()" *ngIf="isLoggedIn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Contact Us
+        </button>
+        <button class="hp-way-btn hp-way-btn-solid" (click)="router.navigate(['/auth/login'])" *ngIf="!isLoggedIn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Login to Contact
+        </button>
+      </div>
+
+      <div class="hp-way-card">
+        <div class="hp-way-ic">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+        </div>
+        <div class="hp-way-body">
+          <h3>Email Support</h3>
+          <p>Send us an email and we'll get back to you.</p>
+        </div>
+        <button class="hp-way-btn hp-way-btn-outline" (click)="showEmailForm = !showEmailForm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          Send Email
+        </button>
+      </div>
+
+      <!-- Email Form -->
+      <div class="hp-email-form" *ngIf="showEmailForm">
+        <div class="hp-form-success" *ngIf="emailSent">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          <h3>Email Sent!</h3>
+          <p>Admin ko aapka message mil gaya. Hum 1-3 din mein reply karein ge.</p>
+          <p style="font-size:12px;color:#9ca3af">Aapko bhi ek confirmation email aayi hogi.</p>
+          <button class="hp-submit-btn" (click)="emailSent=false; showEmailForm=false">Close</button>
+        </div>
+
+        <div *ngIf="!emailSent">
+          <div class="hp-form-grid">
+            <div class="hp-field">
+              <label>Your Name <span class="req">*</span></label>
+              <input type="text" [(ngModel)]="emailForm.name" placeholder="Apna naam likhein"/>
+            </div>
+            <div class="hp-field">
+              <label>Email Address <span class="req">*</span></label>
+              <input type="email" [(ngModel)]="emailForm.email" placeholder="aapki@email.com"/>
+            </div>
+          </div>
+          <div class="hp-field" style="margin-bottom:12px">
+            <label>Subject <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="emailForm.subject" placeholder="Masle ka brief summary"/>
+          </div>
+          <div class="hp-field" style="margin-bottom:14px">
+            <label>Message <span class="req">*</span></label>
+            <textarea [(ngModel)]="emailForm.message" rows="4" placeholder="Apna masla detail mein likhein…"></textarea>
+          </div>
+          <div class="hp-form-err" *ngIf="emailError">{{ emailError }}</div>
+          <div style="display:flex;gap:10px">
+            <button class="hp-submit-btn" (click)="sendEmail()" [disabled]="emailSending">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              {{ emailSending ? 'Sending…' : 'Send Email' }}
+            </button>
+            <button class="hp-submit-btn hp-btn-outline" (click)="showEmailForm=false">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="hp-quick-links">
+      <h2 class="hp-section-title">Quick Links</h2>
+      <div class="hp-ql-list">
+        <a routerLink="/faqs" class="hp-ql-item">
+          <div class="hp-ql-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          </div>
+          <div class="hp-ql-body">
+            <div class="hp-ql-title">View FAQ</div>
+            <div class="hp-ql-sub">Find quick answers to common questions</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a routerLink="/how-it-works" class="hp-ql-item">
+          <div class="hp-ql-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </div>
+          <div class="hp-ql-body">
+            <div class="hp-ql-title">How It Works</div>
+            <div class="hp-ql-sub">Learn how Rentify works step by step</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a routerLink="/about" class="hp-ql-item">
+          <div class="hp-ql-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.14 6.14l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2z"/></svg>
+          </div>
+          <div class="hp-ql-body">
+            <div class="hp-ql-title">Terms & Conditions</div>
+            <div class="hp-ql-sub">Read our terms and conditions</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+        <a routerLink="/about" class="hp-ql-item">
+          <div class="hp-ql-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          </div>
+          <div class="hp-ql-body">
+            <div class="hp-ql-title">Privacy Policy</div>
+            <div class="hp-ql-sub">Learn how we protect your data</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ SUPPORT HOURS ══ -->
+  <div class="hp-hours">
+    <div class="hp-hours-ic">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div>
+      <strong>Support Hours</strong>
+      <p>Our support team is available 24 hours a day, 7 days a week.</p>
+    </div>
+  </div>
+
+  <!-- ══ TICKET FORM ══ -->
+  <div class="hp-form-section" *ngIf="showForm" id="hp-ticket-form">
+    <div class="hp-form-head">
+      <h2>Submit a Support Ticket</h2>
+      <button class="hp-form-close" (click)="showForm=false">✕</button>
+    </div>
+
+    <!-- Not logged in -->
+    <div class="hp-login-gate" *ngIf="!isLoggedIn">
+      <div class="hp-gate-ic">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.7"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>Login Required</h3>
+      <p>Please log in to submit a support ticket and track your requests.</p>
+      <div class="hp-gate-btns">
+        <button class="hp-submit-btn" (click)="router.navigate(['/auth/login'])">Login</button>
+        <button class="hp-submit-btn hp-btn-outline" (click)="router.navigate(['/auth/register'])">Register</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="hp-form-success" *ngIf="isLoggedIn && submitted">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+      <h3>Request submitted!</h3>
+      <p>Your ticket number: <strong>{{ ticketNumber }}</strong></p>
+      <p class="hp-success-note">We've sent a confirmation to your email. Track it in My Tickets.</p>
+      <div class="hp-gate-btns">
+        <button class="hp-submit-btn" (click)="resetForm()">Submit another</button>
+        <button class="hp-submit-btn hp-btn-outline" (click)="router.navigate(['/my-tickets'])">My Tickets</button>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div *ngIf="isLoggedIn && !submitted">
+      <div class="hp-form-grid">
+        <div class="hp-field">
+          <label>Full Name <span class="hp-auto-tag">from account</span></label>
+          <input type="text" [value]="userName" readonly class="hp-readonly"/>
+        </div>
+        <div class="hp-field">
+          <label>Email <span class="hp-auto-tag">from account</span></label>
+          <input type="email" [value]="userEmail" readonly class="hp-readonly"/>
+        </div>
+        <div class="hp-field">
+          <label>Subject <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.subject" placeholder="Brief summary of your issue" maxlength="200"/>
+        </div>
+        <div class="hp-field">
+          <label>Category</label>
+          <select [(ngModel)]="form.category">
+            <option *ngFor="let c of ticketCategories" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="hp-field" style="margin-bottom:14px">
+        <label>Message / Problem Description <span class="req">*</span></label>
+        <textarea [(ngModel)]="form.message" rows="5" placeholder="Describe your issue in detail…" maxlength="5000"></textarea>
+      </div>
+      <div class="hp-form-err" *ngIf="submitError">{{ submitError }}</div>
+      <button class="hp-submit-btn" (click)="submitTicket()" [disabled]="submitting">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        {{ submitting ? 'Submitting…' : 'Submit Request' }}
+      </button>
+    </div>
+  </div>
+
+</div>

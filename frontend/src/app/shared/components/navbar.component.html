@@ -1,0 +1,198 @@
+<nav class="navbar" [class.navbar-scrolled]="scrolled()" [class.navbar-dark]="isDark()" [class.navbar-home]="isHomePage && !scrolled()">
+  <div class="nav-inner">
+
+    <!-- ───────── LEFT: Logo ───────── -->
+    <a routerLink="/" (click)="goHome($event)" class="logo" aria-label="Rentify home">
+      <img src="/rentify-logo.png" class="logo-img" alt="Rentify" />
+    </a>
+
+    <!-- ───────── CENTER: Nav links ───────── -->
+    <div class="nav-center">
+      <a routerLink="/" class="nav-link" routerLinkActive="nav-link-active" [routerLinkActiveOptions]="{exact:true}"><span class="nl-roll" data-text="Browse"><span>Browse</span></span></a>
+
+      <!-- Dashboard — only for logged-in users, routes by role -->
+      <a *ngIf="isLoggedIn()" [routerLink]="isRider() ? '/rider' : '/dashboard'" class="nav-link" routerLinkActive="nav-link-active"><span class="nl-roll" data-text="Dashboard"><span>Dashboard</span></span></a>
+
+      <!-- Categories — simple link to browse -->
+      <a routerLink="/listings" class="nav-link" routerLinkActive="nav-link-active"><span class="nl-roll" data-text="Categories"><span>Categories</span></span></a>
+
+      <a routerLink="/how-it-works" class="nav-link nav-link-hideable" routerLinkActive="nav-link-active"><span class="nl-roll" data-text="How It Works"><span>How It Works</span></span></a>
+
+      <a routerLink="/help" class="nav-link nav-link-hideable" routerLinkActive="nav-link-active"><span class="nl-roll" data-text="Help"><span>Help</span></span></a>
+      <a routerLink="/faqs" class="nav-link nav-link-hideable" routerLinkActive="nav-link-active"><span class="nl-roll" data-text="FAQs"><span>FAQs</span></span></a>
+    </div>
+
+    <!-- ───────── RIGHT: Actions ───────── -->
+    <div class="nav-right">
+
+      <ng-container *ngIf="isLoggedIn()">
+        <!-- Cart -->
+        <button type="button" (click)="cartSvc.openDrawer()" class="icon-btn-plain icon-btn-badge" aria-label="Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path stroke-linecap="round" stroke-linejoin="round" d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span class="badge" *ngIf="cartSvc.count() > 0">{{ cartSvc.count() > 99 ? '99+' : cartSvc.count() }}</span>
+        </button>
+
+        <!-- Messages -->
+        <a routerLink="/messages" class="icon-btn-plain icon-btn-badge" aria-label="Messages">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() > 99 ? '99+' : unreadMessages() }}</span>
+        </a>
+
+        <!-- Notification bell (kept as-is) -->
+        <app-notification-bell></app-notification-bell>
+
+        <!-- Wallet chip -->
+        <a routerLink="/wallet" class="wallet-chip" aria-label="Wallet">
+          <span class="wallet-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-3px;margin-right:4px"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><circle cx="17" cy="14" r="1"/></svg></span>
+          <span class="wallet-text">PKR {{ walletBalance() | number:'1.0-0' }}</span>
+        </a>
+
+        <!-- Avatar dropdown -->
+        <div class="avatar-wrapper">
+          <button class="avatar-trigger" (click)="toggleUserMenu()" aria-haspopup="true" [attr.aria-expanded]="userMenuOpen()">
+            <span class="avatar-circle" [class.avatar-pulse]="true">
+              <img *ngIf="userAvatar()" [src]="userAvatar()" alt="avatar"/>
+              <span *ngIf="!userAvatar()">{{ userInitial() }}</span>
+            </span>
+            <span class="avatar-name">{{ firstName() }}</span>
+            <svg class="chevron" [class.chevron-open]="userMenuOpen()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+
+          <div class="user-panel" *ngIf="userMenuOpen()">
+            <div class="user-panel-head">
+              <span class="avatar-circle avatar-lg">
+                <img *ngIf="userAvatar()" [src]="userAvatar()" alt="avatar"/>
+                <span *ngIf="!userAvatar()">{{ userInitial() }}</span>
+              </span>
+              <div class="user-panel-info">
+                <p class="up-name">{{ userName() }}</p>
+                <p class="up-email">{{ userEmail() }}</p>
+                <span class="role-badge" [class.role-owner]="isOwner()" [class.role-rider]="isRider()">{{ isOwner() ? 'Owner' : (isRider() ? 'Rider' : 'Renter') }}</span>
+              </div>
+            </div>
+
+            <div class="user-panel-items">
+              <a *ngIf="isRider()" routerLink="/rider" (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Rider Dashboard</a>
+              <a *ngIf="!isRider()" routerLink="/dashboard"     (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+              <a routerLink="/profile"       (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>My Profile</a>
+              <a routerLink="/bookings"      (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 2v4M16 2v4M4 10h16"/></svg>My Bookings</a>
+              <a routerLink="/wishlist"      (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>My Wishlist</a>
+              <button type="button" (click)="cartSvc.openDrawer(); closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>My Cart <span class="item-badge" *ngIf="cartSvc.count() > 0">{{ cartSvc.count() > 99 ? '99+' : cartSvc.count() }}</span></button>
+              <a routerLink="/messages"      (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages <span class="item-badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() > 99 ? '99+' : unreadMessages() }}</span></a>
+              <a routerLink="/notifications" (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Notifications <span class="item-badge" *ngIf="unreadNotifs() > 0">{{ unreadNotifs() > 99 ? '99+' : unreadNotifs() }}</span></a>
+              <a routerLink="/track"         (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15M3.29 7 12 12l8.71-5M12 22V12"/><circle cx="18.5" cy="15.5" r="2.5"/><path d="M20.27 17.27 22 19"/></svg>Track Order</a>
+              <a routerLink="/my-tickets"    (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M9 12h6M9 16h6M9 8h6"/><rect x="4" y="3" width="16" height="18" rx="2"/></svg>My Tickets</a>
+              <a routerLink="/wallet"        (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M16 14h2"/></svg>Wallet</a>
+
+              <div class="up-divider"></div>
+              <a *ngIf="isOwner()" routerLink="/listings/add" (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add Listing</a>
+              <a *ngIf="!isOwner()" routerLink="/become-owner" (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Become an Owner</a>
+              <a routerLink="/verify-cnic"   (click)="closeUserMenu()" class="up-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h4M5 16c.5-1.5 2-2 3-2s2.5.5 3 2"/></svg>Verify CNIC</a>
+
+              <div class="up-divider"></div>
+              <button (click)="logout()" class="up-item up-item-danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Guest buttons -->
+      <ng-container *ngIf="!isLoggedIn()">
+        <a routerLink="/auth/login" class="btn-outline">Login</a>
+        <a routerLink="/auth/register" class="btn-solid">Get Started</a>
+      </ng-container>
+    </div>
+
+    <!-- ───────── MOBILE: hamburger ───────── -->
+    <div class="nav-mobile-actions">
+      <button class="hamburger" (click)="toggleMobileMenu()" [attr.aria-label]="mobileMenuOpen() ? 'Close menu' : 'Open menu'" [attr.aria-expanded]="mobileMenuOpen()">
+        {{ mobileMenuOpen() ? '✕' : '≡' }}
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ───────── MOBILE DRAWER ───────── -->
+<div class="drawer-overlay" *ngIf="mobileMenuOpen()" (click)="closeMobileMenu()"></div>
+
+<aside class="drawer" [class.drawer-open]="mobileMenuOpen()" [class.navbar-dark]="isDark()" aria-label="Mobile navigation">
+
+  <!-- Header -->
+  <div class="drawer-head">
+    <a routerLink="/" (click)="goHome($event)" class="logo">
+      <span class="logo-text">Rentify</span>
+    </a>
+    <button class="drawer-close" (click)="closeMobileMenu()" aria-label="Close menu">✕</button>
+  </div>
+
+  <!-- User strip -->
+  <div class="drawer-user" *ngIf="isLoggedIn()">
+    <span class="avatar-circle">
+      <img *ngIf="userAvatar()" [src]="userAvatar()" alt="avatar"/>
+      <span *ngIf="!userAvatar()">{{ userInitial() }}</span>
+    </span>
+    <div class="drawer-user-info">
+      <p class="up-name">{{ userName() }}</p>
+      <p class="up-email">{{ userEmail() }}</p>
+    </div>
+    <a routerLink="/wallet" (click)="closeMobileMenu()" class="drawer-wallet">
+      <span class="dw-label">Wallet</span>
+      <span class="dw-value">PKR {{ walletBalance() | number:'1.0-0' }}</span>
+    </a>
+  </div>
+
+  <!-- Scrollable nav -->
+  <div class="drawer-scroll">
+    <p class="drawer-label">Explore</p>
+    <a routerLink="/" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active" [routerLinkActiveOptions]="{exact:true}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Home</a>
+    <a routerLink="/listings" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>Browse Listings</a>
+    <a *ngIf="isLoggedIn()" [routerLink]="isRider() ? '/rider' : '/dashboard'" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+
+    <!-- Categories accordion -->
+    <a routerLink="/listings" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Categories</a>
+
+    <a routerLink="/how-it-works" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active">📖 How It Works</a>
+    
+    <a routerLink="/help" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active">❓ Help</a>
+
+    <ng-container *ngIf="isLoggedIn()">
+      <p class="drawer-label">My Account</p>
+      <a *ngIf="isRider()" routerLink="/rider" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Rider Dashboard</a>
+      <a *ngIf="!isRider()" routerLink="/dashboard" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+      <a routerLink="/profile" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>My Profile</a>
+      <a routerLink="/bookings" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 2v4M16 2v4M4 10h16"/></svg>My Bookings</a>
+      <a routerLink="/messages" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages <span class="item-badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() > 99 ? '99+' : unreadMessages() }}</span></a>
+      <a routerLink="/notifications" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Notifications <span class="item-badge" *ngIf="unreadNotifs() > 0">{{ unreadNotifs() > 99 ? '99+' : unreadNotifs() }}</span></a>
+      <a routerLink="/track" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15M3.29 7 12 12l8.71-5M12 22V12"/><circle cx="18.5" cy="15.5" r="2.5"/><path d="M20.27 17.27 22 19"/></svg>Track Order</a>
+      <a routerLink="/wallet" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:8px"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M16 14h2"/></svg>Wallet</a>
+      <a routerLink="/verify-cnic" (click)="closeMobileMenu()" class="drawer-link" routerLinkActive="drawer-link-active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:8px"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h4M5 16c.5-1.5 2-2 3-2s2.5.5 3 2"/></svg>Verify CNIC</a>
+
+      <a *ngIf="isOwner()" routerLink="/listings/add" (click)="closeMobileMenu()" class="drawer-cta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add New Listing</a>
+      <a *ngIf="!isOwner()" routerLink="/become-owner" (click)="closeMobileMenu()" class="drawer-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Become an Owner</a>
+    </ng-container>
+  </div>
+
+  <!-- Footer -->
+  <div class="drawer-footer">
+    <ng-container *ngIf="!isLoggedIn()">
+      <a routerLink="/auth/login" (click)="closeMobileMenu()" class="btn-outline btn-block">Login</a>
+      <a routerLink="/auth/register" (click)="closeMobileMenu()" class="btn-solid btn-block">Register Free</a>
+    </ng-container>
+    <button *ngIf="isLoggedIn()" (click)="logout()" class="drawer-signout"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:7px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign Out</button>
+  </div>
+</aside>
+
+<!-- ───────── Logout Confirmation Modal ───────── -->
+<div *ngIf="showLogoutConfirm()" class="logout-overlay" (click)="cancelLogout()">
+  <div class="logout-modal" (click)="$event.stopPropagation()">
+    <div class="logout-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </div>
+    <h3 class="logout-title">Log out?</h3>
+    <p class="logout-text">Are you sure you want to log out of your account?</p>
+    <div class="logout-actions">
+      <button class="logout-cancel" (click)="cancelLogout()">Cancel</button>
+      <button class="logout-confirm" (click)="confirmLogout()">Log Out</button>
+    </div>
+  </div>
+</div>

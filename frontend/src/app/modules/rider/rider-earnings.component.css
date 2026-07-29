@@ -1,0 +1,64 @@
+.re-root { max-width: 100%; font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
+
+.re-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.re-title { font-size: 22px; font-weight: 800; color: #111827; margin: 0; }
+.re-sub { font-size: 13px; color: #6b7280; margin: 2px 0 0; }
+.re-wallet-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: #1F5435; text-decoration: none; }
+.re-wallet-link:hover { text-decoration: underline; }
+
+.re-loading-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.re-skel { height: 90px; border-radius: 14px; background: #f3f4f6; animation: re-pulse 1.4s ease-in-out infinite; }
+@keyframes re-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+.re-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.re-stat { border-radius: 14px; padding: 18px 14px; text-align: center; }
+.re-stat-green { background: #EAF3DE; }
+.re-stat-grey { background: #f3f4f6; }
+.re-stat-val { font-size: 20px; font-weight: 800; color: #1F5435; margin: 0; }
+.re-stat-grey .re-stat-val { color: #111827; }
+.re-stat-label { font-size: 12px; color: #6b7280; margin: 4px 0 0; }
+
+.re-pending-row {
+  display: flex; align-items: center; gap: 9px; padding: 12px 16px; border-radius: 12px;
+  background: #fef3c7; color: #92600a; font-size: 13px; font-weight: 600; margin-bottom: 20px;
+}
+
+.re-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 720px) { .re-charts-row { grid-template-columns: 1fr; } }
+.re-chart-card { background: #fff; border: 1px solid #e8efe8; border-radius: 16px; padding: 20px; box-shadow: 0 2px 16px rgba(0,0,0,.04); }
+.re-chart-title { font-size: 14px; font-weight: 700; color: #111827; margin: 0 0 16px; }
+.re-chart-box { height: 260px; position: relative; }
+.re-donut-box { height: 280px; }
+.re-chart-empty { display: flex; align-items: center; justify-content: center; height: 240px; color: #9ca3af; font-size: 13px; }
+
+.re-summary-row {
+  display: flex; gap: 24px; flex-wrap: wrap; background: #fff; border: 1px solid #e8efe8;
+  border-radius: 14px; padding: 16px 20px; font-size: 13.5px; color: #6b7280;
+}
+.re-summary-row strong { color: #111827; }
+
+/* Milestone bonus card */
+.re-milestone-card { background: #fff; border: 1px solid #e8efe8; border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
+.re-milestone-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.re-milestone-title { font-size: 15px; font-weight: 800; color: #111827; margin: 0; }
+.re-milestone-sub { font-size: 12.5px; color: #6b7280; margin: 3px 0 0; }
+.re-milestone-earned { text-align: right; }
+.re-milestone-earned-val { font-size: 18px; font-weight: 800; color: #1F5435; margin: 0; }
+.re-milestone-earned-label { font-size: 11px; color: #6b7280; margin: 1px 0 0; }
+
+.re-milestone-bar-track { height: 10px; border-radius: 999px; background: #EAF3DE; overflow: hidden; }
+.re-milestone-bar-fill { height: 100%; background: #1F5435; border-radius: 999px; transition: width .3s ease; }
+.re-milestone-progress-text { font-size: 12.5px; color: #6b7280; margin: 8px 0 0; }
+.re-milestone-progress-text strong { color: #1F5435; font-weight: 700; }
+.re-milestone-done { color: #1F5435; font-weight: 600; }
+
+.re-milestone-steps { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.re-milestone-step { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 70px; }
+.re-milestone-step-dot {
+  width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; background: #f3f4f6; color: #9ca3af;
+}
+.re-milestone-step.done .re-milestone-step-dot { background: #1F5435; color: #fff; }
+.re-milestone-step-label { font-size: 10.5px; color: #6b7280; }
+.re-milestone-step-bonus { font-size: 10.5px; font-weight: 700; color: #111827; }
+.re-milestone-step.done .re-milestone-step-bonus { color: #1F5435; }

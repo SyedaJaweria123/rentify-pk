@@ -1,0 +1,180 @@
+/* ── Page ────────────────────────────────────────────── */
+.verify-page {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ── Decorations ─────────────────────────────────────── */
+.deco-top {
+  position: absolute; top: -80px; right: -60px;
+  width: 280px; height: 280px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  opacity: .12; pointer-events: none;
+}
+.deco-bottom {
+  position: absolute; bottom: -60px; left: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  opacity: .08; pointer-events: none;
+}
+
+/* ── Container ───────────────────────────────────────── */
+.verify-container {
+  width: 100%; max-width: 420px;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; z-index: 10;
+}
+
+/* ── Logo ────────────────────────────────────────────── */
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+}
+.logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 6px 18px rgba(255,107,53,.3);
+}
+.logo-name { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+.logo-name span { color: #FF6B35; }
+
+/* ── Card ────────────────────────────────────────────── */
+.verify-card {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.08);
+}
+
+/* ── State Block ─────────────────────────────────────── */
+.state-block {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px; text-align: center;
+}
+
+.state-icon { font-size: 56px; animation: pop .4s ease; }
+@keyframes pop { 0%{transform:scale(0)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+.success-glow { filter: drop-shadow(0 0 16px rgba(34,197,94,.5)); }
+.warn-glow    { filter: drop-shadow(0 0 16px rgba(245,158,11,.4)); }
+.error-glow   { filter: drop-shadow(0 0 16px rgba(239,68,68,.4)); }
+
+h2 { font-size: 22px; font-weight: 800; color: #1a1a2e; }
+p  { color: #64748b; font-size: 14px; line-height: 1.6; max-width: 300px; }
+
+/* ── Loading Ring ────────────────────────────────────── */
+.loading-ring {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, rgba(255,107,53,.1), rgba(255,140,66,.1));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.ring-spinner {
+  width: 44px; height: 44px;
+  border: 3px solid #f1f5f9;
+  border-top-color: #FF6B35;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Progress Bar ────────────────────────────────────── */
+.progress-bar {
+  width: 200px; height: 4px;
+  background: #f1f5f9; border-radius: 2px;
+  overflow: hidden; margin-top: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B35, #FF8C42);
+  border-radius: 2px;
+  animation: fill 4s linear forwards;
+}
+@keyframes fill { from{width:0} to{width:100%} }
+.redirect-note { color: #94a3b8; font-size: 12px; margin-top: -4px; }
+
+/* ── Buttons ─────────────────────────────────────────── */
+.btn-orange {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  color: #fff; border: none; border-radius: 14px;
+  font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; margin-top: 8px; text-decoration: none;
+  box-shadow: 0 6px 18px rgba(255,107,53,.3);
+}
+.btn-orange:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255,107,53,.4);
+}
+.btn-orange:disabled { opacity: .7; cursor: not-allowed; }
+
+.btn-outline {
+  width: 100%; padding: 14px;
+  background: transparent;
+  border: 2px solid #FF6B35; color: #FF6B35;
+  border-radius: 14px; font-size: 15px; font-weight: 700;
+  transition: all .2s; margin-top: 8px;
+}
+.btn-outline:hover { background: #fff8f5; }
+
+/* ── Resend Form ─────────────────────────────────────── */
+.resend-form { width: 100%; text-align: left; }
+.divider { height: 1px; background: #f1f5f9; margin: 20px 0; }
+.resend-form h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+.resend-form p { color: #64748b; font-size: 13px; margin-bottom: 14px; }
+
+.inp-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: #f8fafc; border: 1.5px solid #e2e8f0;
+  border-radius: 12px; padding: 12px 14px; transition: all .2s;
+}
+.inp-wrap:focus-within { border-color: #FF6B35; background: #fff; box-shadow: 0 0 0 4px rgba(255,107,53,.08); }
+.inp-wrap.err { border-color: #f87171; }
+.inp-wrap svg { color: #94a3b8; flex-shrink: 0; }
+.inp-wrap input { flex: 1; background: none; border: none; outline: none; font-size: 14px; color: #1e293b; }
+.inp-wrap input::placeholder { color: #cbd5e1; }
+.ferr { color: #ef4444; font-size: 12px; margin-top: 4px; display: block; }
+
+.alert-success {
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  color: #15803d; border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; margin-top: 10px;
+}
+
+.spin {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+
+.link-btn {
+  background: none; border: none; color: #FF6B35;
+  font-size: 13px; font-weight: 600;
+  display: block; text-align: center;
+  margin-top: 14px; width: 100%;
+}
+.link-btn:hover { color: #e55a2b; }
+
+/* ── Footer ──────────────────────────────────────────── */
+.footer-note {
+  color: #94a3b8; font-size: 12px; margin-top: 20px;
+  text-align: center;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .verify-card { padding: 28px 20px; border-radius: 18px; }
+}

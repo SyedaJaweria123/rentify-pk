@@ -1,0 +1,68 @@
+<div class="rp-root">
+
+  <div class="rp-header">
+    <h1 class="rp-title">Performance</h1>
+    <p class="rp-sub">How you're doing as a rider — all numbers come straight from your real delivery history</p>
+  </div>
+
+  <div *ngIf="loading()" class="rp-loading-grid">
+    <div *ngFor="let i of [1,2,3,4]" class="rp-skel"></div>
+  </div>
+
+  <div *ngIf="!loading() && earnings()">
+
+    <div class="rp-metrics-grid">
+      <div class="rp-metric-card">
+        <div class="rp-metric-icon rp-icon-green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p class="rp-metric-val" *ngIf="earnings().completionRate !== null">{{ earnings().completionRate }}%</p>
+        <p class="rp-metric-val rp-empty" *ngIf="earnings().completionRate === null">—</p>
+        <p class="rp-metric-label">Completion Rate</p>
+        <p class="rp-metric-desc">Of everything you picked up, how much actually reached delivered/completed.</p>
+      </div>
+
+      <div class="rp-metric-card">
+        <div class="rp-metric-icon rp-icon-amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+        </div>
+        <p class="rp-metric-val" *ngIf="earnings().riderRating > 0">{{ earnings().riderRating | number:'1.1-1' }}</p>
+        <p class="rp-metric-val rp-empty" *ngIf="!earnings().riderRating">—</p>
+        <p class="rp-metric-label">Customer Rating</p>
+        <p class="rp-metric-desc">Average rating from renters and owners after completed deliveries.</p>
+      </div>
+
+      <div class="rp-metric-card">
+        <div class="rp-metric-icon rp-icon-blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <p class="rp-metric-val" *ngIf="earnings().avgDeliveryMinutes !== null">{{ earnings().avgDeliveryMinutes }} min</p>
+        <p class="rp-metric-val rp-empty" *ngIf="earnings().avgDeliveryMinutes === null">—</p>
+        <p class="rp-metric-label">Avg. Delivery Time</p>
+        <p class="rp-metric-desc">Average time between scanning pickup and marking delivered.</p>
+      </div>
+
+      <div class="rp-metric-card">
+        <div class="rp-metric-icon rp-icon-purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <p class="rp-metric-val" *ngIf="earnings().acceptanceRate !== null">{{ earnings().acceptanceRate }}%</p>
+        <p class="rp-metric-val rp-empty" *ngIf="earnings().acceptanceRate === null">—</p>
+        <p class="rp-metric-label">Acceptance Rate</p>
+        <p class="rp-metric-desc">Of offers you actually responded to, how many you accepted vs declined.</p>
+      </div>
+    </div>
+
+    <div class="rp-chart-card">
+      <h3 class="rp-chart-title">Delivery Status Breakdown</h3>
+      <div class="rp-chart-box" *ngIf="hasStatusData">
+        <canvas #statusChart></canvas>
+      </div>
+      <div class="rp-chart-empty" *ngIf="!hasStatusData">
+        <p>No assignments yet</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>

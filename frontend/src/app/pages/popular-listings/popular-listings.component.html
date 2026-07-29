@@ -1,0 +1,104 @@
+<div class="hp-page">
+<div class="hp-root">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">
+        <span class="pl-star-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg></span>
+        Popular Listings
+      </h1>
+      <p class="hp-hero-sub">Top-rated items available for rent near you — ranked by real bookings, not guesswork.</p>
+
+      <div class="pl-search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by item, category, or city…" class="pl-search-input">
+        <button *ngIf="searchQuery" class="pl-search-clear" (click)="clearSearch()" aria-label="Clear search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/popular-listings-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div class="pl-loading" *ngIf="loading">
+    <div class="pl-spin"></div><p>Loading popular listings…</p>
+  </div>
+
+  <!-- ══ ERROR ══ -->
+  <div class="hp-section" *ngIf="!loading && error">
+    <p class="pl-error">{{ error }}</p>
+  </div>
+
+  <!-- ══ EMPTY ══ -->
+  <div class="hp-section" *ngIf="!loading && !error && listings.length === 0">
+    <p class="pl-empty">No listings available yet. Check back soon!</p>
+  </div>
+
+  <!-- ══ NO SEARCH RESULTS ══ -->
+  <div class="hp-section" *ngIf="!loading && !error && listings.length > 0 && filteredListings.length === 0">
+    <p class="pl-empty">No listings match "{{ searchQuery }}". <button class="pl-clear-link" (click)="clearSearch()">Clear search</button></p>
+  </div>
+
+  <!-- ══ LISTINGS GRID ══ -->
+  <div class="pl-grid" *ngIf="!loading && !error && filteredListings.length > 0">
+    <div class="pl-card" *ngFor="let item of filteredListings; let i = index" [style.animation-delay]="(i * 0.04) + 's'" (click)="openListing(item._id)">
+      <div class="pl-img" [style.background-image]="item.images?.[0]?.url ? 'url(' + item.images[0].url + ')' : ''">
+        <span class="pl-img-empty" *ngIf="!item.images?.[0]?.url">📦</span>
+
+        <span class="pl-cat-pill">{{ item.category || 'Rental' }}</span>
+        <button class="pl-heart-btn" (click)="toggleWishlist(item._id, $event)" [class.saved]="wishlist.isSaved(item._id)" aria-label="Save to wishlist">
+          <svg width="15" height="15" viewBox="0 0 24 24" [attr.fill]="wishlist.isSaved(item._id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+
+        <div class="pl-img-bottom">
+          <span class="pl-rating-badge" *ngIf="item.avgRating">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+            {{ item.avgRating }}
+          </span>
+          <span class="pl-owner-badge" *ngIf="item.ownerTrustBadge && item.ownerTrustBadge !== 'none'" [ngClass]="'badge-' + item.ownerTrustBadge.toLowerCase()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V5z"/></svg>
+            {{ item.ownerTrustBadge }}
+          </span>
+        </div>
+      </div>
+      <div class="pl-body">
+        <p class="pl-title">{{ item.title }}</p>
+        <div class="pl-price-row">
+          <span class="pl-price">Rs {{ item.price | number:'1.0-0' }} <span>/{{ item.priceUnit || 'day' }}</span></span>
+        </div>
+        <p class="pl-city" *ngIf="item.city">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ item.city }}
+        </p>
+        <p class="pl-bookings" *ngIf="item.bookings > 0">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+          {{ item.bookings }} booking{{ item.bookings === 1 ? '' : 's' }}
+          <ng-container *ngIf="item.reviewCount > 0"> · <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-1px"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg> {{ item.reviewCount }} review{{ item.reviewCount === 1 ? '' : 's' }}</ng-container>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TRUST STRIP ══ -->
+  <div class="pl-trust-strip" *ngIf="!loading && !error && listings.length > 0">
+    <div class="pl-trust-item" *ngFor="let t of trustPoints">
+      <span class="pl-trust-ic" [ngSwitch]="t.icon">
+        <svg *ngSwitchCase="'verified'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+        <svg *ngSwitchCase="'secure'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 15h2"/></svg>
+        <svg *ngSwitchCase="'delivery'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="15" height="12" rx="1"/><path d="M16 10h4l3 3v5h-7z"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/></svg>
+        <svg *ngSwitchCase="'support'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 18 0"/><path d="M21 15a2 2 0 0 1-2 2h-1v-6h3zM3 15a2 2 0 0 0 2 2h1v-6H3z"/></svg>
+        <svg *ngSwitchCase="'toprated'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+      </span>
+      <div>
+        <p class="pl-trust-title">{{ t.title }}</p>
+        <p class="pl-trust-text">{{ t.text }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>

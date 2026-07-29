@@ -1,0 +1,53 @@
+<div class="pg">
+  <div class="pg-head">
+    <p class="pg-eyebrow">Insights</p>
+    <h1 class="pg-title">Analytics</h1>
+    <p class="pg-sub">Platform growth, category mix, and your top performers at a glance.</p>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">User Growth (12 months)</h3>
+      <div class="chart-body"><canvas #usersCanvas></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">Listings by Category</h3>
+      <div class="chart-body"><canvas #categoryCanvas></canvas></div>
+    </div>
+  </div>
+
+  <!-- Top cities + Top owners -->
+  <div class="bottom-grid">
+    <!-- Top 5 cities -->
+    <div class="panel">
+      <h3 class="chart-title">Top 5 Cities by Listings</h3>
+      <div class="city-list" *ngIf="topCities().length > 0">
+        <div class="city-row" *ngFor="let c of topCities()">
+          <span class="city-name">📍 {{ c.city }}</span>
+          <div class="city-bar-wrap"><div class="city-bar" [style.width.%]="cityPct(c)"></div></div>
+          <span class="city-count">{{ c.listings }}</span>
+        </div>
+      </div>
+      <p class="empty" *ngIf="!loading() && topCities().length === 0">No city data yet</p>
+    </div>
+
+    <!-- Top 10 owners -->
+    <div class="panel">
+      <h3 class="chart-title">Top 10 Owners by Earnings</h3>
+      <div class="table-wrap" *ngIf="topOwners().length > 0">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Owner</th><th>Earnings</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let o of topOwners(); let i = index">
+              <td class="rank">{{ i + 1 }}</td>
+              <td><span class="owner-name">{{ o.name }}</span><span class="owner-email">{{ o.email }}</span></td>
+              <td class="earn">Rs {{ o.earnings | number:'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="empty" *ngIf="!loading() && topOwners().length === 0">No earnings data yet</p>
+    </div>
+  </div>
+</div>

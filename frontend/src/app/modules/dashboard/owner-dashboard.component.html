@@ -1,0 +1,151 @@
+<div class="od">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="od-loading">Loading your dashboard…</div>
+
+  <div *ngIf="!loading && data" class="od-wrap">
+
+    <!-- ═══ Welcome header + Wallet ═══ -->
+    <div class="od-top">
+      <div class="od-welcome">
+        <div class="od-welcome-text">
+          <h1 class="od-welcome-title">Welcome back, <span>{{ ownerFirstName }}!</span> 👋</h1>
+          <p class="od-welcome-sub">Here's your business overview</p>
+        </div>
+        <img src="/owner-illustration.png" alt="" class="od-welcome-img">
+      </div>
+
+      <div class="od-wallet">
+        <div class="od-wallet-head">
+          <span class="od-wallet-label">Wallet Balance</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EAF3DE" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+        <p class="od-wallet-amt">PKR {{ balance | number:'1.0-0' }}</p>
+        <button class="od-wallet-btn" (click)="go('/wallet')">
+          Withdraw Earnings
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ Stat cards ═══ -->
+    <div class="od-stats">
+      <div class="od-stat">
+        <div class="od-stat-icon ic-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <div class="od-stat-body">
+          <span class="od-stat-label">Total Listings</span>
+          <span class="od-stat-num">{{ totalListings }}</span>
+          <span class="od-stat-foot od-foot-green">{{ data.listings?.active || 0 }} Active</span>
+        </div>
+      </div>
+
+      <div class="od-stat">
+        <div class="od-stat-icon ic-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+        </div>
+        <div class="od-stat-body">
+          <span class="od-stat-label">Total Bookings</span>
+          <span class="od-stat-num">{{ totalBookings }}</span>
+          <span class="od-stat-foot od-foot-green">↗ {{ data.bookings?.active || 0 }} active</span>
+        </div>
+      </div>
+
+      <div class="od-stat">
+        <div class="od-stat-icon ic-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+        <div class="od-stat-body">
+          <span class="od-stat-label">Total Earnings</span>
+          <span class="od-stat-num">PKR {{ totalEarnings | number:'1.0-0' }}</span>
+          <span class="od-stat-foot od-foot-green">↗ from completed</span>
+        </div>
+      </div>
+
+      <div class="od-stat">
+        <div class="od-stat-icon ic-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#E8A33D" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+        </div>
+        <div class="od-stat-body">
+          <span class="od-stat-label">Avg Rating</span>
+          <span class="od-stat-num">{{ avgRating > 0 ? (avgRating | number:'1.1-1') : '—' }}</span>
+          <span class="od-stat-stars" *ngIf="avgRating > 0">
+            <span *ngFor="let s of [1,2,3,4,5]" [class.on]="s <= Math.round(avgRating)">★</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Charts row + Performance ═══ -->
+    <div class="od-mid">
+      <div class="od-charts">
+        <div class="od-panel">
+          <div class="od-panel-head">
+            <div>
+              <h3 class="od-panel-title">Earnings Overview</h3>
+              <p class="od-big-num">PKR {{ totalEarnings | number:'1.0-0' }}</p>
+            </div>
+          </div>
+          <div class="od-chart-box"><canvas #earningsChart></canvas></div>
+        </div>
+
+        <div class="od-panel">
+          <div class="od-panel-head">
+            <div>
+              <h3 class="od-panel-title">Bookings Overview</h3>
+              <p class="od-big-num">{{ totalBookings }}</p>
+            </div>
+          </div>
+          <div class="od-chart-box"><canvas #bookingChart></canvas></div>
+        </div>
+      </div>
+
+      <!-- Listings Performance donut -->
+      <div class="od-panel od-perf">
+        <h3 class="od-panel-title">Listings Performance</h3>
+        <div class="od-perf-chart"><canvas #perfChart></canvas></div>
+        <div class="od-perf-legend">
+          <div class="od-leg-row"><span class="od-dot" style="background:#1F5435"></span>Active<span class="od-leg-val">{{ data.listings?.active || 0 }}</span></div>
+          <div class="od-leg-row"><span class="od-dot" style="background:#2563eb"></span>Rented<span class="od-leg-val">{{ data.listings?.rented || 0 }}</span></div>
+          <div class="od-leg-row"><span class="od-dot" style="background:#E8A33D"></span>Inactive<span class="od-leg-val">{{ data.listings?.inactive || 0 }}</span></div>
+          <div class="od-leg-row"><span class="od-dot" style="background:#92400e"></span>Pending<span class="od-leg-val">{{ data.bookings?.pending || 0 }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Recent Bookings ═══ -->
+    <div class="od-bottom">
+      <div class="od-panel od-recent od-recent-full">
+        <div class="od-panel-head">
+          <h3 class="od-panel-title">Recent Bookings</h3>
+          <a routerLink="/bookings" class="od-view-all">View all</a>
+        </div>
+
+        <div *ngIf="data.recentBookings?.length > 0" class="od-table">
+          <div class="od-tr od-th">
+            <span>Item</span><span>Renter</span><span>Date</span><span>Amount</span><span>Status</span>
+          </div>
+          <div class="od-tr" *ngFor="let b of data.recentBookings.slice(0, 5)" (click)="go('/bookings/' + b._id)">
+            <span class="od-td-item">
+              <span class="od-td-thumb">
+                <img *ngIf="getListingImage(b)" [src]="getListingImage(b)" alt="">
+                <span *ngIf="!getListingImage(b)">📦</span>
+              </span>
+              {{ b.listing?.title || 'Item' }}
+            </span>
+            <span class="od-td-renter">
+              <span class="od-renter-av">{{ (b.renter?.name || '?')[0] }}</span>
+              {{ b.renter?.name || '—' }}
+            </span>
+            <span class="od-td-date">{{ b.createdAt | date:'d MMM y' }}</span>
+            <span class="od-td-amt">PKR {{ b.totalAmount | number:'1.0-0' }}</span>
+            <span class="od-td-status" [ngClass]="getBookingStatusColor(b.status)">{{ b.status | titlecase }}</span>
+          </div>
+        </div>
+        <div *ngIf="!data.recentBookings?.length" class="od-empty">No bookings yet</div>
+      </div>
+    </div>
+
+  </div>
+</div>

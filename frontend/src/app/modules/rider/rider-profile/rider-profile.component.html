@@ -1,0 +1,132 @@
+<div class="rp-root">
+
+  <!-- Loading -->
+  <div class="rp-loading" *ngIf="loading()">
+    <div class="rp-spin"></div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+
+    <!-- Page header — no avatar/name repeat, sidebar already shows that -->
+    <div class="rp-page-header">
+      <div>
+        <h1 class="rp-title">My Profile</h1>
+        <p class="rp-sub">Your rider tier, stats and milestone bonuses.</p>
+      </div>
+      <!-- Badge shown prominently here since this IS the profile page -->
+      <app-rider-badge *ngIf="rating > 0" [rating]="rating" size="lg" [showRating]="true"></app-rider-badge>
+      <span *ngIf="rating === 0" class="rp-new-badge">⭐ New Rider</span>
+    </div>
+
+    <!-- Rating progress card -->
+    <div class="rp-card">
+      <h2 class="rp-card-title">Rating & Tier Progress</h2>
+
+      <ng-container *ngIf="rating > 0; else noRatingYet">
+        <div class="rp-rating-big">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          {{ rating | number:'1.1-1' }} / 5.0
+        </div>
+
+        <div class="rp-tier-strip">
+          <div class="rp-tier-step" [class.active]="rating >= 3.0">🥉<span>Bronze</span><small>3.0+</small></div>
+          <div class="rp-tier-connector" [class.filled]="rating >= 4.0"></div>
+          <div class="rp-tier-step" [class.active]="rating >= 4.0">🥈<span>Silver</span><small>4.0+</small></div>
+          <div class="rp-tier-connector" [class.filled]="rating >= 4.5"></div>
+          <div class="rp-tier-step" [class.active]="rating >= 4.5">🥇<span>Gold</span><small>4.5+</small></div>
+          <div class="rp-tier-connector" [class.filled]="rating >= 4.8"></div>
+          <div class="rp-tier-step" [class.active]="rating >= 4.8">💎<span>Platinum</span><small>4.8+</small></div>
+        </div>
+
+        <ng-container *ngIf="nextTierGoal() as goal">
+          <div class="rp-progress-bar-track">
+            <div class="rp-progress-bar-fill" [style.width.%]="tierProgress()"></div>
+          </div>
+          <p class="rp-progress-label">
+            {{ (goal.needed - rating) | number:'1.1-1' }} more rating points to reach
+            <strong>{{ goal.label }}</strong>
+          </p>
+        </ng-container>
+        <p class="rp-progress-label rp-top" *ngIf="!nextTierGoal()">
+          🏆 Maximum tier reached — Platinum Rider!
+        </p>
+      </ng-container>
+
+      <ng-template #noRatingYet>
+        <p class="rp-no-rating-msg">
+          No ratings yet — complete your first delivery to start building your score and unlock your badge!
+        </p>
+        <div class="rp-tier-strip rp-tier-strip-dim">
+          <div class="rp-tier-step">🥉<span>Bronze</span><small>3.0+</small></div>
+          <div class="rp-tier-connector"></div>
+          <div class="rp-tier-step">🥈<span>Silver</span><small>4.0+</small></div>
+          <div class="rp-tier-connector"></div>
+          <div class="rp-tier-step">🥇<span>Gold</span><small>4.5+</small></div>
+          <div class="rp-tier-connector"></div>
+          <div class="rp-tier-step">💎<span>Platinum</span><small>4.8+</small></div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Stats card -->
+    <div class="rp-card" *ngIf="earnings()">
+      <h2 class="rp-card-title">Stats</h2>
+      <div class="rp-stats-grid">
+        <div class="rp-stat">
+          <p class="rp-stat-val">{{ earnings().totalDeliveries }}</p>
+          <p class="rp-stat-label">Total Deliveries</p>
+        </div>
+        <div class="rp-stat">
+          <p class="rp-stat-val">Rs {{ earnings().totalEarnings | number }}</p>
+          <p class="rp-stat-label">Total Earned</p>
+        </div>
+        <div class="rp-stat" *ngIf="earnings().milestones?.totalBonusEarned > 0">
+          <p class="rp-stat-val">Rs {{ earnings().milestones.totalBonusEarned | number }}</p>
+          <p class="rp-stat-label">Bonus Earned</p>
+        </div>
+        <div class="rp-stat" *ngIf="earnings().acceptanceRate != null">
+          <p class="rp-stat-val">{{ earnings().acceptanceRate }}%</p>
+          <p class="rp-stat-label">Acceptance Rate</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Milestone table -->
+    <div class="rp-card">
+      <h2 class="rp-card-title">🎯 Milestone Bonuses</h2>
+      <p class="rp-card-sub">Complete orders to earn company bonuses.</p>
+
+      <div class="rp-milestone-table">
+        <div class="rp-milestone-row rp-milestone-header">
+          <span>Orders</span><span>Bonus</span><span>Status</span>
+        </div>
+        <div class="rp-milestone-row" *ngFor="let m of MILESTONES"
+          [class.rp-milestone-done]="(earnings()?.milestones?.completedOrders || 0) >= m.count">
+          <span class="rp-m-count">{{ m.count }} orders</span>
+          <span class="rp-m-bonus">Rs {{ m.bonus }}</span>
+          <span class="rp-m-status">
+            <ng-container *ngIf="(earnings()?.milestones?.completedOrders || 0) >= m.count; else notYet">
+              <span class="rp-m-done-tag">✓ Earned</span>
+            </ng-container>
+            <ng-template #notYet>
+              <span class="rp-m-remaining" *ngIf="earnings()?.milestones">
+                {{ m.count - (earnings().milestones.completedOrders || 0) }} left
+              </span>
+            </ng-template>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="rp-card">
+      <h2 class="rp-card-title">Account Info</h2>
+      <div class="rp-account-rows">
+        <div class="rp-account-row"><span>Email</span><strong>{{ rider?.email }}</strong></div>
+        <div class="rp-account-row" *ngIf="rider?.phone"><span>Phone</span><strong>{{ rider?.phone }}</strong></div>
+        <div class="rp-account-row"><span>Wallet Balance</span><strong class="rp-wallet-val">Rs {{ rider?.walletBalance || 0 | number }}</strong></div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

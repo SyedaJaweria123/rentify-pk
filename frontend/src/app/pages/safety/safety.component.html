@@ -1,0 +1,46 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Safety Tips</h1>
+      <p class="hp-hero-sub">Simple habits that keep every rental on Rentify PK smooth, fair, and worry-free.</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/safety-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ FOR RENTERS ══ -->
+  <div class="hp-section">
+    <h2 class="hp-section-title">For Renters</h2>
+    <div class="hp-topics-grid">
+      <div class="hp-topic-card" *ngFor="let t of renterTips">
+        <div class="hp-topic-ic">{{ t.icon }}</div>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.text }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FOR OWNERS ══ -->
+  <div class="hp-section">
+    <h2 class="hp-section-title">For Owners</h2>
+    <div class="hp-topics-grid">
+      <div class="hp-topic-card" *ngFor="let t of ownerTips">
+        <div class="hp-topic-ic">{{ t.icon }}</div>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.text }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CTA ══ -->
+  <div class="hp-section">
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Something feel off during a booking? Don't wait — reach out right away.</span>
+      <a [href]="'mailto:' + settings.contactEmail()" class="hp-cta-btn">Report a Concern</a>
+    </div>
+  </div>
+
+</div>

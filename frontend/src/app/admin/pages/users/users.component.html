@@ -1,0 +1,133 @@
+<div class="pg">
+  <!-- Header -->
+  <div class="pg-head">
+    <div>
+      <h1 class="pg-title">Users Management</h1>
+      <p class="pg-sub">{{ total() }} total users</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" placeholder="Search name or email…" [(ngModel)]="search" (ngModelChange)="onSearch()"/>
+    </div>
+    <select [(ngModel)]="role" (ngModelChange)="onFilterChange()">
+      <option value="">All Roles</option>
+      <option value="renter">Renter</option>
+      <option value="owner">Owner</option>
+    </select>
+    <select [(ngModel)]="status" (ngModelChange)="onFilterChange()">
+      <option value="">All Status</option>
+      <option value="active">Active</option>
+      <option value="suspended">Banned</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div class="state" *ngIf="loading()">
+    <div class="spin"></div><p>Loading users…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state state-error" *ngIf="error() && !loading()">
+    <p>{{ error() }}</p>
+    <button class="btn" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div class="state" *ngIf="!loading() && !error() && users().length === 0">
+    <span class="state-icon">👥</span><p>No users found</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading() && !error() && users().length > 0">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>User</th><th>Email</th><th>Role</th><th>CNIC</th>
+          <th>Joined</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of users()" (click)="openDetail(u)" class="row">
+          <td>
+            <div class="user-cell">
+              <span class="avatar">
+                <img *ngIf="u.avatar" [src]="u.avatar" alt="">
+                <span *ngIf="!u.avatar">{{ initial(u) }}</span>
+              </span>
+              <span class="user-name">{{ u.name }}</span>
+            </div>
+          </td>
+          <td class="muted">{{ u.email }}</td>
+          <td><span class="role-pill" [class.role-owner]="u.role === 'owner'">{{ u.role }}</span></td>
+          <td>
+            <span class="cnic-pill"
+                  [class.cnic-verified]="u.cnicVerified"
+                  [class.cnic-rejected]="u.cnicRejected"
+                  [class.cnic-pending]="!u.cnicVerified && !u.cnicRejected && u.cnicNumber">
+              {{ cnicLabel(u) }}
+            </span>
+          </td>
+          <td class="muted">{{ u.createdAt | date:'mediumDate' }}</td>
+          <td>
+            <span class="status-pill" [class.status-banned]="isBanned(u)">
+              {{ isBanned(u) ? 'Banned' : 'Active' }}
+            </span>
+          </td>
+          <td>
+            <div class="actions">
+              <button class="act act-ban" (click)="toggleBan(u, $event)">
+                {{ isBanned(u) ? 'Unban' : 'Ban' }}
+              </button>
+              <button class="act act-del" (click)="deleteUser(u, $event)">Delete</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pager" *ngIf="!loading() && totalPages() > 1">
+    <button class="pg-btn" (click)="prevPage()" [disabled]="page === 1">‹ Prev</button>
+    <span class="pg-info">Page {{ page }} of {{ totalPages() }}</span>
+    <button class="pg-btn" (click)="nextPage()" [disabled]="page === totalPages()">Next ›</button>
+  </div>
+</div>
+
+<!-- ───────── Detail Modal ───────── -->
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+
+    <div class="modal-head" *ngIf="modalUser() as mu">
+      <span class="avatar avatar-lg">
+        <img *ngIf="mu.avatar" [src]="mu.avatar" alt="">
+        <span *ngIf="!mu.avatar">{{ initial(mu) }}</span>
+      </span>
+      <div>
+        <h3 class="modal-name">{{ mu.name }}</h3>
+        <p class="modal-email">{{ mu.email }}</p>
+        <span class="role-pill" [class.role-owner]="mu.role === 'owner'">{{ mu.role }}</span>
+        <span class="status-pill" [class.status-banned]="isBanned(mu)">{{ isBanned(mu) ? 'Banned' : 'Active' }}</span>
+      </div>
+    </div>
+
+    <div class="modal-loading" *ngIf="modalLoading()"><div class="spin"></div></div>
+
+    <div class="modal-stats" *ngIf="!modalLoading() && modalStats() as st">
+      <div class="stat"><span class="stat-val">{{ st.bookingsCount }}</span><span class="stat-lbl">Bookings</span></div>
+      <div class="stat"><span class="stat-val">{{ st.listingsCount }}</span><span class="stat-lbl">Listings</span></div>
+      <div class="stat"><span class="stat-val">{{ st.reviewsGiven }}</span><span class="stat-lbl">Reviews</span></div>
+      <div class="stat"><span class="stat-val">Rs {{ st.walletBalance | number:'1.0-0' }}</span><span class="stat-lbl">Wallet</span></div>
+    </div>
+
+    <div class="modal-meta" *ngIf="modalUser() as mu">
+      <p><b>CNIC:</b> {{ cnicLabel(mu) }} <span *ngIf="mu.cnicNumber">({{ mu.cnicNumber }})</span></p>
+      <p><b>Joined:</b> {{ mu.createdAt | date:'fullDate' }}</p>
+    </div>
+  </div>
+</div>

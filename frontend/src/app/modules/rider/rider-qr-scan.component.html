@@ -1,0 +1,181 @@
+<div class="qr-root">
+
+  <!-- ══ Hero ══ -->
+  <div class="qr-hero">
+    <div class="qr-hero-left">
+      <h1 class="qr-hero-title">Verify a booking</h1>
+      <p class="qr-hero-sub">
+        {{ action() === 'deliver' ? 'Scan the QR code to confirm this delivery.'
+         : action() === 'pickup' ? 'Scan the QR code to confirm this pickup.'
+         : 'Scan the QR code provided by the renter to verify this booking.' }}
+      </p>
+    </div>
+    <div class="qr-hero-illus">
+      <img src="/qr-scan-illustration.png" alt="Scan QR" class="qr-illus-img">
+    </div>
+  </div>
+
+  <!-- ══ Verifying spinner ══ -->
+  <div *ngIf="verifying()" class="qr-card qr-verifying">
+    <mat-spinner diameter="44"></mat-spinner>
+    <p>Verifying QR code…</p>
+  </div>
+
+  <!-- ══ Scan Card (before verified) ══ -->
+  <div class="qr-card" *ngIf="!verified() && !verifying()">
+    <div class="qr-card-head">
+      <span class="qr-card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+      </span>
+      <h2 class="qr-card-title">Scan QR Code</h2>
+    </div>
+    <p class="qr-card-desc">Position the QR code within the frame to scan</p>
+
+    <!-- Scanner frame -->
+    <div class="qr-scanner">
+      <!-- Live camera -->
+      <div id="qr-reader" class="qr-reader" [class.qr-hidden]="!scanning()"></div>
+
+      <!-- Idle state (camera off) -->
+      <div class="qr-scanner-idle" *ngIf="!scanning()">
+        <div class="qr-corner qr-corner-tl"></div>
+        <div class="qr-corner qr-corner-tr"></div>
+        <div class="qr-corner qr-corner-bl"></div>
+        <div class="qr-corner qr-corner-br"></div>
+
+        <!-- Sample QR code in the center -->
+        <div class="qr-sample">
+          <svg viewBox="0 0 100 100" width="130" height="130" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="#fff" rx="4"/>
+            <!-- finder patterns (corners) -->
+            <g fill="#111">
+              <rect x="8" y="8" width="24" height="24"/>
+            </g>
+            <rect x="12" y="12" width="16" height="16" fill="#fff"/>
+            <rect x="16" y="16" width="8" height="8" fill="#111"/>
+            <g fill="#111">
+              <rect x="68" y="8" width="24" height="24"/>
+            </g>
+            <rect x="72" y="12" width="16" height="16" fill="#fff"/>
+            <rect x="76" y="16" width="8" height="8" fill="#111"/>
+            <g fill="#111">
+              <rect x="8" y="68" width="24" height="24"/>
+            </g>
+            <rect x="12" y="72" width="16" height="16" fill="#fff"/>
+            <rect x="16" y="76" width="8" height="8" fill="#111"/>
+            <!-- random data modules -->
+            <g fill="#111">
+              <rect x="40" y="8" width="4" height="4"/><rect x="48" y="8" width="4" height="4"/><rect x="56" y="12" width="4" height="4"/>
+              <rect x="40" y="16" width="4" height="4"/><rect x="52" y="16" width="4" height="4"/><rect x="60" y="16" width="4" height="4"/>
+              <rect x="44" y="24" width="4" height="4"/><rect x="56" y="24" width="4" height="4"/>
+              <rect x="8" y="40" width="4" height="4"/><rect x="16" y="40" width="4" height="4"/><rect x="28" y="40" width="4" height="4"/>
+              <rect x="40" y="40" width="4" height="4"/><rect x="48" y="40" width="4" height="4"/><rect x="56" y="40" width="4" height="4"/><rect x="68" y="40" width="4" height="4"/><rect x="80" y="40" width="4" height="4"/><rect x="88" y="40" width="4" height="4"/>
+              <rect x="12" y="48" width="4" height="4"/><rect x="24" y="48" width="4" height="4"/><rect x="44" y="48" width="4" height="4"/><rect x="52" y="48" width="4" height="4"/><rect x="64" y="48" width="4" height="4"/><rect x="76" y="48" width="4" height="4"/><rect x="88" y="48" width="4" height="4"/>
+              <rect x="8" y="56" width="4" height="4"/><rect x="20" y="56" width="4" height="4"/><rect x="40" y="56" width="4" height="4"/><rect x="56" y="56" width="4" height="4"/><rect x="72" y="56" width="4" height="4"/><rect x="84" y="56" width="4" height="4"/>
+              <rect x="40" y="68" width="4" height="4"/><rect x="52" y="68" width="4" height="4"/><rect x="64" y="68" width="4" height="4"/><rect x="76" y="68" width="4" height="4"/><rect x="88" y="68" width="4" height="4"/>
+              <rect x="44" y="76" width="4" height="4"/><rect x="60" y="76" width="4" height="4"/><rect x="72" y="76" width="4" height="4"/><rect x="84" y="76" width="4" height="4"/>
+              <rect x="40" y="84" width="4" height="4"/><rect x="52" y="84" width="4" height="4"/><rect x="64" y="84" width="4" height="4"/><rect x="80" y="84" width="4" height="4"/><rect x="88" y="84" width="4" height="4"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="qr-scan-line"></div>
+
+        <p class="qr-idle-text">Tap "Start Camera" to scan</p>
+      </div>
+    </div>
+
+    <!-- Camera controls -->
+    <button *ngIf="!scanning()" (click)="startScan()" class="qr-camera-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Start Camera
+    </button>
+    <button *ngIf="scanning()" (click)="stopScan()" class="qr-camera-btn qr-camera-stop">Stop Camera</button>
+
+    <!-- Upload QR image (reliable alternative) -->
+    <label *ngIf="!scanning()" class="qr-upload-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload QR Image
+      <input type="file" accept="image/*" (change)="scanFromImage($event)" hidden>
+    </label>
+
+    <!-- Divider -->
+    <div class="qr-divider"><span>or</span></div>
+
+    <!-- Paste code -->
+    <div class="qr-paste-row" (click)="showManual.set(!showManual())">
+      <span class="qr-paste-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M18 12h.01M10 12h4M7 16h10"/></svg>
+      </span>
+      <span class="qr-paste-label">Paste QR code</span>
+      <svg class="qr-paste-arrow" [class.qr-arrow-open]="showManual()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <!-- Manual input (expandable) -->
+    <div class="qr-manual" *ngIf="showManual()">
+      <input type="text" [(ngModel)]="manualCode" placeholder="Paste the QR code here…" class="qr-manual-input" (click)="$event.stopPropagation()">
+    </div>
+
+    <!-- Verify button -->
+    <button (click)="verifyManual(manualCode())" class="qr-verify-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      Verify Booking
+    </button>
+  </div>
+
+  <!-- ══ Secure Verification info ══ -->
+  <div class="qr-secure" *ngIf="!verified()">
+    <div class="qr-secure-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <div>
+      <h3 class="qr-secure-title">Secure Verification</h3>
+      <p class="qr-secure-text">This ensures the booking is valid and secure before you proceed with the delivery.</p>
+    </div>
+  </div>
+
+  <!-- ══ Verified booking result ══ -->
+  <div class="qr-card qr-verified" *ngIf="verified() as v">
+    <div class="qr-verified-head">
+      <span class="qr-verified-check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      QR Verified
+    </div>
+
+    <div class="qr-detail-row"><span>Type</span><strong class="qr-cap">{{ v.type }}</strong></div>
+    <div class="qr-detail-row"><span>Renter</span><strong>{{ v.renter?.name }}</strong></div>
+    <div class="qr-detail-row"><span>Owner</span><strong>{{ v.owner?.name }}</strong></div>
+
+    <!-- Pickup -->
+    <div class="qr-loc qr-loc-pickup" *ngIf="v.pickup">
+      <p class="qr-loc-title">📦 Pickup From (Owner)</p>
+      <p class="qr-loc-name">{{ v.pickup.name }}</p>
+      <p class="qr-loc-addr">{{ v.pickup.address }}</p>
+      <a *ngIf="v.pickup.phone" [href]="'tel:' + v.pickup.phone" class="qr-loc-phone">📞 {{ v.pickup.phone }}</a>
+    </div>
+
+    <!-- Delivery -->
+    <div class="qr-loc qr-loc-deliver" *ngIf="v.delivery">
+      <p class="qr-loc-title">🏠 Deliver To (Renter)</p>
+      <p class="qr-loc-name">{{ v.delivery.name }}</p>
+      <p class="qr-loc-addr">{{ v.delivery.address }}</p>
+      <a *ngIf="v.delivery.phone" [href]="'tel:' + v.delivery.phone" class="qr-loc-phone">📞 {{ v.delivery.phone }}</a>
+    </div>
+
+    <!-- Evidence upload -->
+    <div *ngIf="action() === 'pickup' || action() === 'deliver'" class="qr-evidence">
+      <label class="qr-evidence-label">Evidence photo (required)</label>
+      <input type="file" accept="image/*" (change)="onPhoto($event)" class="qr-file-input">
+      <img *ngIf="photoPreview()" [src]="photoPreview()" alt="evidence" class="qr-evidence-preview">
+    </div>
+
+    <button *ngIf="action() === 'pickup' || action() === 'deliver'"
+      (click)="confirmAction()" [disabled]="!photo() || submitting()" class="qr-verify-btn qr-confirm-btn">
+      <mat-spinner *ngIf="submitting()" diameter="18"></mat-spinner>
+      <span>{{ action() === 'deliver' ? 'Confirm Delivery' : 'Confirm Pickup' }}</span>
+    </button>
+    <button *ngIf="action() !== 'pickup' && action() !== 'deliver'" (click)="goBack()" class="qr-verify-btn">Done</button>
+  </div>
+
+</div>

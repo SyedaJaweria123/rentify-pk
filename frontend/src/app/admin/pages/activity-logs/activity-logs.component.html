@@ -1,0 +1,38 @@
+<div class="pg">
+  <div class="pg-head"><h1 class="pg-title">Activity Logs</h1></div>
+
+  <div class="filters">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" placeholder="Search user, target, details…" [(ngModel)]="search" (ngModelChange)="onFilterChange()"/>
+    </div>
+    <select [(ngModel)]="actionFilter" (ngModelChange)="onFilterChange()">
+      <option value="">All Actions</option>
+      <option *ngFor="let a of actionTypes()" [value]="a">{{ a }}</option>
+    </select>
+  </div>
+
+  <div class="state" *ngIf="loading()"><div class="spin"></div><p>Loading activity…</p></div>
+  <div class="state state-error" *ngIf="error() && !loading()"><p>{{ error() }}</p><button class="btn" (click)="load()">Retry</button></div>
+  <div class="state" *ngIf="!loading() && !error() && filtered().length === 0"><span class="state-icon">📜</span><p>No activity found</p></div>
+
+  <div class="table-wrap" *ngIf="!loading() && !error() && visible().length > 0">
+    <table class="tbl">
+      <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th><th>IP</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let l of visible()">
+          <td class="muted ts">{{ l.createdAt | date:'medium' }}</td>
+          <td class="user">{{ l.user || '—' }}</td>
+          <td><span class="action-pill">{{ l.action }}</span></td>
+          <td>{{ l.entity || '—' }}</td>
+          <td class="muted">{{ l.details || '—' }}</td>
+          <td class="muted">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="load-more-wrap" *ngIf="!loading() && visible().length < filtered().length">
+    <button class="load-more" (click)="loadMore()">Load More ({{ filtered().length - visible().length }} remaining)</button>
+  </div>
+</div>

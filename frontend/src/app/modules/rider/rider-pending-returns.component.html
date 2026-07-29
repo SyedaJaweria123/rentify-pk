@@ -1,0 +1,97 @@
+<div class="rpr-root">
+
+  <!-- Header -->
+  <div class="rpr-header">
+    <div>
+      <h1 class="rpr-title">Pending Returns</h1>
+      <p class="rpr-sub">Items you delivered that now need to be collected back from the renter.</p>
+    </div>
+    <button class="rpr-refresh" (click)="load()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Urgent banner -->
+  <div class="rpr-urgent-banner" *ngIf="!loading() && urgentCount() > 0">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    {{ urgentCount() }} return{{ urgentCount() === 1 ? '' : 's' }} overdue — rental period has ended, collect ASAP.
+  </div>
+
+  <!-- Loading -->
+  <div class="rpr-state" *ngIf="loading()">
+    <div class="rpr-spin"></div>
+    <p>Loading pending returns…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="rpr-state" *ngIf="!loading() && error()">
+    <p class="rpr-error-text">{{ error() }}</p>
+    <button class="rpr-btn" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div class="rpr-state rpr-empty" *ngIf="!loading() && !error() && returns().length === 0">
+    <svg width="48" height="48" fill="none" stroke="#9ca3af" stroke-width="1.2" viewBox="0 0 24 24">
+      <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/>
+    </svg>
+    <h3>No pending returns</h3>
+    <p>All collections are up to date. Well done!</p>
+  </div>
+
+  <!-- List -->
+  <div class="rpr-list" *ngIf="!loading() && !error() && returns().length > 0">
+    <div class="rpr-card" *ngFor="let a of returns()" [class.rpr-card-urgent]="isUrgent(a)">
+
+      <!-- Urgent tag -->
+      <div class="rpr-urgent-tag" *ngIf="isUrgent(a)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        OVERDUE
+      </div>
+
+      <div class="rpr-card-body">
+        <!-- Listing image -->
+        <div class="rpr-img-wrap">
+          <img *ngIf="a.booking?.listing?.images?.[0]?.url" [src]="a.booking.listing.images[0].url" alt="listing" class="rpr-img"/>
+          <div *ngIf="!a.booking?.listing?.images?.[0]?.url" class="rpr-img-placeholder">📦</div>
+        </div>
+
+        <!-- Details -->
+        <div class="rpr-details">
+          <div class="rpr-top-row">
+            <h3 class="rpr-listing-title">{{ a.booking?.listing?.title || 'Listing' }}</h3>
+            <span class="rpr-status-badge" [ngClass]="statusClass(a.status)">{{ statusLabel(a.status) }}</span>
+          </div>
+
+          <div class="rpr-meta-row">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ a.booking?.listing?.city || 'Location not set' }}
+          </div>
+
+          <div class="rpr-meta-row">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Collect from: <strong>{{ a.booking?.renter?.name || 'Renter' }}</strong>
+            <span *ngIf="a.booking?.renter?.phone"> · {{ a.booking.renter.phone }}</span>
+          </div>
+
+          <div class="rpr-meta-row" *ngIf="a.booking?.endDate">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Rental ended: <strong [class.rpr-overdue-text]="isUrgent(a)">{{ a.booking.endDate | date:'MMM d, y' }}</strong>
+          </div>
+
+          <div class="rpr-meta-row">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Earning: <strong class="rpr-earning">Rs {{ a.earnings || 0 }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action -->
+      <button class="rpr-action-btn" (click)="goDeliver(a)">
+        Start Return Collection
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,108 @@
+<div class="re-root">
+
+  <div class="re-header">
+    <div>
+      <h1 class="re-title">Earnings</h1>
+      <p class="re-sub">Detailed breakdown of what you've earned</p>
+    </div>
+    <a routerLink="/rider/wallet" class="re-wallet-link">
+      View full transaction history
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+  </div>
+
+  <div *ngIf="loading()" class="re-loading-grid">
+    <div *ngFor="let i of [1,2,3,4]" class="re-skel"></div>
+  </div>
+
+  <div *ngIf="!loading() && earnings()">
+
+    <div class="re-stats-grid">
+      <div class="re-stat re-stat-green">
+        <p class="re-stat-val">Rs. {{ earnings().today | number }}</p>
+        <p class="re-stat-label">Today</p>
+      </div>
+      <div class="re-stat re-stat-green">
+        <p class="re-stat-val">Rs. {{ earnings().thisWeek | number }}</p>
+        <p class="re-stat-label">This Week</p>
+      </div>
+      <div class="re-stat re-stat-green">
+        <p class="re-stat-val">Rs. {{ earnings().thisMonth | number }}</p>
+        <p class="re-stat-label">This Month</p>
+      </div>
+      <div class="re-stat re-stat-grey">
+        <p class="re-stat-val">Rs. {{ earnings().totalEarnings | number }}</p>
+        <p class="re-stat-label">All Time</p>
+      </div>
+    </div>
+
+    <div class="re-pending-row" *ngIf="earnings().pendingEarnings > 0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Rs. {{ earnings().pendingEarnings | number }} pending payout — released ~24 hours after each delivery completes
+    </div>
+
+    <!-- Milestone bonus progress -->
+    <div class="re-milestone-card" *ngIf="earnings().milestones as ms">
+      <div class="re-milestone-head">
+        <div>
+          <h3 class="re-milestone-title">🎯 Milestone Bonus</h3>
+          <p class="re-milestone-sub">{{ ms.completedOrders }} completed orders so far</p>
+        </div>
+        <div class="re-milestone-earned" *ngIf="ms.totalBonusEarned > 0">
+          <p class="re-milestone-earned-val">Rs. {{ ms.totalBonusEarned | number }}</p>
+          <p class="re-milestone-earned-label">bonus earned</p>
+        </div>
+      </div>
+
+      <ng-container *ngIf="ms.nextMilestone as next; else allMilestonesDone">
+        <div class="re-milestone-bar-track">
+          <div class="re-milestone-bar-fill" [style.width.%]="((ms.completedOrders / next.count) * 100)"></div>
+        </div>
+        <p class="re-milestone-progress-text">
+          {{ next.remaining }} more order{{ next.remaining === 1 ? '' : 's' }} to earn
+          <strong>Rs. {{ next.bonus }}</strong> at {{ next.count }} orders
+        </p>
+      </ng-container>
+      <ng-template #allMilestonesDone>
+        <p class="re-milestone-progress-text re-milestone-done">🏆 You've reached every milestone — keep going for more orders!</p>
+      </ng-template>
+
+      <div class="re-milestone-steps">
+        <div class="re-milestone-step" *ngFor="let m of ms.all" [class.done]="ms.completedOrders >= m.count">
+          <span class="re-milestone-step-dot">{{ ms.completedOrders >= m.count ? '✓' : m.count }}</span>
+          <span class="re-milestone-step-label">{{ m.count }} orders</span>
+          <span class="re-milestone-step-bonus">Rs {{ m.bonus }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="re-charts-row">
+      <div class="re-chart-card">
+        <h3 class="re-chart-title">Earnings — Last 7 Days</h3>
+        <div class="re-chart-box" *ngIf="hasTrendData">
+          <canvas #trendChart></canvas>
+        </div>
+        <div class="re-chart-empty" *ngIf="!hasTrendData">
+          <p>No earnings yet this week</p>
+        </div>
+      </div>
+
+      <div class="re-chart-card">
+        <h3 class="re-chart-title">Delivery vs Return</h3>
+        <div class="re-chart-box re-donut-box" *ngIf="hasTypeData">
+          <canvas #typeChart></canvas>
+        </div>
+        <div class="re-chart-empty" *ngIf="!hasTypeData">
+          <p>No completed jobs yet</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="re-summary-row">
+      <span><strong>{{ earnings().totalDeliveries }}</strong> total deliveries completed</span>
+      <span *ngIf="earnings().activeDeliveries > 0"><strong>{{ earnings().activeDeliveries }}</strong> currently in progress</span>
+    </div>
+
+  </div>
+
+</div>

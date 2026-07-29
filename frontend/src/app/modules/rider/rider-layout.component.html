@@ -1,0 +1,127 @@
+<!-- Full-width navbar at the very top -->
+<app-navbar></app-navbar>
+
+<div class="rl-root">
+
+  <!-- ══ Sidebar ══ -->
+  <aside class="rl-sidebar">
+    <a routerLink="/rider/profile" class="rl-profile rl-profile-link">
+      <div class="rl-avatar">
+        <img *ngIf="rider?.avatar" [src]="rider!.avatar" alt="">
+        <span *ngIf="!rider?.avatar">{{ (rider?.name || 'R')[0] }}</span>
+      </div>
+      <div class="rl-profile-info">
+        <p class="rl-profile-name">{{ rider?.name || 'Rider' }}</p>
+        <p class="rl-profile-status"><span class="rl-status-dot"></span>{{ rider?.isAvailable ? 'Online' : 'Offline' }}</p>
+        <p class="rl-profile-rating" *ngIf="rider?.riderRating">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          {{ rider!.riderRating | number:'1.1-1' }}
+        </p>
+        <div class="rl-badge-wrap" *ngIf="riderRating > 0">
+          <app-rider-badge [rating]="riderRating" size="sm"></app-rider-badge>
+        </div>
+        <span *ngIf="riderRating === 0" class="rl-rider-badge rl-badge-new">⭐ New Rider</span>
+      </div>
+    </a>
+
+    <nav class="rl-nav">
+      <a routerLink="/rider/dashboard" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Dashboard
+      </a>
+      <a routerLink="/rider/deliveries" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        My Deliveries
+      </a>
+      <a routerLink="/rider/scan" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 14v.01M14 20v.01M17 17h.01M20 17h.01M17 20h.01M20 20h.01"/></svg>
+        Scan QR
+      </a>
+      <a routerLink="/track" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Track Order
+      </a>
+      <a routerLink="/rider/pending-returns" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Pending Returns
+        <span *ngIf="pendingReturnsCount() > 0" class="rl-nav-count">{{ pendingReturnsCount() }}</span>
+      </a>
+      <a routerLink="/rider/earnings" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Earnings
+      </a>
+      <a routerLink="/rider/wallet" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        Wallet
+      </a>
+      <a routerLink="/my-reviews" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+        My Reviews
+      </a>
+      <a routerLink="/inspections" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Inspections &amp; Proofs
+      </a>
+      <a routerLink="/rider/reviews" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+        Reviews
+      </a>
+      <a routerLink="/rider/performance" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Performance
+      </a>
+      <a routerLink="/rider/profile" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+      <a routerLink="/rider/support" routerLinkActive="rl-nav-active" class="rl-nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11a9 9 0 0 1 18 0v6a3 3 0 0 1-3 3h-1v-7h4M3 17v-6a9 9 0 0 1 9-9 9 9 0 0 1 9 9v6M7 11H3v7a3 3 0 0 0 3 3h1z"/></svg>
+        Support
+      </a>
+    </nav>
+
+    <!-- Become an Owner card -->
+    <a routerLink="/become-owner" class="rl-owner-card">
+      <p class="rl-owner-title">Earn Extra as an Owner</p>
+      <p class="rl-owner-sub">List your own items and earn between deliveries</p>
+      <img src="/owner-illustration.png" alt="Become an owner" class="rl-owner-img">
+      <span class="rl-owner-link">
+        Become an Owner
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+
+    <button class="rl-logout" (click)="logout()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Log Out
+    </button>
+  </aside>
+
+  <!-- ══ Main column ══ -->
+  <div class="rl-main">
+
+    <!-- Child page renders here -->
+    <main class="rl-content">
+      <ng-content></ng-content>
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div *ngIf="showLogoutConfirm()" class="rl-logout-overlay" (click)="cancelLogout()">
+    <div class="rl-logout-modal" (click)="$event.stopPropagation()">
+      <div class="rl-logout-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </div>
+      <h3 class="rl-logout-title">Log out?</h3>
+      <p class="rl-logout-text">Are you sure you want to log out of your account?</p>
+      <div class="rl-logout-actions">
+        <button class="rl-logout-cancel" (click)="cancelLogout()">Cancel</button>
+        <button class="rl-logout-confirm" (click)="confirmLogout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+</div>

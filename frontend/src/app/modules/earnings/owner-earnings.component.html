@@ -1,0 +1,166 @@
+<app-owner-layout [showNavbar]="true">
+<div class="er-root">
+  <div class="er-container">
+
+    <!-- Hero -->
+    <div class="er-hero">
+      <div class="er-hero-left">
+        <h1 class="er-title">Earnings Report</h1>
+        <p class="er-sub">Track your rental income, payouts and trends in one place.</p>
+      </div>
+      <img src="/wallet-img.png" alt="" class="er-hero-img">
+    </div>
+
+    <!-- Loading -->
+    <div class="er-loading" *ngIf="loading">
+      <div class="er-spin"></div><p>Loading your earnings…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="er-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <ng-container *ngIf="!loading && !error && dashboard">
+
+      <!-- Stat cards -->
+      <div class="er-stats">
+        <div class="er-stat">
+          <span class="er-stat-ic tone-green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </span>
+          <div class="er-stat-body">
+            <p class="er-stat-label">Total Earned</p>
+            <p class="er-stat-val">Rs. {{ (summary?.totalEarned || 0) | number:'1.0-0' }}</p>
+          </div>
+        </div>
+        <div class="er-stat">
+          <span class="er-stat-ic tone-forest">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </span>
+          <div class="er-stat-body">
+            <p class="er-stat-label">Wallet Balance</p>
+            <p class="er-stat-val">Rs. {{ (dashboard.wallet?.balance || 0) | number:'1.0-0' }}</p>
+          </div>
+        </div>
+        <div class="er-stat">
+          <span class="er-stat-ic tone-amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          <div class="er-stat-body">
+            <p class="er-stat-label">Pending Payout</p>
+            <p class="er-stat-val">Rs. {{ (dashboard.wallet?.pendingPayout || 0) | number:'1.0-0' }}</p>
+          </div>
+        </div>
+        <div class="er-stat">
+          <span class="er-stat-ic tone-red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          </span>
+          <div class="er-stat-body">
+            <p class="er-stat-label">Total Withdrawn</p>
+            <p class="er-stat-val">Rs. {{ (summary?.totalWithdrawn || 0) | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trend chart -->
+      <div class="er-card er-trend-card">
+        <div class="er-card-head">
+          <h3 class="er-card-title">Earnings Trend</h3>
+          <div class="er-period-toggle">
+            <button [class.active]="earningsPeriod === '3m'" (click)="setPeriod('3m')">3M</button>
+            <button [class.active]="earningsPeriod === '6m'" (click)="setPeriod('6m')">6M</button>
+            <button [class.active]="earningsPeriod === '12m'" (click)="setPeriod('12m')">12M</button>
+          </div>
+        </div>
+        <div class="er-chart-wrap">
+          <canvas #trendChart></canvas>
+        </div>
+      </div>
+
+      <!-- Cumulative growth -->
+      <div class="er-card">
+        <div class="er-card-head">
+          <h3 class="er-card-title">Cumulative Growth</h3>
+          <span class="er-card-hint">Running total over the selected period</span>
+        </div>
+        <div class="er-chart-wrap">
+          <canvas #growthChart></canvas>
+        </div>
+      </div>
+
+      <!-- Breakdown + booking status donuts -->
+      <div class="er-donut-row">
+        <div class="er-card">
+          <div class="er-card-head">
+            <h3 class="er-card-title">Earnings Breakdown</h3>
+          </div>
+          <div class="er-chart-wrap er-chart-wrap-sm">
+            <canvas #breakdownChart></canvas>
+          </div>
+        </div>
+        <div class="er-card">
+          <div class="er-card-head">
+            <h3 class="er-card-title">Booking Status</h3>
+          </div>
+          <div class="er-chart-wrap er-chart-wrap-sm">
+            <canvas #statusChart></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction ledger -->
+      <div class="er-card">
+        <div class="er-card-head">
+          <h3 class="er-card-title">Transaction History</h3>
+          <button class="er-export" (click)="exportCsv()" [disabled]="!transactions.length">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <div class="er-filters">
+          <button class="er-filter-btn" *ngFor="let f of txFilters" [class.active]="activeFilter === f.value" (click)="onFilter(f.value)">
+            {{ f.label }}
+          </button>
+        </div>
+
+        <div class="er-tx-loading" *ngIf="loadingTx">
+          <div class="er-spin er-spin-sm"></div>
+        </div>
+
+        <div class="er-tx-empty" *ngIf="!loadingTx && transactions.length === 0">
+          <p>No transactions found.</p>
+        </div>
+
+        <div class="er-tx-list" *ngIf="!loadingTx && transactions.length > 0">
+          <div class="er-tx-row" *ngFor="let tx of transactions">
+            <span class="er-tx-ic" [class.credit]="isCredit(tx)" [class.debit]="!isCredit(tx)">
+              <svg *ngIf="isCredit(tx)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              <svg *ngIf="!isCredit(tx)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            </span>
+            <div class="er-tx-body">
+              <p class="er-tx-type">{{ txLabel(tx.type) }}</p>
+              <p class="er-tx-desc">{{ tx.description }}</p>
+              <p class="er-tx-date">{{ tx.createdAt | date:'medium' }}</p>
+            </div>
+            <div class="er-tx-right">
+              <p class="er-tx-amt" [class.credit]="isCredit(tx)" [class.debit]="!isCredit(tx)">
+                {{ isCredit(tx) ? '+' : '' }}Rs. {{ tx.amount | number:'1.0-0' }}
+              </p>
+              <p class="er-tx-bal">Balance: Rs. {{ tx.balance | number:'1.0-0' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="er-pagination" *ngIf="pagination && pagination.totalPages > 1">
+          <button class="er-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+          <span class="er-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+          <button class="er-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </div>
+</div>
+</app-owner-layout>

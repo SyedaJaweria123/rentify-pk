@@ -1,0 +1,119 @@
+<app-owner-layout [showNavbar]="true">
+<div class="ml-root">
+  <div class="ml-container">
+
+    <!-- Hero -->
+    <div class="ml-hero">
+      <div class="ml-hero-left">
+        <h1 class="ml-title">My Listings</h1>
+        <p class="ml-sub">Everything you've listed for rent, in one place.</p>
+      </div>
+      <button class="ml-add-btn" (click)="addNewItem()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add New Item
+      </button>
+    </div>
+
+    <!-- Toolbar: filters + search -->
+    <div class="ml-toolbar">
+      <div class="ml-filters">
+        <button class="ml-filter-btn" *ngFor="let t of statusTabs" [class.active]="statusFilter === t.value" (click)="onStatusFilter(t.value)">
+          {{ t.label }}
+        </button>
+      </div>
+      <div class="ml-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search your listings..." [(ngModel)]="search">
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="ml-loading" *ngIf="loading">
+      <div class="ml-spin"></div><p>Loading your listings…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="ml-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <!-- Empty -->
+    <div class="ml-empty" *ngIf="!loading && !error && filteredListings.length === 0">
+      <img src="/owner-illustration.png" alt="" class="ml-empty-img">
+      <p class="ml-empty-title">{{ statusFilter === 'all' && !search ? "You haven't listed anything yet" : 'No listings match this view' }}</p>
+      <p class="ml-empty-sub">{{ statusFilter === 'all' && !search ? 'List your first item and start earning today.' : 'Try a different filter or search term.' }}</p>
+      <button class="ml-empty-btn" *ngIf="statusFilter === 'all' && !search" (click)="addNewItem()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add Your First Item
+      </button>
+    </div>
+
+    <!-- Grid -->
+    <div class="ml-grid" *ngIf="!loading && !error && filteredListings.length > 0">
+      <div class="ml-card" *ngFor="let l of filteredListings; let i = index" [style.animation-delay]="(i * 0.05) + 's'" (click)="viewListing(l)">
+
+        <div class="ml-card-img-wrap">
+          <img *ngIf="coverImage(l)" [src]="coverImage(l)" [alt]="l.title" class="ml-card-img">
+          <div *ngIf="!coverImage(l)" class="ml-card-img-placeholder">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+          </div>
+          <span class="ml-status-badge" [ngClass]="'st-' + l.status">{{ l.status }}</span>
+        </div>
+
+        <div class="ml-card-body">
+          <p class="ml-card-cat">{{ l.category }}</p>
+          <h3 class="ml-card-title">{{ l.title }}</h3>
+          <p class="ml-card-price">Rs. {{ l.price | number:'1.0-0' }} <span>{{ priceUnitLabel(l.priceUnit) }}</span></p>
+
+          <div class="ml-card-meta">
+            <span *ngIf="l.city">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ l.city }}
+            </span>
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {{ l.views || 0 }} views
+            </span>
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+              {{ l.bookings || 0 }} bookings
+            </span>
+          </div>
+        </div>
+
+        <div class="ml-card-actions" (click)="$event.stopPropagation()">
+          <button class="ml-action-btn" (click)="editListing(l)" title="Edit">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+          </button>
+          <button class="ml-action-btn" *ngIf="l.status === 'active' || l.status === 'inactive'"
+                  [disabled]="togglingId === id(l)" (click)="toggleActive(l, $event)"
+                  [title]="l.status === 'active' ? 'Deactivate' : 'Activate'">
+            <svg *ngIf="l.status === 'active'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 6.5A9 9 0 1 1 6.5 17.5"/><path d="M12 2v6"/></svg>
+            <svg *ngIf="l.status === 'inactive'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          </button>
+          <button class="ml-action-btn ml-action-danger" (click)="askDelete(l, $event)" title="Delete">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+
+        <!-- Delete confirm overlay -->
+        <div class="ml-confirm-overlay" *ngIf="confirmDeleteId === id(l)" (click)="$event.stopPropagation()">
+          <p>Delete this listing?</p>
+          <div class="ml-confirm-actions">
+            <button class="ml-confirm-cancel" (click)="cancelDelete($event)">Cancel</button>
+            <button class="ml-confirm-delete" [disabled]="deletingId === id(l)" (click)="confirmDelete(l, $event)">
+              {{ deletingId === id(l) ? 'Deleting…' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ml-pagination" *ngIf="!loading && pagination && pagination.totalPages > 1">
+      <button class="ml-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+      <span class="ml-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+      <button class="ml-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>
+</app-owner-layout>

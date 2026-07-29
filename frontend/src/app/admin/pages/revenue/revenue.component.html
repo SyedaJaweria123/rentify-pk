@@ -1,0 +1,65 @@
+<div class="pg">
+  <div class="pg-head">
+    <h1 class="pg-title">Revenue & Financials</h1>
+    <button class="export-btn" (click)="exportCsv()">⬇ Export CSV</button>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <span class="kpi-icon kpi-green">💰</span>
+      <div><span class="kpi-val">Rs {{ totalEarned() | number:'1.0-0' }}</span><span class="kpi-lbl">Total Revenue</span></div>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon kpi-blue">🏦</span>
+      <div><span class="kpi-val">Rs {{ totalFees() | number:'1.0-0' }}</span><span class="kpi-lbl">Platform Commission</span></div>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon kpi-amber">⏳</span>
+      <div><span class="kpi-val">Rs {{ pendingPayouts() | number:'1.0-0' }}</span><span class="kpi-lbl">Payouts</span></div>
+    </div>
+  </div>
+
+  <!-- Monthly revenue bar chart -->
+  <div class="chart-card">
+    <h3 class="chart-title">Monthly Revenue</h3>
+    <div class="chart-body"><canvas #revenueCanvas></canvas></div>
+  </div>
+
+  <!-- Transactions -->
+  <div class="txn-head">
+    <h3 class="chart-title">Transactions</h3>
+    <select [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilter()">
+      <option value="">All Types</option>
+      <option value="earning">Earning</option>
+      <option value="service_fee">Commission</option>
+      <option value="withdrawal">Withdrawal</option>
+      <option value="refund">Refund</option>
+    </select>
+  </div>
+
+  <div class="state" *ngIf="txnLoading()"><div class="spin"></div><p>Loading transactions…</p></div>
+  <div class="state state-error" *ngIf="txnError() && !txnLoading()"><p>{{ txnError() }}</p><button class="btn" (click)="loadTransactions()">Retry</button></div>
+  <div class="state" *ngIf="!txnLoading() && !txnError() && transactions().length === 0"><span class="state-icon">💳</span><p>No transactions found</p></div>
+
+  <div class="table-wrap" *ngIf="!txnLoading() && !txnError() && transactions().length > 0">
+    <table class="tbl">
+      <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let t of transactions()">
+          <td>{{ userName(t) }}</td>
+          <td><span class="type-pill" [class.tp-fee]="t.type === 'service_fee'" [class.tp-refund]="t.type === 'refund'">{{ t.type }}</span></td>
+          <td class="amount">Rs {{ t.amount | number:'1.0-0' }}</td>
+          <td class="muted">{{ t.createdAt | date:'mediumDate' }}</td>
+          <td><span class="status-pill" [class.st-done]="t.status === 'completed'">{{ t.status }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager" *ngIf="!txnLoading() && totalPages() > 1">
+    <button class="pg-btn" (click)="prevPage()" [disabled]="page === 1">‹ Prev</button>
+    <span class="pg-info">Page {{ page }} of {{ totalPages() }}</span>
+    <button class="pg-btn" (click)="nextPage()" [disabled]="page === totalPages()">Next ›</button>
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="td-page">
+
+  <button class="td-back" (click)="back()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    Back to My Tickets
+  </button>
+
+  <!-- Loading -->
+  <div class="td-loading" *ngIf="loading">
+    <div class="td-spin"></div><p>Loading ticket…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="td-state" *ngIf="!loading && error">
+    <div class="td-state-ic">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    </div>
+    <h2>{{ error }}</h2>
+    <button class="td-btn" (click)="back()">Back to My Tickets</button>
+  </div>
+
+  <!-- Content -->
+  <div class="td-wrap" *ngIf="!loading && !error && ticket">
+    <div class="td-grid">
+
+      <!-- ══ LEFT ══ -->
+      <div class="td-left">
+
+        <!-- Header -->
+        <div class="td-header">
+          <div class="td-h-top">
+            <span class="td-tno">{{ ticket.ticketNumber }}</span>
+            <span class="td-badge" [ngClass]="statusClass(ticket.status)">{{ ticket.status }}</span>
+          </div>
+          <h1 class="td-subject">{{ ticket.subject }}</h1>
+          <div class="td-h-meta">
+            <span class="td-cat">{{ ticket.category }}</span>
+            <span class="td-date">Created: {{ ticket.createdAt | date:'MMM d, y, h:mm a' }}</span>
+          </div>
+        </div>
+
+        <!-- Conversation -->
+        <div class="td-convo-card">
+          <h3 class="td-sec-h">Conversation</h3>
+          <div class="td-convo">
+
+            <!-- User message -->
+            <div class="td-msg">
+              <div class="td-msg-av td-av-user">{{ userName[0] }}</div>
+              <div class="td-msg-body">
+                <div class="td-msg-name">
+                  {{ userName }}
+                  <span class="td-msg-role">You</span>
+                </div>
+                <div class="td-bubble td-bubble-user">{{ ticket.message }}</div>
+                <a *ngIf="ticket.attachmentUrl" [href]="ticket.attachmentUrl" target="_blank" class="td-attach">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                  {{ isPdf(ticket.attachmentUrl) ? 'View PDF' : 'View attachment' }}
+                </a>
+                <span class="td-msg-time">{{ ticket.createdAt | date:'MMM d, h:mm a' }}</span>
+              </div>
+            </div>
+
+            <!-- Admin reply -->
+            <div class="td-msg" *ngIf="ticket.adminReply">
+              <div class="td-msg-av td-av-admin">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 4.5-3 7.5-7 10-4-2.5-7-5.5-7-10V6z"/></svg>
+              </div>
+              <div class="td-msg-body">
+                <div class="td-msg-name">
+                  Rentify Support
+                  <span class="td-msg-role td-role-admin">Admin</span>
+                </div>
+                <div class="td-bubble td-bubble-admin">{{ ticket.adminReply }}</div>
+                <span class="td-msg-time" *ngIf="ticket.repliedAt">{{ ticket.repliedAt | date:'MMM d, h:mm a' }}</span>
+              </div>
+            </div>
+
+            <!-- Awaiting -->
+            <div class="td-awaiting" *ngIf="!ticket.adminReply">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              Our support team hasn't replied yet. You'll receive an email when they do.
+            </div>
+
+          </div>
+        </div>
+
+
+
+      </div>
+
+      <!-- ══ RIGHT ══ -->
+      <aside class="td-right">
+
+        <!-- Ticket Details -->
+        <div class="td-card">
+          <h3 class="td-card-h">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            Ticket Details
+          </h3>
+          <div class="td-row"><span>Ticket #</span><strong>{{ ticket.ticketNumber }}</strong></div>
+          <div class="td-row"><span>Category</span><strong>{{ ticket.category }}</strong></div>
+          <div class="td-row"><span>Status</span><span class="td-badge" [ngClass]="statusClass(ticket.status)">{{ ticket.status }}</span></div>
+          <div class="td-row"><span>Created</span><strong>{{ ticket.createdAt | date:'MMM d, y' }}</strong></div>
+          <div class="td-row"><span>Last Updated</span><strong>{{ ticket.updatedAt | date:'MMM d, y' }}</strong></div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="td-card">
+          <h3 class="td-card-h">Activity Timeline</h3>
+          <div class="td-timeline">
+            <div class="td-tl-item" *ngFor="let item of timeline">
+              <div class="td-tl-dot" [ngSwitch]="item.icon">
+                <svg *ngSwitchCase="'created'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+                <svg *ngSwitchCase="'reply'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <svg *ngSwitchCase="'progress'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <svg *ngSwitchCase="'resolved'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+              </div>
+              <div class="td-tl-body">
+                <span class="td-tl-label">{{ item.label }}</span>
+                <span class="td-tl-date">{{ item.date | date:'MMM d, y, h:mm a' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</div>

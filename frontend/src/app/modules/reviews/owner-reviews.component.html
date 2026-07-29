@@ -1,0 +1,109 @@
+<app-owner-layout [showNavbar]="true">
+<div class="rv-root">
+  <div class="rv-container">
+
+    <!-- Hero -->
+    <div class="rv-hero">
+      <div class="rv-hero-left">
+        <h1 class="rv-title">Reviews</h1>
+        <p class="rv-sub">What renters are saying about your listings.</p>
+      </div>
+      <div class="rv-hero-stats">
+        <div class="rv-hero-stat">
+          <p class="rv-hero-stat-val">{{ stats.avgRating || 0 }}<span>/5</span></p>
+          <p class="rv-hero-stat-label">Average Rating</p>
+        </div>
+        <div class="rv-hero-divider"></div>
+        <div class="rv-hero-stat">
+          <p class="rv-hero-stat-val">{{ stats.totalCount || 0 }}</p>
+          <p class="rv-hero-stat-label">Total Reviews</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="rv-filters" *ngIf="!loading && reviews.length > 0">
+      <button class="rv-filter-btn" [class.active]="ratingFilter === null" (click)="onRatingFilter(null)">All</button>
+      <button class="rv-filter-btn" *ngFor="let r of ratingFilters" [class.active]="ratingFilter === r" (click)="onRatingFilter(r)">
+        {{ r }} <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="rv-loading" *ngIf="loading">
+      <div class="rv-spin"></div><p>Loading reviews…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="rv-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <!-- Empty -->
+    <div class="rv-empty" *ngIf="!loading && !error && reviews.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+      <p class="rv-empty-title">No reviews yet</p>
+      <p class="rv-empty-sub">Once renters complete a booking, their reviews will show up here.</p>
+    </div>
+
+    <!-- Reviews list -->
+    <div class="rv-list" *ngIf="!loading && !error && filteredReviews.length > 0">
+      <div class="rv-card" *ngFor="let r of filteredReviews; let i = index" [style.animation-delay]="(i * 0.05) + 's'">
+
+        <div class="rv-card-head">
+          <div class="rv-reviewer">
+            <div class="rv-avatar">
+              <img *ngIf="r.reviewer?.avatar" [src]="r.reviewer.avatar" alt="">
+              <span *ngIf="!r.reviewer?.avatar">{{ (r.reviewer?.name || 'U').charAt(0).toUpperCase() }}</span>
+            </div>
+            <div>
+              <p class="rv-reviewer-name">{{ r.reviewer?.name || 'Renter' }}</p>
+              <p class="rv-reviewer-date">{{ r.createdAt | date:'mediumDate' }}</p>
+            </div>
+          </div>
+          <div class="rv-stars">
+            <svg *ngFor="let filled of starsArray(r.rating)" width="15" height="15" viewBox="0 0 24 24" [attr.fill]="filled ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          </div>
+        </div>
+
+        <p class="rv-listing-tag" *ngIf="r.listing?.title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+          {{ r.listing.title }}
+        </p>
+
+        <p class="rv-comment">{{ r.comment }}</p>
+
+        <!-- Existing owner response -->
+        <div class="rv-response" *ngIf="r.ownerResponse?.comment">
+          <p class="rv-response-label">Your response</p>
+          <p class="rv-response-text">{{ r.ownerResponse.comment }}</p>
+        </div>
+
+        <!-- Respond action -->
+        <div class="rv-respond-area" *ngIf="!r.ownerResponse?.comment">
+          <button class="rv-respond-btn" *ngIf="respondingId !== r._id" (click)="startResponse(r)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Respond
+          </button>
+
+          <div class="rv-respond-form" *ngIf="respondingId === r._id">
+            <textarea [(ngModel)]="responseDraft" rows="2" maxlength="500" placeholder="Thank the renter or address their feedback…"></textarea>
+            <div class="rv-respond-actions">
+              <button class="rv-respond-cancel" (click)="cancelResponse()">Cancel</button>
+              <button class="rv-respond-submit" [disabled]="!responseDraft.trim() || submittingResponse" (click)="submitResponse(r)">
+                {{ submittingResponse ? 'Posting…' : 'Post Response' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="rv-pagination" *ngIf="!loading && pagination && pagination.totalPages > 1">
+      <button class="rv-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+      <span class="rv-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+      <button class="rv-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>
+</app-owner-layout>

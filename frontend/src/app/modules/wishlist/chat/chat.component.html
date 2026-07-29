@@ -1,0 +1,203 @@
+
+    <div class="flex h-screen bg-gray-50">
+
+      <!-- Conversations Sidebar -->
+      <div class="w-80 bg-white border-r border-gray-200 flex flex-col"
+           [class.hidden]="!!activeConversationId() && isMobile">
+
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-bold text-lg text-gray-900">Messages</h2>
+        </div>
+
+        <div class="overflow-y-auto flex-1">
+          @if (loadingConvs()) {
+            <div class="flex justify-center p-8"><mat-spinner diameter="28"></mat-spinner></div>
+          }
+
+          @for (conv of conversations(); track conv._id) {
+            <div
+              class="px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 transition-colors"
+              [class.bg-indigo-50]="activeConversationId() === conv._id"
+              (click)="openConversation(conv)">
+
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                  @if (conv.otherParticipant?.avatar) {
+                    <img [src]="conv.otherParticipant.avatar" class="w-full h-full object-cover">
+                  } @else {
+                    <span class="text-indigo-700 font-bold">
+                      {{ conv.otherParticipant?.name?.[0] | uppercase }}
+                    </span>
+                  }
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start">
+                    <span class="font-semibold text-sm text-gray-900 truncate">
+                      {{ conv.otherParticipant?.name }}
+                    </span>
+                    <span class="text-xs text-gray-400 flex-shrink-0">
+                      {{ conv.lastMessageAt | date:'shortTime' }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-gray-500 truncate">
+                    {{ conv.lastMessage || 'No messages yet' }}
+                  </p>
+                  @if (conv.myUnreadCount > 0) {
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-xs font-bold mt-1">
+                      {{ conv.myUnreadCount }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (!loadingConvs() && conversations().length === 0) {
+            <div class="text-center p-8 text-gray-400">
+              <div class="text-4xl mb-2">💬</div>
+              <p class="text-sm">No conversations yet</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Message Area -->
+      <div class="flex-1 flex flex-col"
+           [class.hidden]="!activeConversationId() && isMobile">
+
+        @if (!activeConversationId()) {
+          <div class="flex-1 flex items-center justify-center text-gray-400">
+            <div class="text-center">
+              <div class="text-6xl mb-4">💬</div>
+              <p class="text-lg">Select a conversation to start chatting</p>
+            </div>
+          </div>
+        }
+
+        @if (activeConversationId()) {
+          <!-- Chat Header -->
+          <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3">
+            <button mat-icon-button class="md:hidden" (click)="activeConversationId.set(null)">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
+              @if (activeConv()?.otherParticipant?.avatar) {
+                <img [src]="activeConv()!.otherParticipant.avatar" class="w-full h-full object-cover">
+              } @else {
+                <span class="text-indigo-700 font-bold">
+                  {{ activeConv()?.otherParticipant?.name?.[0] | uppercase }}
+                </span>
+              }
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-gray-900">{{ activeConv()?.otherParticipant?.name }}</p>
+              @if (activeConv()?.listing?.title) {
+                <p class="text-xs text-gray-500">Re: {{ activeConv()!.listing.title }}</p>
+              }
+            </div>
+            <button
+              mat-icon-button
+              [disabled]="callingInProgress()"
+              (click)="startVideoCall()"
+              matTooltip="Video Call shuru karein"
+              aria-label="Video call">
+              @if (callingInProgress()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                <mat-icon class="text-indigo-600">videocam</mat-icon>
+              }
+            </button>
+          </div>
+
+          <!-- Messages -->
+          <div #messageContainer class="flex-1 overflow-y-auto p-6 space-y-3">
+            @if (loadingMessages()) {
+              <div class="flex justify-center py-4"><mat-spinner diameter="24"></mat-spinner></div>
+            }
+
+            @for (msg of messages(); track msg._id) {
+              <div class="flex" [class.justify-end]="isMyMessage(msg)">
+                <div class="max-w-xs lg:max-w-md">
+                  <div
+                    class="px-4 py-2.5 rounded-2xl text-sm relative cursor-pointer"
+                    [class.bg-indigo-600]="isMyMessage(msg)"
+                    [class.text-white]="isMyMessage(msg)"
+                    [class.bg-white]="!isMyMessage(msg)"
+                    [class.text-gray-800]="!isMyMessage(msg)"
+                    [class.shadow-sm]="!isMyMessage(msg)"
+                    [class.rounded-br-sm]="isMyMessage(msg)"
+                    [class.rounded-bl-sm]="!isMyMessage(msg)"
+                    (contextmenu)="onMsgRightClick($event, msg)">
+                    @if (msg.isDeleted) {
+                      <span class="italic opacity-60">Message deleted</span>
+                    } @else {
+                      {{ msg.content }}
+                    }
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1" [class.text-right]="isMyMessage(msg)">
+                    {{ msg.createdAt | date:'shortTime' }}
+                  </p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Message Input -->
+          <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-end gap-3">
+            <mat-form-field appearance="outline" class="flex-1" subscriptSizing="dynamic">
+              <textarea
+                matInput
+                [(ngModel)]="newMessage"
+                placeholder="Type a message..."
+                rows="1"
+                [style.resize]="'none'"
+                (keydown.enter)="onEnterKey($event)"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="1"
+                cdkAutosizeMaxRows="5">
+              </textarea>
+            </mat-form-field>
+            <button
+              mat-flat-button color="primary"
+              class="!mb-0.5"
+              [disabled]="!newMessage.trim() || sending()"
+              (click)="send()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Right-click delete menu (only for own messages) -->
+      @if (ctxMenu().show) {
+        <div class="fixed inset-0 z-40" (click)="closeCtxMenu()" (contextmenu)="closeCtxMenu(); $event.preventDefault()"></div>
+        <div class="fixed z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1"
+             [style.left.px]="ctxMenu().x" [style.top.px]="ctxMenu().y">
+          <button class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                  (click)="deleteSelectedMsg()">
+            🗑️ Delete message
+          </button>
+        </div>
+      }
+
+      <!-- Video Call Modals -->
+      @if (socketSvc.callState()?.incoming) {
+        <app-video-call-modal
+          mode="incoming"
+          [callerName]="socketSvc.callState()!.callerName"
+          [roomUrl]="socketSvc.callState()!.roomUrl"
+          (onAccept)="acceptCall()"
+          (onDecline)="declineCall()">
+        </app-video-call-modal>
+      }
+      @if (socketSvc.callState()?.active && !socketSvc.callState()?.incoming) {
+        <app-video-call-modal
+          mode="active"
+          [roomUrl]="socketSvc.callState()!.roomUrl"
+          [callerName]="socketSvc.callState()!.callerName"
+          (onEnd)="endCall()">
+        </app-video-call-modal>
+      }
+
+    </div>
+  

@@ -1,0 +1,264 @@
+<div class="rd-root">
+
+  <!-- ══ HERO SECTION ════════════════════════════════ -->
+  <div class="rd-hero">
+
+    <!-- Left: title + search -->
+    <div class="rd-hero-left">
+      <div class="rd-hero-banners">
+        <app-switch-account-banner></app-switch-account-banner>
+      </div>
+      <h1 class="rd-hero-title">Rider Dashboard</h1>
+      <p class="rd-hero-sub">Manage your deliveries</p>
+      <div class="rd-search-wrap">
+        <div class="rd-search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearch($event)"
+            placeholder="Search deliveries by item, city, or status..." class="rd-search-input">
+          <button *ngIf="searchQuery()" class="rd-search-clear" (click)="clearSearch()">✕</button>
+        </div>
+
+        <!-- Search results dropdown -->
+        <div class="rd-search-results" *ngIf="searchQuery().length > 0">
+          <div *ngIf="searchResults().length === 0" class="rd-search-empty">
+            No matching deliveries found
+          </div>
+          <a *ngFor="let r of searchResults()" class="rd-search-item"
+            [routerLink]="['/rider/deliveries']" (click)="clearSearch()">
+            <div class="rd-sr-thumb">
+              <img *ngIf="r.booking?.listing?.images?.[0]?.url" [src]="r.booking.listing.images[0].url" alt="">
+              <span *ngIf="!r.booking?.listing?.images?.[0]?.url">📦</span>
+            </div>
+            <div class="rd-sr-info">
+              <p class="rd-sr-title">{{ r.booking?.listing?.title || 'Item' }}</p>
+              <p class="rd-sr-meta">{{ r.booking?.listing?.city || '—' }} · {{ r.type === 'return' ? 'Return' : 'Delivery' }}</p>
+            </div>
+            <span class="rd-sr-status rd-ros-{{r.status}}">{{ statusLabel(r.status) }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: rider illustration -->
+    <div class="rd-hero-illus">
+      <img src="/rider-illustration.png"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+           alt="Rider" class="rd-illus-img">
+      <!-- SVG fallback illustration -->
+      <div class="rd-illus-svg" style="display:none">
+        <svg viewBox="0 0 260 180" width="260" height="180" xmlns="http://www.w3.org/2000/svg">
+          <!-- road -->
+          <ellipse cx="130" cy="160" rx="110" ry="14" fill="#EAF3DE" opacity=".7"/>
+          <!-- scooter body -->
+          <rect x="70" y="105" width="100" height="45" rx="18" fill="#1F5435"/>
+          <!-- wheel back -->
+          <circle cx="88" cy="148" r="18" fill="#fff" stroke="#1F5435" stroke-width="4"/>
+          <circle cx="88" cy="148" r="8" fill="#1F5435"/>
+          <!-- wheel front -->
+          <circle cx="168" cy="148" r="18" fill="#fff" stroke="#1F5435" stroke-width="4"/>
+          <circle cx="168" cy="148" r="8" fill="#1F5435"/>
+          <!-- delivery box -->
+          <rect x="72" y="88" width="46" height="36" rx="6" fill="#fff" stroke="#1F5435" stroke-width="2"/>
+          <path d="M80 106h30M95 98v16" stroke="#EAF3DE" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- handle -->
+          <path d="M150 110h28a6 6 0 0 1 0 12h-28" stroke="#EAF3DE" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- rider body -->
+          <ellipse cx="148" cy="85" rx="20" ry="28" fill="#1F5435"/>
+          <!-- helmet -->
+          <circle cx="148" cy="60" r="22" fill="#1F5435"/>
+          <ellipse cx="148" cy="72" rx="22" ry="10" fill="#143524"/>
+          <!-- visor -->
+          <path d="M130 58 a18 18 0 0 1 36 0" fill="#EAF3DE" opacity=".6"/>
+          <!-- arm + phone -->
+          <path d="M160 88 l18 -14" stroke="#1F5435" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <rect x="174" y="66" width="14" height="20" rx="3" fill="#fff" stroke="#9ca3af" stroke-width="1.5"/>
+          <!-- map pins -->
+          <circle cx="205" cy="30" r="8" fill="#1F5435"/>
+          <path d="M205 38 l0 12" stroke="#1F5435" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="235" cy="50" r="6" fill="#EAF3DE" stroke="#1F5435" stroke-width="2"/>
+          <path d="M235 56 l0 10" stroke="#1F5435" stroke-width="2" stroke-linecap="round"/>
+          <!-- route line -->
+          <path d="M205 42 Q218 20 235 56" stroke="#1F5435" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+          <!-- check badge -->
+          <circle cx="235" cy="130" r="16" fill="#EAF3DE" stroke="#1F5435" stroke-width="2"/>
+          <path d="M226 130 l6 6 10-12" stroke="#1F5435" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right: duty toggle -->
+    <div class="rd-hero-right">
+      <button class="rd-duty-btn" [class.rd-duty-on]="available()"
+        (click)="toggleAvailability()" [disabled]="savingAvail()">
+        <span class="rd-duty-dot" [class.rd-duty-dot-on]="available()"></span>
+        {{ available() ? 'On Duty' : 'Off Duty' }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══ EARNINGS CARDS ═══════════════════════════════ -->
+  <div class="rd-earn-row" *ngIf="!loadingEarnings() && earnings()">
+    <div class="rd-earn-card" *ngFor="let c of [
+      {icon:'wallet', val: earnings().today,         lbl:'Today'},
+      {icon:'wallet', val: earnings().thisWeek,      lbl:'This Week'},
+      {icon:'wallet', val: earnings().thisMonth,     lbl:'This Month'},
+      {icon:'chart',  val: earnings().totalEarnings, lbl:'All Time'}
+    ]">
+      <div class="rd-earn-icon">
+        <svg *ngIf="c.icon==='wallet'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        <svg *ngIf="c.icon==='chart'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="rd-earn-info">
+        <p class="rd-earn-val">Rs. {{ c.val | number }}</p>
+        <p class="rd-earn-lbl">{{ c.lbl }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="rd-earn-row" *ngIf="loadingEarnings()">
+    <div class="rd-skel" style="height:72px;flex:1" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- ══ MAIN GRID: Performance + Chart ══ -->
+  <div class="rd-main-grid">
+
+    <!-- LEFT COLUMN (now full width) -->
+    <div class="rd-left-col">
+
+      <!-- Charts -->
+      <div class="rd-charts-row" *ngIf="!loadingEarnings() && earnings()">
+        <div class="rd-chart-card">
+          <h3 class="rd-card-title">Earnings — Last 7 Days</h3>
+          <div class="rd-chart-box" *ngIf="hasTrendData"><canvas #trendChart></canvas></div>
+          <div class="rd-chart-empty" *ngIf="!hasTrendData">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18M7 14l4-4 4 4 4-7"/></svg>
+            No earnings this week
+          </div>
+        </div>
+        <div class="rd-chart-card">
+          <h3 class="rd-card-title">Delivery Status</h3>
+          <div class="rd-chart-box rd-donut-box" *ngIf="hasStatusData"><canvas #statusChart></canvas></div>
+          <div class="rd-chart-empty" *ngIf="!hasStatusData">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            No assignments yet
+          </div>
+        </div>
+      </div>
+
+      <!-- More Charts -->
+      <div class="rd-charts-row" *ngIf="!loadingEarnings() && earnings()">
+        <!-- Weekly deliveries bar -->
+        <div class="rd-chart-card">
+          <h3 class="rd-card-title">Deliveries — Last 7 Days</h3>
+          <div class="rd-chart-box" *ngIf="hasDeliveryCountData"><canvas #deliveryBar></canvas></div>
+          <div class="rd-chart-empty" *ngIf="!hasDeliveryCountData">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            No deliveries this week
+          </div>
+        </div>
+        <!-- Acceptance vs Decline -->
+        <div class="rd-chart-card">
+          <h3 class="rd-card-title">Acceptance Rate</h3>
+          <div class="rd-chart-box rd-donut-box" *ngIf="hasAcceptData"><canvas #acceptChart></canvas></div>
+          <div class="rd-chart-empty" *ngIf="!hasAcceptData">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            No response data yet
+          </div>
+        </div>
+      </div>
+
+      <!-- Completion Rate + Recent Orders (2 separate cards) -->
+      <div class="rd-bottom-row" *ngIf="!loadingEarnings() && earnings()">
+
+        <!-- Completion Rate card -->
+        <div class="rd-card rd-completion-card">
+          <h3 class="rd-card-title">Completion Rate</h3>
+          <div class="rd-ring-wrap">
+            <div class="rd-ring-box"><canvas #completionRing></canvas></div>
+            <div class="rd-ring-info">
+              <p class="rd-ring-text">You've successfully completed <strong>{{ earnings().completionRate ?? 0 }}%</strong> of the deliveries you picked up.</p>
+              <p class="rd-ring-sub">Based on {{ earnings().totalDeliveries }} total deliveries.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders card -->
+        <div class="rd-card rd-recent-card">
+          <div class="rd-recent-head">
+            <h3 class="rd-card-title" style="margin:0">Recent Orders</h3>
+            <a routerLink="/rider/deliveries" class="rd-recent-all">View all</a>
+          </div>
+
+          <div *ngIf="loading()" class="rd-recent-loading"><mat-spinner diameter="26"></mat-spinner></div>
+
+          <div *ngIf="!loading() && recentOrders.length === 0" class="rd-recent-empty">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.3"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <p>No orders yet</p>
+          </div>
+
+          <div *ngIf="!loading() && recentOrders.length > 0" class="rd-recent-list">
+            <div class="rd-recent-item" *ngFor="let o of recentOrders.slice(0, 3)">
+              <!-- Thumbnail -->
+              <div class="rd-ro-thumb">
+                <img *ngIf="o.booking?.listing?.images?.[0]?.url" [src]="o.booking.listing.images[0].url" alt="item">
+                <div *ngIf="!o.booking?.listing?.images?.[0]?.url" class="rd-ro-thumb-ph">📦</div>
+              </div>
+              <!-- Info -->
+              <div class="rd-ro-main">
+                <p class="rd-ro-title">{{ o.booking?.listing?.title || 'Item' }}</p>
+                <div class="rd-ro-sub">
+                  <span class="rd-ro-type">{{ o.type === 'return' ? '↩ Return' : '→ Delivery' }}</span>
+                </div>
+                <p class="rd-ro-city">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  {{ o.booking?.listing?.city || '—' }}
+                </p>
+              </div>
+              <!-- Right -->
+              <div class="rd-ro-right">
+                <span class="rd-ro-earn">Rs. {{ o.earnings || 0 }}</span>
+                <span class="rd-ro-status rd-ros-{{o.status}}">{{ statusLabel(o.status) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="rd-card">
+        <h3 class="rd-card-title">Quick Actions</h3>
+        <div class="rd-quick-grid">
+          <button class="rd-quick-btn" (click)="goScan()">
+            <div class="rd-quick-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h7v7h-7z"/></svg>
+            </div>
+            <span>Scan QR</span>
+          </button>
+          <a class="rd-quick-btn" routerLink="/rider/deliveries">
+            <div class="rd-quick-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            </div>
+            <span>My Bookings</span>
+          </a>
+          <a class="rd-quick-btn" routerLink="/track">
+            <div class="rd-quick-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <span>Track Order</span>
+          </a>
+          <a class="rd-quick-btn" routerLink="/rider/wallet">
+            <div class="rd-quick-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            </div>
+            <span>Wallet</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

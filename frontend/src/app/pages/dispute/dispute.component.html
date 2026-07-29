@@ -1,0 +1,212 @@
+<!-- ════════════════════════════════════════════════════
+     DISPUTE — Rentify PK
+     Booking summary · Issue type · Description · Evidence
+════════════════════════════════════════════════════ -->
+<div class="dispute-root">
+
+  <!-- ── Navbar ────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-brand" routerLink="/">
+      <span>🏠</span><span class="brand-name">Rent<b>ify</b></span>
+    </div>
+    <button class="nav-btn" routerLink="/bookings">← My Bookings</button>
+  </nav>
+
+  <div class="dispute-body">
+
+    <!-- ── Progress Steps ────────────────────────────────── -->
+    <div class="progress-bar-wrap">
+      <div class="progress-steps">
+        <div class="ps" [class.done]="true">
+          <div class="ps-circle">1</div>
+          <span class="ps-label">Booking</span>
+        </div>
+        <div class="ps-line" [class.done]="!bookingLoading && !bookingError"></div>
+        <div class="ps" [class.done]="!submitted" [class.active]="!submitted">
+          <div class="ps-circle">2</div>
+          <span class="ps-label">Issue</span>
+        </div>
+        <div class="ps-line" [class.done]="submitted"></div>
+        <div class="ps" [class.done]="submitted" [class.active]="submitted">
+          <div class="ps-circle">3</div>
+          <span class="ps-label">Submitted</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Loading ───────────────────────────────────────── -->
+    <div class="loading-card" *ngIf="bookingLoading">
+      <div class="spinner"></div>
+      <p>Loading booking details…</p>
+    </div>
+
+    <!-- ── Booking Error ──────────────────────────────────── -->
+    <div class="error-card" *ngIf="!bookingLoading && bookingError">
+      <span class="err-icon">⚠️</span>
+      <h3>Booking Not Found</h3>
+      <p>{{ bookingError }}</p>
+      <button class="btn-back" routerLink="/bookings">← Back to Bookings</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SUCCESS STATE
+    ════════════════════════════════════════════════════ -->
+    <div class="success-card" *ngIf="submitted">
+      <div class="success-icon">✅</div>
+      <h2>Dispute Submitted Successfully</h2>
+      <p>Our team will review your dispute and respond within <strong>24–48 hours</strong>.</p>
+      <div class="ref-box">
+        <span class="ref-label">Dispute Reference ID</span>
+        <span class="ref-val">{{ disputeRef }}</span>
+      </div>
+      <p class="success-note">
+        You will receive an email notification when the dispute status changes.
+        You can also track it from your <strong>Dashboard → Disputes</strong>.
+      </p>
+      <div class="success-btns">
+        <button class="btn-primary" routerLink="/dashboard">Go to Dashboard</button>
+        <button class="btn-outline" routerLink="/help">Contact Support</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         MAIN FORM
+    ════════════════════════════════════════════════════ -->
+    <div class="dispute-form-wrap" *ngIf="!bookingLoading && !bookingError && !submitted">
+
+      <div class="form-header">
+        <h1 class="form-title">🚩 File a Dispute</h1>
+        <p class="form-sub">
+          Something went wrong with your booking? Let us know and we'll help resolve it.
+        </p>
+      </div>
+
+      <!-- Booking Summary Card -->
+      <div class="booking-summary" *ngIf="booking">
+        <h3 class="summary-title">📋 Booking Summary</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="si-label">Listing</span>
+            <span class="si-val">{{ booking.listing?.title || 'N/A' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="si-label">Booking ID</span>
+            <span class="si-val booking-id">#{{ bookingId | slice:0:8 }}…</span>
+          </div>
+          <div class="summary-item">
+            <span class="si-label">Start Date</span>
+            <span class="si-val">{{ booking.startDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="si-label">End Date</span>
+            <span class="si-val">{{ booking.endDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="si-label">Total Paid</span>
+            <span class="si-val price-val">PKR {{ booking.totalPrice | number }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="si-label">Status</span>
+            <span class="si-val status-chip">{{ booking.status }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No booking data fallback -->
+      <div class="booking-summary no-booking" *ngIf="!booking">
+        <p>📋 Booking ID: <strong>{{ bookingId }}</strong></p>
+        <p class="no-booking-note">Booking details could not be loaded, but you may still proceed.</p>
+      </div>
+
+      <!-- Error banner -->
+      <div class="alert-error" *ngIf="submitError">{{ submitError }}</div>
+
+      <!-- ── Issue Type ─────────────────────────────────── -->
+      <div class="form-section">
+        <h3 class="fs-title">1. What is the issue?</h3>
+        <div class="issue-types">
+          <label
+            *ngFor="let type of issueTypes"
+            class="issue-option"
+            [class.selected]="issueType === type.value">
+            <input
+              type="radio"
+              [(ngModel)]="issueType"
+              [value]="type.value"
+              name="issueType"
+            />
+            <span class="issue-label">{{ type.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── Description ───────────────────────────────── -->
+      <div class="form-section">
+        <h3 class="fs-title">2. Describe what happened</h3>
+        <p class="fs-hint">Be as specific as possible. Include dates, amounts, and what was agreed upon.</p>
+        <div class="textarea-wrap">
+          <textarea
+            [(ngModel)]="description"
+            rows="6"
+            placeholder="E.g. I returned the camera on June 5th as agreed, but the owner claims it was damaged. The camera was in perfect condition when I returned it. I have photos as proof…"
+            class="desc-textarea"
+            maxlength="2000"
+          ></textarea>
+          <div class="char-counter" [class.near-limit]="descLength > 1800">
+            {{ descLength }} / 2000
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Evidence Upload ───────────────────────────── -->
+      <div class="form-section">
+        <h3 class="fs-title">3. Upload evidence (optional)</h3>
+        <p class="fs-hint">Photos, screenshots, or receipts that support your case. Max 5 files, 5MB each.</p>
+
+        <div class="upload-zone" (click)="fileInput.click()" [class.has-files]="evidencePreviews.length > 0">
+          <input
+            type="file"
+            #fileInput
+            accept="image/*,.pdf"
+            multiple
+            style="display:none"
+            (change)="onFilesSelected($event)"
+          />
+          <span class="upload-icon">📎</span>
+          <span class="upload-text">
+            {{ evidenceFiles.length === 0 ? 'Click to upload photos or PDFs' : 'Add more files' }}
+          </span>
+          <span class="upload-hint">JPG, PNG, PDF — max 5 files</span>
+        </div>
+
+        <!-- Preview thumbnails -->
+        <div class="evidence-previews" *ngIf="evidencePreviews.length > 0">
+          <div class="preview-item" *ngFor="let p of evidencePreviews; let i = index">
+            <img [src]="p" [alt]="'Evidence ' + (i+1)" class="preview-img" />
+            <button class="preview-remove" (click)="removeEvidence(i)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Submit ─────────────────────────────────────── -->
+      <div class="form-actions">
+        <button class="btn-cancel" routerLink="/bookings" [disabled]="submitting">
+          Cancel
+        </button>
+        <button
+          class="btn-submit"
+          (click)="submitDispute()"
+          [disabled]="submitting || !issueType || description.trim().length < 20">
+          <span *ngIf="!submitting">🚩 Submit Dispute</span>
+          <span *ngIf="submitting" class="spinner-sm"></span>
+        </button>
+      </div>
+
+      <p class="disclaimer">
+        ⚠️ Please only file disputes for genuine issues. False or abusive disputes may result in account suspension.
+        Our team typically responds within <strong>24–48 hours</strong>.
+      </p>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+.admin-layout {
+  display: flex;
+  flex-direction: column;   /* navbar (full width) on top, body (sidebar+content) below */
+  height: 100vh;
+  overflow: hidden;
+  background: #f0f2f5;
+}
+.admin-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;   /* lets the sidebar/content scroll independently instead of growing past the viewport */
+}
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+  .admin-content { padding: 1rem; }
+}

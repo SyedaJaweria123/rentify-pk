@@ -1,0 +1,234 @@
+<app-owner-layout [showNavbar]="true">
+<div class="al-root">
+  <div class="al-container">
+
+    <!-- Hero -->
+    <div class="al-hero">
+      <div class="al-hero-left">
+        <h1 class="al-title">Edit Listing</h1>
+        <p class="al-sub">Update your item details below.</p>
+      </div>
+      <img src="/add-listing-hero.png" alt="" class="al-hero-img">
+    </div>
+
+    <!-- Loading -->
+    <div class="al-loading" *ngIf="loadingListing">
+      <div class="al-spin"></div><p>Loading listing…</p>
+    </div>
+
+    <!-- Load error -->
+    <div class="al-alert al-error" *ngIf="!loadingListing && loadError">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      {{ loadError }}
+    </div>
+
+    <ng-container *ngIf="!loadingListing && !loadError">
+      <!-- Alerts -->
+      <div class="al-alert al-success" *ngIf="globalSuccess">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        {{ globalSuccess }}
+      </div>
+      <div class="al-alert al-error" *ngIf="globalError">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        {{ globalError }}
+      </div>
+
+      <div class="al-card">
+
+        <!-- Photos -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">1</span> Photos</h3>
+          <p class="al-sec-hint">Tap an existing photo to keep or remove it. Add new photos below.</p>
+
+          <div class="al-photo-grid">
+            <div class="al-dropzone" [class.dragging]="isDragging"
+                 (dragover)="onDragOver($event)" (dragleave)="isDragging = false" (drop)="onDrop($event)">
+              <input type="file" id="elFiles" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)"/>
+              <label for="elFiles" class="al-drop-label">
+                <div class="al-drop-ic">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <span class="al-drop-main">Drag &amp; drop or <strong>browse</strong></span>
+                <span class="al-drop-sub">JPEG, PNG, WebP — max 5MB each</span>
+              </label>
+            </div>
+
+            <!-- Existing images -->
+            <div class="al-preview-slot" *ngFor="let img of existingImages" [class.removed]="!isImageRetained(img.publicId)">
+              <img [src]="img.url" alt="Existing photo"/>
+              <div class="al-img-overlay" *ngIf="!isImageRetained(img.publicId)">Removed</div>
+              <button class="al-preview-toggle" type="button" (click)="toggleExistingImage(img.publicId)"
+                      [class.keep]="isImageRetained(img.publicId)">
+                <svg *ngIf="isImageRetained(img.publicId)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <svg *ngIf="!isImageRetained(img.publicId)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              </button>
+            </div>
+
+            <!-- New image previews -->
+            <div class="al-preview-slot" *ngFor="let p of newImages; let i = index">
+              <img [src]="p.url" alt="New photo"/>
+              <span class="al-new-tag">New</span>
+              <button class="al-preview-del" (click)="removeNewImage(i)" type="button" aria-label="Remove">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="al-field-err" *ngIf="errors['images']">{{ errors['images'] }}</div>
+        </div>
+
+        <!-- Details -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">2</span> Details</h3>
+
+          <div class="al-row al-row-details">
+            <div class="al-field">
+              <label>Title <span class="req">*</span></label>
+              <input type="text" [(ngModel)]="form.title" placeholder="e.g. Canon EOS R6 Camera" maxlength="100"/>
+              <span class="al-err-text" *ngIf="errors['title']">{{ errors['title'] }}</span>
+            </div>
+            <div class="al-field">
+              <label>Category <span class="req">*</span></label>
+              <select [(ngModel)]="form.category" class="al-select">
+                <option value="" disabled>Select a category</option>
+                <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+              </select>
+              <span class="al-err-text" *ngIf="errors['category']">{{ errors['category'] }}</span>
+            </div>
+          </div>
+
+          <div class="al-field">
+            <label>Description <span class="req">*</span></label>
+            <textarea [(ngModel)]="form.description" rows="5" placeholder="Describe your item…" maxlength="1000"></textarea>
+            <span class="al-err-text" *ngIf="errors['description']">{{ errors['description'] }}</span>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">3</span> Pricing</h3>
+          <div class="al-row">
+            <div class="al-field">
+              <label>Price (Rs) <span class="req">*</span></label>
+              <input type="number" [(ngModel)]="form.price" placeholder="0" min="0"/>
+              <span class="al-err-text" *ngIf="errors['price']">{{ errors['price'] }}</span>
+            </div>
+            <div class="al-field al-field-narrow">
+              <label>Per</label>
+              <select [(ngModel)]="form.priceUnit" class="al-select">
+                <option value="per_day">Day</option>
+                <option value="per_week">Week</option>
+                <option value="per_month">Month</option>
+              </select>
+            </div>
+          </div>
+          <div class="al-row">
+            <div class="al-field">
+              <label>Security Deposit (Rs) <span class="al-optional">(optional, refundable)</span></label>
+              <input type="number" [(ngModel)]="form.securityDeposit" placeholder="0" min="0"/>
+              <span class="al-err-text" *ngIf="errors['securityDeposit']">{{ errors['securityDeposit'] }}</span>
+              <span class="al-hint">Held in escrow alongside the rental fee and refunded to the renter if the item comes back undamaged.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item Details (all optional) -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">4</span> Item Details <span class="al-optional">(optional)</span></h3>
+          <div class="al-row al-row-4">
+            <div class="al-field">
+              <label>Condition</label>
+              <select [(ngModel)]="form.condition" class="al-select">
+                <option value="">Not specified</option>
+                <option *ngFor="let c of conditions" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="al-field">
+              <label>Brand</label>
+              <input type="text" [(ngModel)]="form.brand" placeholder="e.g. Logitech" maxlength="60"/>
+            </div>
+            <div class="al-field">
+              <label>Model</label>
+              <input type="text" [(ngModel)]="form.model" placeholder="e.g. G Pro X" maxlength="60"/>
+            </div>
+            <div class="al-field">
+              <label>Setup / Type</label>
+              <input type="text" [(ngModel)]="form.setupType" placeholder="e.g. Full Gaming Setup" maxlength="80"/>
+            </div>
+          </div>
+
+          <div class="al-field">
+            <label>What's Included</label>
+            <div class="al-chip-input-row">
+              <input type="text" [(ngModel)]="includedItemDraft" placeholder="e.g. Monitor, Keyboard, Headset"
+                     maxlength="60" (keydown.enter)="$event.preventDefault(); addIncludedItem()"/>
+              <button type="button" class="al-chip-add-btn" (click)="addIncludedItem()">+ Add</button>
+            </div>
+            <div class="al-chip-list" *ngIf="form.includedItems.length">
+              <span class="al-chip" *ngFor="let item of form.includedItems; let i = index">
+                {{ item }}
+                <button type="button" (click)="removeIncludedItem(i)" aria-label="Remove">×</button>
+              </span>
+            </div>
+          </div>
+
+          <div class="al-field">
+            <label>Quality Badges <span class="al-optional">(self-declared)</span></label>
+            <div class="al-claim-grid">
+              <button type="button" class="al-claim-opt" *ngFor="let claim of ownerClaimOptions"
+                      [class.active]="isOwnerClaimSelected(claim)" (click)="toggleOwnerClaim(claim)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+                {{ claim }}
+              </button>
+            </div>
+            <span class="al-hint">These reflect your own description of the item — not independently verified by Rentify.</span>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">5</span> Location</h3>
+          <div class="al-row">
+            <div class="al-field">
+              <label>City</label>
+              <select [(ngModel)]="form.city" (ngModelChange)="onCityChange()" class="al-select">
+                <option value="">Select city</option>
+                <option *ngFor="let c of cityNames" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="al-field">
+              <label>Area</label>
+              <select [(ngModel)]="form.area" class="al-select" [disabled]="!availableAreas.length">
+                <option value="">{{ availableAreas.length ? 'Select area' : 'Select city first' }}</option>
+                <option *ngFor="let a of availableAreas" [value]="a">{{ a }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="al-section">
+          <h3 class="al-sec-title"><span class="al-step">6</span> Status</h3>
+          <div class="al-field al-field-status">
+            <label>Listing Status</label>
+            <select [(ngModel)]="form.status" class="al-select">
+              <option value="active">Active (visible to renters)</option>
+              <option value="inactive">Inactive (hidden)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="al-actions">
+          <button class="al-cancel" (click)="goBack()" type="button">Cancel</button>
+          <button class="al-submit" (click)="onSubmit()" [disabled]="submitting">
+            <span *ngIf="!submitting">Save Changes</span>
+            <span *ngIf="submitting">Saving…</span>
+            <svg *ngIf="!submitting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </ng-container>
+  </div>
+</div>
+</app-owner-layout>

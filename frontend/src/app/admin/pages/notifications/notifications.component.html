@@ -1,0 +1,51 @@
+<div class="pg">
+  <div class="pg-head"><h1 class="pg-title">Notifications</h1></div>
+
+  <div class="notif-grid">
+    <!-- Compose form -->
+    <div class="compose">
+      <h3 class="card-title">Compose & Send</h3>
+
+      <div class="success-banner" *ngIf="successMsg()">✓ {{ successMsg() }}</div>
+
+      <label class="fld-label">Target Audience</label>
+      <select [(ngModel)]="target" class="fld">
+        <option value="">All Users</option>
+        <option value="renter">Renters Only</option>
+        <option value="owner">Owners Only</option>
+      </select>
+
+      <label class="fld-label">Title</label>
+      <input type="text" class="fld" [(ngModel)]="title" placeholder="e.g. New feature launched!" maxlength="100"/>
+
+      <label class="fld-label">Message</label>
+      <textarea class="fld fld-area" [(ngModel)]="message" placeholder="Write your announcement…" rows="5" maxlength="500"></textarea>
+
+      <button class="send-btn" (click)="send()" [disabled]="sending()">
+        {{ sending() ? 'Sending…' : '📢 Send Notification' }}
+      </button>
+    </div>
+
+    <!-- History -->
+    <div class="history">
+      <h3 class="card-title">Sent History</h3>
+
+      <div class="state" *ngIf="historyLoading()"><div class="spin"></div></div>
+      <div class="state" *ngIf="!historyLoading() && history().length === 0"><span class="state-icon">📭</span><p>No announcements sent yet</p></div>
+
+      <div class="hist-list" *ngIf="!historyLoading() && history().length > 0">
+        <div class="hist-item" *ngFor="let h of history()">
+          <div class="hist-top">
+            <span class="hist-title">{{ h.title }}</span>
+            <span class="hist-target">{{ targetLabel(h.targetRole) }}</span>
+          </div>
+          <p class="hist-body">{{ h.body }}</p>
+          <div class="hist-meta">
+            <span>{{ h.recipients }} recipients</span>
+            <span>{{ h.createdAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,121 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Terms of Service</h1>
+      <p class="hp-hero-sub">The rules that keep bookings, payments, and deliveries fair for everyone.</p>
+      <p class="hp-updated">Last updated: {{ lastUpdated }}</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/terms-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="hp-section">
+    <p class="hp-intro">
+      These terms govern your use of Rentify PK, Pakistan's peer-to-peer rental marketplace. By
+      creating an account or using the platform, you agree to the terms below.
+    </p>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">1</span>Eligibility</h2>
+      <p class="hp-p">
+        You must be at least 18 years old and hold a valid Pakistani CNIC to book, list, or
+        deliver items on Rentify PK. Owners must complete CNIC verification before their listings
+        go live.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">2</span>Listings &amp; Bookings</h2>
+      <ul class="hp-ul">
+        <li>Owners are responsible for accurately describing their items' condition, availability, and price.</li>
+        <li>Renters are responsible for using rented items carefully and returning them in the condition they were received.</li>
+        <li>A booking is only confirmed once the owner accepts the request (or, for instant-book listings, once payment is completed).</li>
+        <li>Delivery or pickup arrangements must match what's shown on the listing at the time of booking.</li>
+      </ul>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">3</span>Payments, Fees &amp; Security Deposits</h2>
+      <p class="hp-p">
+        Rentify PK charges a service fee of <strong>{{ settings.serviceFeePercent() }}%</strong> on
+        completed bookings to maintain the platform, payment processing, and support.
+      </p>
+      <p class="hp-p">
+        Payments for a booking are held in escrow and released to the owner once the rental period
+        is confirmed complete. Security deposits, where applicable, are refunded after a
+        successful, damage-free return, subject to our damage claim process.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">4</span>Delivery &amp; Riders</h2>
+      <p class="hp-p">
+        Some bookings are fulfilled through in-app delivery by verified riders. Both the renter and
+        owner can track the delivery in real time, and a handover code or QR scan is used to
+        confirm pickup and drop-off.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">5</span>Cancellations</h2>
+      <p class="hp-p">
+        Either party may cancel a booking before it is confirmed. Cancelling a confirmed booking
+        may be subject to a cancellation policy shown at checkout, and repeated late cancellations
+        may affect your trust score.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">6</span>Prohibited Items &amp; Conduct</h2>
+      <ul class="hp-ul">
+        <li>No illegal items, weapons, hazardous materials, or counterfeit goods may be listed.</li>
+        <li>No harassment, discrimination, or abusive behavior toward other users or riders.</li>
+        <li>No attempts to bypass in-app payments to avoid service fees or buyer/seller protections.</li>
+      </ul>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">7</span>Disputes &amp; Damage Claims</h2>
+      <p class="hp-p">
+        If an item is returned damaged or a booking goes wrong, either party can open a dispute or
+        file a damage claim with supporting photos. Our team reviews evidence from both sides
+        before deciding on refunds, deposit deductions, or other resolutions.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">8</span>Account Suspension</h2>
+      <p class="hp-p">
+        We may suspend or terminate accounts that violate these terms, repeatedly receive poor
+        reviews, or are found to be fraudulent, to keep the platform safe for everyone.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">9</span>Limitation of Liability</h2>
+      <p class="hp-p">
+        Rentify PK is a marketplace connecting renters and owners — we are not the owner of any
+        listed item. We work to resolve issues fairly but are not liable for indirect damages
+        arising from the condition of a rented item outside of our dispute process.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">10</span>Governing Law</h2>
+      <p class="hp-p">
+        These terms are governed by the laws of Pakistan. Any disputes not resolved through our
+        in-app process will be subject to the jurisdiction of the courts of Pakistan.
+      </p>
+    </div>
+
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Have a question about these terms?</span>
+      <a [href]="'mailto:' + settings.contactEmail()" class="hp-cta-btn">Contact Us</a>
+    </div>
+  </div>
+
+</div>

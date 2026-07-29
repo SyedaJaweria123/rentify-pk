@@ -1,0 +1,84 @@
+<div class="pg">
+  <div class="pg-head">
+    <div>
+      <h1 class="pg-title">Bookings Management</h1>
+      <p class="pg-sub">{{ total() }} total bookings</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select [(ngModel)]="status" (ngModelChange)="onFilterChange()">
+      <option value="">All Status</option>
+      <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+    </select>
+    <label class="date-lbl">From <input type="date" [(ngModel)]="fromDate" (ngModelChange)="onFilterChange()"/></label>
+    <label class="date-lbl">To <input type="date" [(ngModel)]="toDate" (ngModelChange)="onFilterChange()"/></label>
+  </div>
+
+  <div class="state" *ngIf="loading()"><div class="spin"></div><p>Loading bookings…</p></div>
+  <div class="state state-error" *ngIf="error() && !loading()"><p>{{ error() }}</p><button class="btn" (click)="load()">Retry</button></div>
+  <div class="state" *ngIf="!loading() && !error() && bookings().length === 0"><span class="state-icon">📋</span><p>No bookings found</p></div>
+
+  <div class="table-wrap" *ngIf="!loading() && !error() && bookings().length > 0">
+    <table class="tbl">
+      <thead>
+        <tr><th>ID</th><th>Item</th><th>Renter</th><th>Owner</th><th>Dates</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of bookings()" (click)="openDetail(b)" class="row">
+          <td class="bid">{{ shortId(b) }}</td>
+          <td class="item-title">{{ itemTitle(b) }}</td>
+          <td class="muted">{{ renterName(b) }}</td>
+          <td class="muted">{{ ownerName(b) }}</td>
+          <td class="muted dates">{{ b.startDate | date:'MMM d' }} – {{ b.endDate | date:'MMM d' }}</td>
+          <td class="price">Rs {{ amount(b) | number:'1.0-0' }}</td>
+          <td>
+            <span class="status-pill"
+                  [class.st-pending]="b.status === 'pending'"
+                  [class.st-confirmed]="b.status === 'confirmed'"
+                  [class.st-active]="b.status === 'active'"
+                  [class.st-completed]="b.status === 'completed'"
+                  [class.st-cancelled]="b.status === 'cancelled'"
+                  [class.st-disputed]="b.status === 'disputed'">
+              {{ b.status }}
+            </span>
+          </td>
+          <td>
+            <div class="actions">
+              <button class="act act-ok" *ngIf="b.status !== 'completed' && b.status !== 'cancelled'" (click)="forceComplete(b, $event)">Complete</button>
+              <button class="act act-del" *ngIf="b.status !== 'cancelled' && b.status !== 'completed'" (click)="cancelBooking(b, $event)">Cancel</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager" *ngIf="!loading() && totalPages() > 1">
+    <button class="pg-btn" (click)="prevPage()" [disabled]="page === 1">‹ Prev</button>
+    <span class="pg-info">Page {{ page }} of {{ totalPages() }}</span>
+    <button class="pg-btn" (click)="nextPage()" [disabled]="page === totalPages()">Next ›</button>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeModal()">✕</button>
+    <div *ngIf="modalBooking() as b">
+      <h3 class="modal-title">Booking {{ shortId(b) }}</h3>
+      <span class="status-pill" [class.st-completed]="b.status === 'completed'">{{ b.status }}</span>
+      <div class="modal-meta">
+        <p><b>Item:</b> {{ itemTitle(b) }}</p>
+        <p><b>Renter:</b> {{ renterName(b) }}</p>
+        <p><b>Owner:</b> {{ ownerName(b) }}</p>
+        <p><b>Dates:</b> {{ b.startDate | date:'mediumDate' }} → {{ b.endDate | date:'mediumDate' }}</p>
+        <p><b>Total Days:</b> {{ b.totalDays || '—' }}</p>
+        <p><b>Amount:</b> Rs {{ amount(b) | number:'1.0-0' }}</p>
+        <p><b>Payment:</b> {{ b.paymentStatus || '—' }}</p>
+        <p><b>Created:</b> {{ b.createdAt | date:'fullDate' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

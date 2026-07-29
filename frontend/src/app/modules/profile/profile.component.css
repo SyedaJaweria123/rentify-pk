@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  --forest: #1F5435;
+  --forest-d: #143524;
+  --mint: #EAF3DE;
+  --bg: #faf9f6;
+  --ink: #1a1f1c;
+  --ink-2: #6b7280;
+  --ink-3: #9ca3af;
+  --line: #e7e4dc;
+  font-family: 'Poppins','Inter',system-ui,sans-serif;
+}
+.pf-root { background: var(--bg); min-height: 100vh; padding: 28px 32px 60px; }
+.pf-container { max-width: 980px; margin: 0 auto; animation: pfPageIn .4s ease both; }
+.pf-page-title { font-family: 'Sora','Poppins',sans-serif; font-size: 26px; font-weight: 800; color: var(--ink); margin: 0 0 20px; letter-spacing: -.4px; animation: pfFadeUp .4s ease both; }
+
+.pf-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+@media(max-width: 860px) { .pf-grid { grid-template-columns: 1fr; } }
+
+.pf-side { display: flex; flex-direction: column; gap: 16px; }
+.pf-main { display: flex; flex-direction: column; gap: 20px; }
+
+.pf-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 20px;
+  box-shadow: 0 4px 20px rgba(20,53,36,.05); animation: pfFadeUp .45s ease both;
+}
+.pf-side .pf-card:nth-child(1) { animation-delay: .05s; }
+.pf-side .pf-card:nth-child(2) { animation-delay: .1s; }
+.pf-side .pf-card:nth-child(3) { animation-delay: .15s; }
+.pf-main .pf-section:nth-of-type(1) { animation-delay: .1s; }
+.pf-main .pf-section:nth-of-type(2) { animation-delay: .18s; }
+.pf-main .pf-section:nth-of-type(3) { animation-delay: .26s; }
+
+/* Avatar card */
+.pf-avatar-card { text-align: center; }
+.pf-avatar-wrap { position: relative; display: inline-block; margin-bottom: 12px; }
+.pf-avatar {
+  width: 92px; height: 92px; border-radius: 50%; overflow: hidden; background: var(--mint);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto;
+  font-size: 32px; font-weight: 800; color: var(--forest); border: 3px solid #fff; box-shadow: 0 4px 16px rgba(20,53,36,.1);
+}
+.pf-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pf-avatar-edit {
+  position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--forest); color: #fff; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 3px 10px rgba(20,53,36,.3); border: 2px solid #fff; transition: all .18s;
+}
+.pf-avatar-edit:hover { background: var(--forest-d); transform: scale(1.08); }
+.pf-name { font-size: 15px; font-weight: 700; color: var(--ink); margin: 0; }
+.pf-email { font-size: 12.5px; color: var(--ink-2); margin: 2px 0 8px; }
+.pf-role-pill {
+  display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  text-transform: capitalize; background: var(--mint); color: var(--forest);
+}
+.pf-role-pill.owner { background: #dbeafe; color: #1d4ed8; }
+.pf-save-photo {
+  display: block; width: 100%; margin-top: 14px; padding: 10px; border-radius: 11px; border: none;
+  background: linear-gradient(135deg, var(--forest), var(--forest-d)); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all .18s;
+}
+.pf-save-photo:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(31,84,53,.3); }
+.pf-save-photo:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Verification card */
+.pf-card-title { font-size: 13.5px; font-weight: 700; color: var(--ink); margin: 0 0 14px; }
+.pf-verify-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f2f1ec; }
+.pf-verify-row:last-child { border-bottom: none; padding-bottom: 0; }
+.pf-verify-label { font-size: 12.5px; color: var(--ink-2); }
+.pf-verify-badge { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.pf-verify-badge.ok { background: var(--mint); color: var(--forest); }
+.pf-verify-badge.pending { background: #fef3c7; color: #b45309; }
+.pf-verify-badge.review { background: #ffedd5; color: #c2410c; }
+
+/* Member since */
+.pf-member-label { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; margin: 0 0 4px; }
+.pf-member-val { font-size: 14px; font-weight: 700; color: var(--ink); margin: 0; }
+
+/* Section cards */
+.pf-section-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 18px; }
+.pf-section-ic { width: 34px; height: 34px; border-radius: 10px; background: var(--mint); color: var(--forest); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pf-section-head h2 { font-size: 15.5px; font-weight: 700; color: var(--ink); margin: 0; }
+.pf-section-sub { font-size: 12px; color: var(--ink-3); margin: 2px 0 0; }
+
+.pf-form { display: flex; flex-direction: column; gap: 16px; }
+.pf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width: 560px) { .pf-row { grid-template-columns: 1fr; } }
+
+.pf-field { display: flex; flex-direction: column; gap: 6px; }
+.pf-field label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.pf-field .req { color: #c0392b; }
+.pf-field input, .pf-field textarea {
+  padding: 11px 14px; border-radius: 11px; border: 1.5px solid var(--line); background: var(--bg);
+  font-size: 13.5px; color: var(--ink); font-family: inherit; outline: none; transition: all .18s;
+}
+.pf-field input:focus, .pf-field textarea:focus { border-color: var(--forest); background: #fff; box-shadow: 0 0 0 3px rgba(31,84,53,.1); }
+.pf-field textarea { resize: vertical; line-height: 1.5; }
+.pf-disabled { color: var(--ink-3) !important; cursor: not-allowed; background: #f3f4f2 !important; }
+.pf-hint { font-size: 11px; color: var(--ink-3); }
+.pf-err { font-size: 12px; color: #c0392b; font-weight: 500; }
+.pf-success { font-size: 12px; color: var(--forest); font-weight: 600; }
+
+.pf-form-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pf-submit {
+  margin-left: auto; padding: 11px 24px; border-radius: 11px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--forest), var(--forest-d)); color: #fff; font-size: 13.5px; font-weight: 700;
+  font-family: inherit; box-shadow: 0 5px 16px rgba(31,84,53,.25); transition: all .2s;
+}
+.pf-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(31,84,53,.35); }
+.pf-submit:disabled { opacity: .6; cursor: not-allowed; }
+.pf-submit-dark { background: linear-gradient(135deg, #1f2937, #111827); box-shadow: 0 5px 16px rgba(17,24,39,.25); }
+.pf-submit-dark:hover:not(:disabled) { box-shadow: 0 8px 20px rgba(17,24,39,.35); }
+
+/* Biometric */
+.pf-bio-body { display: flex; flex-direction: column; gap: 12px; }
+.pf-bio-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; width: 100%;
+  border: 2px dashed #cfe0d1; border-radius: 12px; background: var(--bg); color: var(--ink-2);
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .18s;
+}
+.pf-bio-btn:hover:not(:disabled) { border-color: var(--forest); color: var(--forest); background: var(--mint); }
+.pf-bio-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.pf-devices { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid #f2f1ec; }
+.pf-devices-label { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 2px; }
+.pf-device-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg);
+  border-radius: 11px; animation: pfFadeUp .35s ease both;
+}
+.pf-device-name { font-size: 13px; font-weight: 600; color: var(--ink); margin: 0; }
+.pf-device-meta { font-size: 11px; color: var(--ink-3); margin: 2px 0 0; }
+.pf-device-remove { font-size: 11.5px; font-weight: 700; color: #dc2626; background: none; border: none; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+.pf-device-remove:hover { opacity: .7; }
+
+@keyframes pfPageIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pfFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media(max-width: 560px) {
+  .pf-root { padding: 18px 14px 50px; }
+  .pf-page-title { font-size: 21px; }
+}

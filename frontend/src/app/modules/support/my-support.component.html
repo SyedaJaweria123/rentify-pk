@@ -1,0 +1,164 @@
+<div class="sc-wrap">
+
+  <!-- ── Breadcrumb ── -->
+  <nav class="sc-breadcrumb">
+    <a routerLink="/">Home</a>
+    <span>›</span>
+    <span>Support Center</span>
+  </nav>
+
+  <!-- ── Hero Banner ── -->
+  <div class="sc-hero">
+    <div class="sc-hero-left">
+      <h1 class="sc-hero-title">Support Center</h1>
+      <p class="sc-hero-sub">How can we help you today?</p>
+      <div class="sc-search-box">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search your question..." [(ngModel)]="search"
+               (ngModelChange)="onSearch()"
+               (keyup.enter)="searchFaqs()"/>
+        <button class="sc-search-btn" (click)="searchFaqs()">Search</button>
+      </div>
+    </div>
+    <div class="sc-hero-right">
+      <img src="/support-agent.png" alt="Support Agent" class="sc-agent-img"/>
+    </div>
+  </div>
+
+  <!-- ── FAQ Search Results ── -->
+  <div class="sc-faq-results" *ngIf="showFaqResults">
+    <div class="sc-faq-head">
+      <h2 class="sc-section-title">
+        {{ faqLoading ? 'Searching...' : faqResults.length + ' result(s) for "' + search + '"' }}
+      </h2>
+      <button class="sc-close-btn" (click)="showFaqResults=false; search=''">✕ Clear</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="sc-faq-loading" *ngIf="faqLoading">
+      <div class="sc-spin"></div>
+    </div>
+
+    <!-- No results -->
+    <div class="sc-faq-empty" *ngIf="!faqLoading && faqResults.length === 0">
+      <p>No FAQs matched "<strong>{{ search }}</strong>"</p>
+      <p class="sc-faq-empty-sub">Try different keywords or <a routerLink="/help">create a support ticket</a></p>
+    </div>
+
+    <!-- Results -->
+    <div class="sc-faq-list" *ngIf="!faqLoading && faqResults.length > 0">
+      <div class="sc-faq-item" *ngFor="let f of faqResults">
+        <div class="sc-faq-q">
+          <span class="sc-faq-ic">?</span>
+          {{ f.q }}
+        </div>
+        <div class="sc-faq-a">{{ f.a }}</div>
+      </div>
+    </div>
+
+    <div class="sc-faq-footer" *ngIf="!faqLoading">
+      <span>Still need help?</span>
+      <a routerLink="/help" class="sc-faq-ticket-btn">Create a Ticket</a>
+    </div>
+  </div>
+
+  <!-- ── Popular Topics ── -->
+  <div class="sc-section">
+    <h2 class="sc-section-title">Popular Topics</h2>
+    <div class="sc-topics">
+      <div class="sc-topic" *ngFor="let t of popularTopics" (click)="openTopic(t)">
+        <span class="sc-topic-ic">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </span>
+        {{ t }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Quick Actions ── -->
+  <div class="sc-actions-row">
+    <div class="sc-action-card" routerLink="/help">
+      <div class="sc-action-ic">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </div>
+      <h3>FAQs</h3>
+      <p>Find answers to common questions</p>
+    </div>
+    <div class="sc-action-card sc-action-primary" routerLink="/help">
+      <div class="sc-action-ic">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3>Create Ticket</h3>
+      <p>Submit a ticket and get help</p>
+    </div>
+    <div class="sc-action-card" (click)="showTickets = true">
+      <div class="sc-action-ic">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <h3>My Tickets</h3>
+      <p>View your existing tickets</p>
+    </div>
+  </div>
+
+  <!-- ── My Tickets Section ── -->
+  <div class="sc-tickets-section" *ngIf="showTickets">
+    <div class="sc-tickets-head">
+      <h2 class="sc-section-title">My Tickets</h2>
+      <div class="sc-filters">
+        <select [(ngModel)]="statusFilter" (ngModelChange)="onFilter()" class="sc-select">
+          <option value="">All Status</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+        <select [(ngModel)]="sortOrder" (ngModelChange)="onFilter()" class="sc-select">
+          <option value="latest">Latest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="sc-state" *ngIf="loading">
+      <div class="sc-spin"></div><p>Loading tickets…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="sc-state" *ngIf="!loading && error">
+      <p>{{ error }}</p>
+      <button class="sc-retry-btn" (click)="load()">Retry</button>
+    </div>
+
+    <!-- Empty -->
+    <div class="sc-state" *ngIf="!loading && !error && tickets.length === 0">
+      <div class="sc-empty-ic">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <p>No tickets yet.</p>
+      <a routerLink="/help" class="sc-new-btn">Create Your First Ticket</a>
+    </div>
+
+    <!-- Tickets List -->
+    <div class="sc-tickets-list" *ngIf="!loading && !error && tickets.length > 0">
+      <div class="sc-ticket-row" *ngFor="let t of tickets" (click)="viewTicket(t)">
+        <div class="sc-ticket-left">
+          <span class="sc-tno">#{{ t.ticketNumber }}</span>
+          <div>
+            <div class="sc-tsubj">{{ t.subject }}</div>
+            <div class="sc-tmeta">{{ t.category }} · {{ t.createdAt | date:'MMM d, y' }}</div>
+          </div>
+        </div>
+        <div class="sc-ticket-right">
+          <span class="sc-badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="sc-pager" *ngIf="!loading && !error && pagination.totalPages > 1">
+      <button [disabled]="!pagination.hasPrev" (click)="changePage(pagination.page - 1)">← Prev</button>
+      <span>{{ pagination.page }} / {{ pagination.totalPages }}</span>
+      <button [disabled]="!pagination.hasNext" (click)="changePage(pagination.page + 1)">Next →</button>
+    </div>
+  </div>
+
+</div>

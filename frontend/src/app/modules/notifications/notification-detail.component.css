@@ -1,0 +1,78 @@
+:host {
+  display: block;
+  font-family: 'Poppins','Inter',system-ui,sans-serif;
+}
+.nd-root { background: #faf9f6; min-height: 100vh; padding: 28px 32px 60px; }
+.nd-container { max-width: 680px; margin: 0 auto; animation: ndPageIn .4s ease both; }
+
+.nd-back {
+  display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; border-radius: 10px;
+  border: 1.5px solid #e7e4dc; background: #fff; color: #6b7280; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .18s; margin-bottom: 18px;
+}
+.nd-back:hover { border-color: #1F5435; color: #1F5435; transform: translateX(-2px); }
+
+/* Loading / empty states */
+.nd-loading, .nd-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 90px 20px; color: #6b7280;
+}
+.nd-loading p, .nd-empty p { margin: 0; font-size: 14px; }
+.nd-empty p { font-weight: 700; color: #1a1f1c; margin-bottom: 4px; }
+.nd-empty span { font-size: 12.5px; color: #9ca3af; }
+.nd-empty-ic { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: #f3f4f2; color: #9ca3af; margin-bottom: 12px; }
+.nd-spin { width: 40px; height: 40px; margin-bottom: 14px; border: 4px solid #EAF3DE; border-top-color: #1F5435; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Card */
+.nd-card {
+  background: #fff; border: 1px solid #e7e4dc; border-radius: 20px; padding: 26px 28px 28px;
+  box-shadow: 0 8px 30px rgba(20,53,36,.06); animation: ndFadeUp .45s ease .05s both;
+}
+.nd-head { display: flex; align-items: flex-start; gap: 16px; }
+.nd-ic { width: 52px; height: 52px; border-radius: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.tone-rider    { background: #ccfbf1; color: #0f766e; }
+.tone-delivery { background: #cffafe; color: #0e7490; }
+.tone-claim    { background: #ffedd5; color: #c2410c; }
+.tone-booking  { background: #EAF3DE; color: #1F5435; }
+.tone-payment  { background: #dbeafe; color: #2563eb; }
+.tone-message  { background: #ede9fe; color: #7c3aed; }
+.tone-support  { background: #e0f2fe; color: #0284c7; }
+.tone-alert    { background: #fee2e2; color: #dc2626; }
+.tone-box      { background: #ecfccb; color: #4d7c0f; }
+.tone-shield   { background: #e0e7ff; color: #4338ca; }
+.tone-system   { background: #f3f4f6; color: #6b7280; }
+
+.nd-head-body { flex: 1; min-width: 0; }
+.nd-title { font-family: 'Sora','Poppins',sans-serif; font-size: 20px; font-weight: 800; color: #1a1f1c; margin: 2px 0 6px; letter-spacing: -.2px; }
+.nd-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12.5px; color: #9ca3af; margin: 0; }
+.nd-read-pill { padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #f3f4f2; color: #6b7280; margin-left: 4px; }
+.nd-read-pill.unread { background: #EAF3DE; color: #1F5435; }
+
+.nd-delete {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid #e7e4dc; background: #fff;
+  color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s;
+}
+.nd-delete:hover { border-color: #dc2626; color: #dc2626; background: #fdecea; }
+
+.nd-divider { height: 1px; background: #eef0eb; margin: 20px 0; }
+
+.nd-body { font-size: 14.5px; line-height: 1.7; color: #374151; margin: 0 0 24px; white-space: pre-line; }
+
+.nd-action {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 12px; border: none;
+  cursor: pointer; background: linear-gradient(135deg, #1F5435, #143524); color: #fff; font-size: 14px; font-weight: 700;
+  font-family: inherit; box-shadow: 0 6px 20px rgba(31,84,53,.25); transition: all .2s;
+}
+.nd-action:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(31,84,53,.35); }
+.nd-action:hover svg { transform: translateX(2px); }
+.nd-action svg { transition: transform .2s; }
+
+@keyframes ndPageIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ndFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media(max-width: 560px) {
+  .nd-root { padding: 18px 14px 50px; }
+  .nd-card { padding: 20px 18px 22px; }
+  .nd-title { font-size: 18px; }
+}

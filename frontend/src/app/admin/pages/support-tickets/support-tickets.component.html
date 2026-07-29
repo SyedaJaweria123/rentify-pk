@@ -1,0 +1,145 @@
+<div class="st-page">
+
+  <!-- Header -->
+  <div class="st-head">
+    <div>
+      <h1 class="st-h1">Support Tickets</h1>
+      <p class="st-sub">Manage and respond to user support requests.</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="st-stats" *ngIf="!loading">
+    <div class="st-stat"><span class="st-stat-num">{{ stats.total }}</span><span class="st-stat-lbl">Total</span></div>
+    <div class="st-stat st-s-open"><span class="st-stat-num">{{ stats.open }}</span><span class="st-stat-lbl">Open</span></div>
+    <div class="st-stat st-s-prog"><span class="st-stat-num">{{ stats.inProgress }}</span><span class="st-stat-lbl">In Progress</span></div>
+    <div class="st-stat st-s-res"><span class="st-stat-num">{{ stats.resolved }}</span><span class="st-stat-lbl">Resolved</span></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="st-filters">
+    <div class="st-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" placeholder="Search ticket #, name, email, subject…" [(ngModel)]="search" (ngModelChange)="onSearch()"/>
+    </div>
+    <select [(ngModel)]="statusFilter" (ngModelChange)="onFilter()" class="st-select">
+      <option value="">All Status</option>
+      <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+    </select>
+    <select [(ngModel)]="categoryFilter" (ngModelChange)="onFilter()" class="st-select">
+      <option value="">All Categories</option>
+      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+    </select>
+    <button class="st-clear" *ngIf="search || statusFilter || categoryFilter" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="st-loading" *ngIf="loading">
+    <div class="st-spin"></div><p>Loading tickets…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="st-state" *ngIf="!loading && error">
+    <p>{{ error }}</p><button class="st-btn" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div class="st-state" *ngIf="!loading && !error && tickets.length === 0">
+    <div class="st-empty-ic">
+      <svg width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <h3>No tickets found</h3>
+    <p>Support requests will appear here.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="st-table-wrap" *ngIf="!loading && !error && tickets.length > 0">
+    <table class="st-table">
+      <thead>
+        <tr><th>Ticket #</th><th>Name</th><th>Subject</th><th>Category</th><th>Status</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of tickets" (click)="openTicket(t)">
+          <td class="st-tno">{{ t.ticketNumber }}</td>
+          <td>{{ t.fullName }}<div class="st-email">{{ t.email }}</div></td>
+          <td class="st-subj">{{ t.subject }}</td>
+          <td><span class="st-cat">{{ t.category }}</span></td>
+          <td><span class="st-badge" [ngClass]="statusClass(t.status)">{{ t.status }}</span></td>
+          <td class="st-date">{{ t.createdAt | date:'MMM d, y' }}</td>
+          <td><button class="st-view" (click)="openTicket(t); $event.stopPropagation()">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="st-pager" *ngIf="!loading && !error && pagination.totalPages > 1">
+    <button class="st-pg" [disabled]="!pagination.hasPrev" (click)="changePage(pagination.page - 1)">Prev</button>
+    <span>Page {{ pagination.page }} of {{ pagination.totalPages }}</span>
+    <button class="st-pg" [disabled]="!pagination.hasNext" (click)="changePage(pagination.page + 1)">Next</button>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div class="st-drawer-bg" *ngIf="selected" (click)="closeDetail()"></div>
+<div class="st-drawer" [class.open]="selected" *ngIf="selected">
+  <div class="st-drawer-head">
+    <div>
+      <span class="st-drawer-tno">{{ selected.ticketNumber }}</span>
+      <span class="st-badge" [ngClass]="statusClass(selected.status)">{{ selected.status }}</span>
+    </div>
+    <button class="st-drawer-close" (click)="closeDetail()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="st-drawer-body">
+    <h2 class="st-d-subject">{{ selected.subject }}</h2>
+
+    <div class="st-d-meta">
+      <div class="st-d-row"><span>Name</span><strong>{{ selected.fullName }}</strong></div>
+      <div class="st-d-row"><span>Email</span><strong>{{ selected.email }}</strong></div>
+      <div class="st-d-row"><span>Category</span><strong>{{ selected.category }}</strong></div>
+      <div class="st-d-row"><span>Created</span><strong>{{ selected.createdAt | date:'MMM d, y, h:mm a' }}</strong></div>
+    </div>
+
+    <div class="st-d-section">
+      <label class="st-d-label">Message</label>
+      <div class="st-d-message">{{ selected.message }}</div>
+    </div>
+
+    <div class="st-d-section" *ngIf="selected.attachmentUrl">
+      <label class="st-d-label">Attachment</label>
+      <a [href]="selected.attachmentUrl" target="_blank" class="st-attach">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        {{ isPdf(selected.attachmentUrl) ? 'View PDF' : 'View Image' }}
+      </a>
+      <a [href]="selected.attachmentUrl" target="_blank" *ngIf="!isPdf(selected.attachmentUrl)" class="st-attach-preview">
+        <img [src]="selected.attachmentUrl" alt="attachment"/>
+      </a>
+    </div>
+
+    <div class="st-d-section">
+      <label class="st-d-label">Status</label>
+      <select [(ngModel)]="replyStatus" class="st-select st-full">
+        <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <div class="st-d-section">
+      <label class="st-d-label">Internal Notes (private)</label>
+      <textarea [(ngModel)]="noteText" rows="2" placeholder="Notes for admins only…" class="st-textarea"></textarea>
+      <button class="st-btn-ghost" (click)="saveStatus()" [disabled]="actionBusy">Save status &amp; notes</button>
+    </div>
+
+    <div class="st-d-section">
+      <label class="st-d-label">Reply to user (sent by email)</label>
+      <textarea [(ngModel)]="replyText" rows="4" placeholder="Type your response to the user…" class="st-textarea"></textarea>
+      <button class="st-btn" (click)="sendReply()" [disabled]="actionBusy || !replyText.trim()">
+        {{ actionBusy ? 'Sending…' : 'Send Reply' }}
+      </button>
+    </div>
+
+    <div class="st-action-msg" *ngIf="actionMsg">{{ actionMsg }}</div>
+  </div>
+</div>

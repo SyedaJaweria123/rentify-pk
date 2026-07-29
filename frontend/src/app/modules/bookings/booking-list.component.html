@@ -1,0 +1,86 @@
+<!-- Owner: owner sidebar layout -->
+<app-owner-layout *ngIf="isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="bookingsContent"></ng-container>
+</app-owner-layout>
+
+<!-- Renter: renter sidebar layout -->
+<app-renter-layout *ngIf="!isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="bookingsContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #bookingsContent>
+  <div class="bk-root">
+
+  <!-- Hero header -->
+  <div class="bk-hero">
+    <div class="bk-hero-left">
+      <h1 class="bk-title">{{ isOwner ? 'Booking Requests' : 'My Bookings' }}</h1>
+      <p class="bk-sub">{{ isOwner ? 'Manage rental requests for your items' : 'Track and manage all your rentals' }}</p>
+      <div class="bk-total-pill">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+        {{ pagination()?.total || 0 }} total
+      </div>
+    </div>
+    <div class="bk-hero-illus">
+      <img src="/bookings-illustration.png" alt="My Bookings" class="bk-illus-img">
+    </div>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="bk-filters">
+    @for (tab of statusTabs; track tab.value) {
+      <button class="bk-filter-btn" [class.active]="activeStatus() === tab.value" (click)="onTabChange(tab.value)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="bk-loading"><mat-spinner diameter="44"></mat-spinner></div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && bookings().length === 0) {
+    <div class="bk-empty">
+      <div class="bk-empty-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+      </div>
+      <p class="bk-empty-title">No bookings found</p>
+      <span class="bk-empty-sub">{{ activeStatus() === 'all' ? 'You have no bookings yet.' : 'No ' + activeStatus() + ' bookings.' }}</span>
+      @if (!isOwner) {
+        <a routerLink="/listings" class="bk-empty-link">Browse listings →</a>
+      }
+    </div>
+  }
+
+  <!-- Booking Cards -->
+  @if (!loading() && bookings().length > 0) {
+    <div class="bk-list">
+      @for (booking of bookings(); track booking._id; let i = $index) {
+        <div class="bk-card-wrap" [style.animation-delay]="(i * 0.05) + 's'">
+          <app-booking-card
+            [booking]="booking"
+            [isOwner]="isOwner"
+            (confirm)="onConfirm($event)"
+            (reject)="onReject(booking)"
+            (cancel)="onCancel(booking)"
+            (complete)="onComplete($event)">
+          </app-booking-card>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (pagination() && pagination().totalPages > 1) {
+      <div class="bk-pagination">
+        <button class="bk-page-btn" [disabled]="!pagination().hasPrev" (click)="onPageChange(pagination().page - 1)">←</button>
+        <span class="bk-page-info">Page {{ pagination().page }} of {{ pagination().totalPages }}</span>
+        <button class="bk-page-btn" [disabled]="!pagination().hasNext" (click)="onPageChange(pagination().page + 1)">→</button>
+      </div>
+    }
+  }
+
+  </div>
+</ng-template>
+

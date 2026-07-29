@@ -1,0 +1,103 @@
+<app-rider-layout *ngIf="isRider">
+  <ng-container *ngTemplateOutlet="reviewsContent"></ng-container>
+</app-rider-layout>
+
+<app-owner-layout *ngIf="!isRider && isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="reviewsContent"></ng-container>
+</app-owner-layout>
+
+<app-renter-layout *ngIf="!isRider && !isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="reviewsContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #reviewsContent>
+<div class="mr-root">
+  <div class="mr-container">
+
+    <!-- Hero -->
+    <div class="mr-hero">
+      <div class="mr-hero-left">
+        <h1 class="mr-title">My Reviews</h1>
+        <p class="mr-sub">Reviews you've left for owners after your rentals.</p>
+      </div>
+      <div class="mr-hero-stat" *ngIf="!loading && pagination">
+        <p class="mr-hero-stat-val">{{ pagination.total || 0 }}</p>
+        <p class="mr-hero-stat-label">Reviews Given</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="mr-loading" *ngIf="loading">
+      <div class="mr-spin"></div><p>Loading your reviews…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="mr-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <!-- Empty -->
+    <div class="mr-empty" *ngIf="!loading && !error && reviews.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+      <p class="mr-empty-title">You haven't reviewed anything yet</p>
+      <p class="mr-empty-sub">After a booking is complete, you can leave a review from your bookings page.</p>
+      <a routerLink="/bookings" class="mr-empty-btn">Go to My Bookings</a>
+    </div>
+
+    <!-- Reviews list -->
+    <div class="mr-list" *ngIf="!loading && !error && reviews.length > 0">
+      <div class="mr-card" *ngFor="let r of reviews; let i = index" [style.animation-delay]="(i * 0.05) + 's'">
+
+        <div class="mr-card-head">
+          <div class="mr-listing-info">
+            <div class="mr-listing-thumb">
+              <img *ngIf="r.listing?.images?.[0]?.url" [src]="r.listing.images[0].url" alt="">
+              <svg *ngIf="!r.listing?.images?.[0]?.url" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+            </div>
+            <div>
+              <p class="mr-listing-title">{{ r.listing?.title || 'Listing' }}</p>
+              <p class="mr-listing-owner" *ngIf="r.reviewee?.name">Owner: {{ r.reviewee.name }}</p>
+            </div>
+          </div>
+          <div class="mr-stars">
+            <svg *ngFor="let filled of starsArray(r.rating)" width="15" height="15" viewBox="0 0 24 24" [attr.fill]="filled ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          </div>
+        </div>
+
+        <p class="mr-date">{{ r.createdAt | date:'mediumDate' }}</p>
+        <p class="mr-comment">{{ decodeComment(r.comment) }}</p>
+
+        <!-- Owner's response (read-only here) -->
+        <div class="mr-response" *ngIf="r.ownerResponse?.comment">
+          <p class="mr-response-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Owner's Response
+          </p>
+          <p class="mr-response-text">{{ decodeComment(r.ownerResponse.comment) }}</p>
+        </div>
+        <p class="mr-no-response" *ngIf="!r.ownerResponse?.comment">The owner hasn't responded yet.</p>
+
+        <div class="mr-card-foot">
+          <button class="mr-delete-btn" *ngIf="confirmDeleteId !== r._id" (click)="askDelete(r._id)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <div class="mr-confirm-row" *ngIf="confirmDeleteId === r._id">
+            <span>Delete this review?</span>
+            <button class="mr-confirm-cancel" (click)="cancelDelete()">Cancel</button>
+            <button class="mr-confirm-delete" [disabled]="deletingId === r._id" (click)="confirmDelete(r._id)">
+              {{ deletingId === r._id ? 'Deleting…' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mr-pagination" *ngIf="!loading && pagination && pagination.totalPages > 1">
+      <button class="mr-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+      <span class="mr-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+      <button class="mr-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>
+</ng-template>

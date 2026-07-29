@@ -1,0 +1,128 @@
+<div class="ds-page">
+
+  <!-- Header -->
+  <div class="ds-head">
+    <div>
+      <h1 class="ds-h1">Disputes</h1>
+      <p class="ds-sub">Review and resolve disputes raised between renters and owners.</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="ds-filters">
+    <select [(ngModel)]="statusFilter" (ngModelChange)="onFilter()" class="ds-select">
+      <option value="">All Status</option>
+      <option *ngFor="let s of statuses" [value]="s">{{ s.replace('_',' ') }}</option>
+    </select>
+    <button class="ds-clear" *ngIf="statusFilter" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="ds-loading" *ngIf="loading">
+    <div class="ds-spin"></div><p>Loading disputes…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="ds-state" *ngIf="!loading && error">
+    <p>{{ error }}</p><button class="ds-btn" (click)="load()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div class="ds-state" *ngIf="!loading && !error && disputes.length === 0">
+    <div class="ds-empty-ic">
+      <svg width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <h3>No disputes found</h3>
+    <p>Disputes raised by renters or owners will appear here.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="ds-table-wrap" *ngIf="!loading && !error && disputes.length > 0">
+    <table class="ds-table">
+      <thead>
+        <tr><th>Raised By</th><th>Against</th><th>Reason</th><th>Status</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of disputes" (click)="openDispute(d)">
+          <td>{{ d.raisedBy?.name || '—' }}<div class="ds-email">{{ d.raisedBy?.email }}</div></td>
+          <td>{{ d.against?.name || '—' }}<div class="ds-email">{{ d.against?.email }}</div></td>
+          <td class="ds-reason">{{ d.reason }}</td>
+          <td><span class="ds-badge" [ngClass]="statusClass(d.status)">{{ d.status.replace('_',' ') }}</span></td>
+          <td class="ds-date">{{ d.createdAt | date:'MMM d, y' }}</td>
+          <td><button class="ds-view" (click)="openDispute(d); $event.stopPropagation()">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="ds-pager" *ngIf="!loading && !error && pagination.pages > 1">
+    <button class="ds-pg" [disabled]="pagination.page <= 1" (click)="changePage(pagination.page - 1)">Prev</button>
+    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <button class="ds-pg" [disabled]="pagination.page >= pagination.pages" (click)="changePage(pagination.page + 1)">Next</button>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div class="ds-drawer-bg" *ngIf="selected" (click)="closeDetail()"></div>
+<div class="ds-drawer" [class.open]="selected" *ngIf="selected">
+  <div class="ds-drawer-head">
+    <div>
+      <span class="ds-badge" [ngClass]="statusClass(selected.status)">{{ selected.status.replace('_',' ') }}</span>
+    </div>
+    <button class="ds-drawer-close" (click)="closeDetail()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="ds-drawer-body">
+    <h2 class="ds-d-reason">{{ selected.reason }}</h2>
+
+    <div class="ds-d-meta">
+      <div class="ds-d-row"><span>Raised By</span><strong>{{ selected.raisedBy?.name }} ({{ selected.raisedBy?.email }})</strong></div>
+      <div class="ds-d-row"><span>Against</span><strong>{{ selected.against?.name }} ({{ selected.against?.email }})</strong></div>
+      <div class="ds-d-row"><span>Booking</span><strong>{{ selected.booking }}</strong></div>
+      <div class="ds-d-row"><span>Created</span><strong>{{ selected.createdAt | date:'MMM d, y, h:mm a' }}</strong></div>
+    </div>
+
+    <div class="ds-d-section" *ngIf="selected.evidence?.length">
+      <label class="ds-d-label">Evidence</label>
+      <div class="ds-evidence-grid">
+        <a *ngFor="let e of selected.evidence" [href]="e.url" target="_blank" class="ds-evidence-item">
+          <img *ngIf="e.type === 'image'" [src]="e.url" alt="evidence"/>
+          <span *ngIf="e.type !== 'image'" class="ds-evidence-file">{{ e.type }}</span>
+        </a>
+      </div>
+    </div>
+
+    <ng-container *ngIf="selected.status === 'resolved' || selected.status === 'closed'; else resolveForm">
+      <div class="ds-d-section">
+        <label class="ds-d-label">Resolution</label>
+        <div class="ds-resolved-box">
+          <strong>{{ selected.resolution?.replace('_',' ') }}</strong>
+          <p *ngIf="selected.resolutionNote">{{ selected.resolutionNote }}</p>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #resolveForm>
+      <div class="ds-d-section">
+        <label class="ds-d-label">Resolution</label>
+        <select [(ngModel)]="resolution" class="ds-select ds-full">
+          <option value="" disabled>Choose a resolution…</option>
+          <option *ngFor="let r of resolutions" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </div>
+
+      <div class="ds-d-section">
+        <label class="ds-d-label">Resolution Note</label>
+        <textarea [(ngModel)]="note" rows="3" placeholder="Explain the decision (visible to both parties)…" class="ds-textarea"></textarea>
+        <button class="ds-btn" (click)="resolveDispute()" [disabled]="actionBusy || !resolution">
+          {{ actionBusy ? 'Resolving…' : 'Resolve Dispute' }}
+        </button>
+      </div>
+    </ng-template>
+
+    <div class="ds-action-msg" *ngIf="actionMsg">{{ actionMsg }}</div>
+  </div>
+</div>

@@ -1,0 +1,252 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Admin Dashboard — Rentify PK
+   ─────────────────────────────────────────────────────────────────────────────
+   OFFICIAL BRAND PALETTE (every accent below is one of these two colors, or
+   a computed opacity/gradient of them — no other hues introduced):
+     --primary   #14532D  (dark green)  — solid buttons, active states, headings
+     --secondary #16A34A  (green)       — gradients, icon tints, hover brightening
+   Light chip/active-nav/badge backgrounds are the secondary color at low
+   opacity, not a separate hex, so the palette stays exactly as specified.
+   ─────────────────────────────────────────────────────────────────────────────
+   White cards, soft borders, and layered shadows for real depth (a tight
+   contact shadow + a soft ambient one, the way most modern SaaS dashboards
+   do it) — plus a staggered entrance animation on the KPI row and consistent
+   spacing/typography throughout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dashboard-page {
+  --ink:         #111827;   /* primary text */
+  --ink-2:       #6b7280;   /* secondary text */
+  --ink-3:       #9ca3af;   /* tertiary / muted text */
+  --line:        #eef1ee;   /* hairline borders inside cards (table rows, etc.) */
+  --forest:      #14532D;   /* brand primary — dark green (official) */
+  --forest-d:    #0d3d20;   /* primary, darkened further for hover states */
+  --mint:        rgba(22,163,74,0.1);    /* brand secondary at low opacity — chip/active backgrounds */
+
+  --card-bg:     #ffffff;
+  --card-border: #e8efe8;
+  --card-shadow: 0 1px 2px rgba(20,83,45,.04), 0 8px 24px rgba(20,83,45,.06);
+  --card-shadow-hover: 0 4px 10px rgba(20,83,45,.07), 0 18px 42px rgba(20,83,45,.13);
+  --card-radius: 16px;
+
+  background: transparent;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.ad-hero {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px;
+  background: #fff; border: 1.5px solid var(--card-border); border-radius: 20px;
+  padding: 28px 28px 24px; box-shadow: var(--card-shadow);
+  position: relative; overflow: hidden; z-index: 10;
+  animation: kpiFadeIn .5s ease both;
+}
+.ad-hero::before {
+  content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, var(--mint) 0%, transparent 70%);
+  left: 38%; top: -70px; pointer-events: none; opacity: .5;
+}
+.ad-hero-left { position: relative; z-index: 1; }
+.ad-hero-title { font-size: 26px; font-weight: 800; color: var(--ink); margin: 0 0 4px; font-family: 'Sora','Poppins',sans-serif; letter-spacing: -.3px; }
+.ad-hero-sub { font-size: 13.5px; color: var(--ink-2); margin: 0 0 16px; }
+.ad-hero-actions { display: flex; gap: 10px; }
+.ad-hero-illus { display: flex; align-items: flex-end; justify-content: flex-end; position: relative; z-index: 1; padding-top: 30px; }
+.ad-illus-img { width: 230px; max-width: 100%; height: auto; object-fit: contain; display: block; }
+@media(max-width: 760px) { .ad-hero { grid-template-columns: 1fr; text-align: center; } .ad-hero-actions { justify-content: center; } .ad-illus-img { width: 160px; } }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; background: var(--forest); color: #fff; border: none;
+  border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+  box-shadow: 0 2px 12px rgba(20,83,45,.25); transition: all 0.18s;
+}
+.btn-primary:hover { background: var(--forest-d); transform: translateY(-1px); }
+.btn-outline {
+  padding: 10px 18px; background: #fff; border: 1.5px solid #e5e7eb;
+  color: #374151; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 6px; transition: all 0.18s;
+}
+.btn-outline:hover { border-color: var(--forest); color: var(--forest); background: var(--mint); }
+
+/* ── KPI grid — exactly 4 per row (4 + 4) ──────────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi-grid > * { animation: kpiFadeIn .45s ease both; }
+.kpi-grid > *:nth-child(1) { animation-delay: .02s; }
+.kpi-grid > *:nth-child(2) { animation-delay: .06s; }
+.kpi-grid > *:nth-child(3) { animation-delay: .10s; }
+.kpi-grid > *:nth-child(4) { animation-delay: .14s; }
+.kpi-grid > *:nth-child(5) { animation-delay: .18s; }
+.kpi-grid > *:nth-child(6) { animation-delay: .22s; }
+.kpi-grid > *:nth-child(7) { animation-delay: .26s; }
+.kpi-grid > *:nth-child(8) { animation-delay: .30s; }
+@keyframes kpiFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .kpi-grid > * { animation: none; } }
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .kpi-grid { grid-template-columns: 1fr; } }
+
+/* ── Section labels — small heading above each chart/table group, so the
+   page reads as clear sections rather than one long unbroken scroll ──────── */
+.section-label {
+  font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .08em; margin: 4px 2px -6px;
+}
+
+/* ── Chart cards ───────────────────────────────────────────────────────────── */
+.charts-row { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 1024px) { .charts-row { grid-template-columns: 3fr 2fr; } }
+.chart-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--card-radius); padding: 20px; box-shadow: var(--card-shadow);
+  transition: box-shadow .2s ease, transform .2s ease;
+  animation: kpiFadeIn .5s ease both; animation-delay: .1s;
+}
+.chart-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; gap: 10px; }
+.chart-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.chart-tabs { display: flex; gap: 4px; background: #f4f6f4; border-radius: 8px; padding: 3px; }
+.chart-tab {
+  padding: 5px 13px; border: none; background: transparent; color: var(--ink-3);
+  border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+  font-family: inherit;
+}
+.chart-tab:hover:not(.chart-tab-active) { color: var(--ink-2); }
+.chart-tab-active { background: var(--forest); color: #fff; }
+.chart-body { position: relative; height: 280px; }
+.chart-body canvas { max-height: 280px; }
+.chart-body-donut { height: 220px; display: flex; align-items: center; justify-content: center; }
+.chart-body-donut canvas { max-height: 220px; }
+
+/* Legend */
+.chart-legend { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 13px; color: var(--ink-2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-blue   { background: #3b82f6; }  /* Renters — matches the chart's BLUE dataset color */
+.dot-indigo { background: var(--forest); }  /* Owners — matches the chart's GREEN dataset color (class name kept for compatibility) */
+.legend-val { margin-left: auto; font-weight: 700; color: var(--ink); }
+
+/* ── Tables ────────────────────────────────────────────────────────────────── */
+.tables-row { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 1024px) { .tables-row { grid-template-columns: 1fr 1fr; } }
+.mini-table-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--card-radius); overflow: hidden; box-shadow: var(--card-shadow);
+  transition: box-shadow .2s ease, transform .2s ease;
+  animation: kpiFadeIn .5s ease both; animation-delay: .15s;
+}
+.mini-table-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+.mini-table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--line);
+}
+.mini-table-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.view-all-link { font-size: 13px; color: var(--forest); text-decoration: none; font-weight: 700; transition: opacity .15s; }
+.view-all-link:hover { opacity: .75; }
+.mini-table-scroll { overflow-x: auto; }
+.mini-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.mini-table th {
+  padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700;
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em;
+  background: #fafbf9; border-bottom: 1px solid var(--line);
+}
+.mini-table tr { border-bottom: 1px solid #fafbf9; transition: background 0.15s; }
+.mini-table tbody tr:hover { background: #fafbf9; }
+.mini-table td { padding: 10px 16px; color: var(--ink); }
+.td-listing, .td-name { font-weight: 600; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-email { color: var(--ink-2); max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.td-amount { font-weight: 700; color: var(--forest); }
+.td-date { color: var(--ink-3); font-size: 11px; }
+
+/* Empty-state row shown inside a table when there's genuinely no data yet
+   (rather than leaving a blank body, which can look broken) */
+.mini-table-empty { padding: 32px 16px; text-align: center; color: var(--ink-3); font-size: 13px; }
+
+/* ── Badges ────────────────────────────────────────────────────────────────── */
+.badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
+.badge-confirmed, .badge-active   { background: var(--mint); color: var(--forest); }
+.badge-completed                  { background: #dbeafe; color: #1d4ed8; }
+.badge-pending                    { background: #fef3c7; color: #92400e; }
+.badge-cancelled, .badge-rejected { background: #fee2e2; color: #b91c1c; }
+.badge-owner                      { background: var(--mint); color: var(--forest); }
+.badge-renter                     { background: #dbeafe; color: #1d4ed8; }
+
+/* ── Pending CNIC alert ────────────────────────────────────────────────────── */
+.alert-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: #fffbeb; border: 1.5px solid #fde68a;
+  border-radius: 14px; padding: 16px 20px;
+}
+.alert-icon {
+  width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px;
+  background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #92400e;
+}
+.alert-content { flex: 1; }
+.alert-title { font-size: 13.5px; font-weight: 700; color: #92400e; }
+.alert-desc  { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.alert-btn {
+  padding: 9px 18px; background: var(--forest); color: #fff;
+  border-radius: 10px; font-size: 12.5px; font-weight: 700;
+  text-decoration: none; white-space: nowrap; transition: all 0.18s;
+}
+.alert-btn:hover { background: var(--forest-d); transform: translateY(-1px); }
+
+/* ── Empty chart state ─────────────────────────────────────────────────────── */
+.chart-empty {
+  height: 160px; display: flex; align-items: center; justify-content: center;
+  background: #fafbf9; border-radius: 10px; border: 1.5px dashed #e3e6ea;
+}
+.chart-empty-text { font-size: 13px; color: var(--ink-3); text-align: center; padding: 0 20px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Design polish to match the reference mockup:
+   hero greeting + This Month pill, Bookings Overview donut, feature strip.
+   ══════════════════════════════════════════════════════════════════════════ */
+.ad-hero { position: relative; }
+.ad-hero-eyebrow { font-size: 14px; font-weight: 600; color: var(--ink-2); margin: 0 0 2px; }
+.ad-hero-eyebrow .wave { display: inline-block; animation: adWave 2.2s ease-in-out infinite; transform-origin: 70% 70%; }
+@keyframes adWave { 0%,60%,100%{ transform: rotate(0); } 15%{ transform: rotate(16deg); } 30%{ transform: rotate(-8deg); } 45%{ transform: rotate(12deg); } }
+.ad-hero-period {
+  position: absolute; top: 18px; right: 18px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #fff; border: 1.5px solid var(--card-border); color: var(--ink);
+  font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20,83,45,.05);
+}
+@media(max-width: 760px){ .ad-hero-period { position: static; margin: 12px auto 0; } }
+
+/* Bookings Overview donut + legend */
+.bo-body { display: flex; align-items: center; gap: 18px; padding: 6px 4px 4px; }
+.bo-donut { position: relative; width: 148px; height: 148px; flex: none; }
+.bo-donut canvas { width: 148px !important; height: 148px !important; }
+.bo-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.bo-center b { font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1; font-family: 'Sora','Poppins',sans-serif; }
+.bo-center span { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.bo-legend { flex: 1; display: flex; flex-direction: column; gap: 11px; }
+.bo-row { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+.bo-row .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.bo-label { color: var(--ink-2); font-weight: 600; }
+.bo-count { margin-left: auto; font-weight: 800; color: var(--ink); }
+.bo-pct { color: var(--ink-3); font-weight: 600; min-width: 46px; text-align: right; }
+.dot-green { background: #14532D; }
+.dot-blue  { background: #3b82f6; }
+.dot-red   { background: #ef4444; }
+.dot-amber { background: #f59e0b; }
+@media(max-width: 520px){ .bo-body { flex-direction: column; } }
+
+/* Feature strip */
+.feature-strip {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
+  background: var(--card-bg); border: 1.5px solid var(--card-border);
+  border-radius: var(--card-radius); box-shadow: var(--card-shadow);
+  padding: 20px; margin-top: 18px;
+}
+.feat { display: flex; align-items: flex-start; gap: 11px; }
+.feat-ic {
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20,83,45,.10); color: #14532D;
+}
+.feat-t { font-size: 13.5px; font-weight: 800; color: var(--ink); margin: 0 0 2px; }
+.feat-s { font-size: 12px; color: var(--ink-2); margin: 0; line-height: 1.4; }
+@media(max-width: 980px){ .feature-strip { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width: 520px){ .feature-strip { grid-template-columns: 1fr; } }

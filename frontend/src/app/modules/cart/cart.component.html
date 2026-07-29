@@ -1,0 +1,307 @@
+<div class="cart-root">
+
+  <!-- ══ HERO (matches how-it-works hero pattern) ══ -->
+  <div class="cart-hero">
+    <div>
+      <h1 class="cart-title">Checkout</h1>
+      <p class="cart-sub">Review pricing, adjust dates and delivery, then complete your booking.</p>
+    </div>
+    <button class="cart-clear-btn" *ngIf="!loading && items.length > 0" (click)="cartClearConfirm = true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+      Clear cart
+    </button>
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div class="cart-section cart-loading" *ngIf="loading">
+    <div class="spin"></div>
+    <p>Loading your cart…</p>
+  </div>
+
+  <!-- ══ ERROR ══ -->
+  <div class="cart-section cart-error" *ngIf="!loading && error">
+    <span>⚠️</span> {{ error }}
+    <button (click)="retry()">Retry</button>
+  </div>
+
+  <!-- ══ EMPTY ══ -->
+  <div class="cart-section cart-empty" *ngIf="!loading && !error && items.length === 0 && !checkoutResult">
+    <span class="cart-empty-icon">🛒</span>
+    <p class="cart-empty-title">Your cart is empty</p>
+    <p class="cart-empty-sub">Browse listings and add the ones you'd like to rent.</p>
+    <a routerLink="/listings" class="cart-browse-btn">Browse Listings →</a>
+  </div>
+
+  <!-- ══ CHECKOUT RESULT ══ -->
+  <div class="cart-section cart-result" *ngIf="checkoutResult">
+    <div class="cart-result-success" *ngIf="checkoutResult.created.length > 0">
+      <span class="cart-result-icon">⏳</span>
+      <h3>{{ checkoutResult.created.length }} booking request{{ checkoutResult.created.length !== 1 ? 's' : '' }} sent</h3>
+      <p class="cart-result-pending-note">
+        Waiting on the owner{{ checkoutResult.created.length !== 1 ? 's' : '' }} to accept — you'll pay once your booking is confirmed. Nothing has been charged yet.
+      </p>
+      <div class="cart-result-list">
+        <button class="cart-result-item" *ngFor="let b of checkoutResult.created" (click)="goToBooking(b.id)">
+          View request #{{ b.id.slice(-8).toUpperCase() }} →
+        </button>
+      </div>
+      <button class="cart-browse-btn" (click)="goToBookings()">Go to My Bookings →</button>
+    </div>
+
+    <div class="cart-result-failed" *ngIf="checkoutResult.failed.length > 0">
+      <h4>{{ checkoutResult.failed.length }} item{{ checkoutResult.failed.length !== 1 ? 's' : '' }} could not be booked</h4>
+      <p class="cart-result-failed-note">Fix the issue below and try checking out again — they're still in your cart.</p>
+      <ul class="cart-result-reasons">
+        <li *ngFor="let f of checkoutResult.failed">
+          <strong>{{ failedItemTitle(f.itemId) }}</strong>
+          <span>{{ f.reason }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ CART ITEMS + SUMMARY ══ -->
+  <div class="cart-layout" *ngIf="!loading && !error && items.length > 0">
+
+    <!-- Items list -->
+    <div class="cart-items-col">
+
+      <div class="cart-select-all" *ngIf="validCount > 0">
+        <label class="cart-checkbox-label">
+          <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()" />
+          <span>Select all ({{ validCount }} available)</span>
+        </label>
+      </div>
+
+      <div *ngFor="let item of items; trackBy: trackByItemId">
+
+        <!-- Owner group header — shown once per owner, right before their first item -->
+        <div class="cart-owner-divider" *ngIf="isFirstItemForOwner(item)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {{ getOwnerName(item.listing) }}
+        </div>
+
+        <div class="cart-item-card" [class.unavailable]="item.unavailable">
+
+          <!-- Unavailable banner -->
+          <div class="cart-item-unavailable-bar" *ngIf="item.unavailable">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            This listing is no longer available — please remove it.
+          </div>
+
+          <div class="cart-item-top">
+            <input type="checkbox" class="cart-item-check"
+              [checked]="isSelected(item)" [disabled]="item.unavailable"
+              (change)="toggleSelect(item)" />
+
+            <a class="cart-item-img" [routerLink]="item.listing ? ['/listings', item.listing._id || item.listing.id] : null">
+              <img *ngIf="getListingImage(item.listing)" [src]="getListingImage(item.listing)" [alt]="item.listing?.title" (error)="onImgError($event)"/>
+              <div class="cart-no-img" [style.display]="getListingImage(item.listing) ? 'none' : 'flex'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+            </a>
+
+            <div class="cart-item-info">
+              <a class="cart-item-title" [routerLink]="item.listing ? ['/listings', item.listing._id || item.listing.id] : null">
+                {{ item.listing?.title || 'Listing unavailable' }}
+              </a>
+              <p class="cart-item-owner" *ngIf="item.listing">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ getOwnerName(item.listing) }}
+              </p>
+              <p class="cart-item-price" *ngIf="item.listing">
+                Rs {{ item.listing.price | number }} {{ getPriceUnitLabel(item.listing.priceUnit) }}
+              </p>
+          </div>
+
+          <button class="cart-item-remove" (click)="askRemove(item)" aria-label="Remove item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Remove confirmation -->
+        <div class="cart-remove-confirm" *ngIf="confirmRemoveId === item.id">
+          <span>Remove this item from your cart?</span>
+          <div class="cart-remove-confirm-btns">
+            <button class="cart-cancel-sm" (click)="cancelRemove()">Cancel</button>
+            <button class="cart-remove-sm" [disabled]="busyItemId === item.id" (click)="confirmRemove(item)">
+              {{ busyItemId === item.id ? 'Removing…' : 'Remove' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Date + delivery configuration -->
+        <div class="cart-item-config" *ngIf="!item.unavailable && confirmRemoveId !== item.id">
+
+          <div class="cart-config-row">
+            <div class="cart-config-field">
+              <label>Start date</label>
+              <input type="date" [value]="item.startDate | date:'yyyy-MM-dd'" [min]="todayString()"
+                (change)="onDateChange(item, 'startDate', $event.target.value)" [disabled]="busyItemId === item.id"/>
+            </div>
+            <div class="cart-config-field">
+              <label>End date</label>
+              <input type="date" [value]="item.endDate | date:'yyyy-MM-dd'" [min]="todayString()"
+                (change)="onDateChange(item, 'endDate', $event.target.value)" [disabled]="busyItemId === item.id"/>
+            </div>
+            <div class="cart-config-field cart-config-days" *ngIf="item.pricing">
+              <label>Duration</label>
+              <span class="cart-days-badge">{{ item.pricing.days }} day{{ item.pricing.days !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+
+          <div class="cart-config-row">
+            <div class="cart-delivery-toggle">
+              <button type="button" class="cart-delivery-opt" [class.active]="item.deliveryMethod === 'pickup'"
+                (click)="onDeliveryMethodChange(item, 'pickup')" [disabled]="busyItemId === item.id">
+                🚶 Self Pickup
+              </button>
+              <button type="button" class="cart-delivery-opt" [class.active]="item.deliveryMethod === 'delivery'"
+                (click)="onDeliveryMethodChange(item, 'delivery')" [disabled]="busyItemId === item.id">
+                🛵 Door Delivery
+              </button>
+            </div>
+          </div>
+
+          <div class="cart-delivery-details" *ngIf="item.deliveryMethod === 'delivery'">
+            <p class="cart-vehicle-note" *ngIf="allowedVehiclesFor(item).length < 3">
+              {{ item.listing?.category }} items need a bigger vehicle for safe delivery.
+            </p>
+            <div class="cart-vehicle-row">
+              <button type="button" class="cart-vehicle-opt" *ngIf="allowedVehiclesFor(item).includes('bike')" [class.active]="item.vehicleType === 'bike'"
+                (click)="onVehicleChange(item, 'bike')" [disabled]="busyItemId === item.id">
+                🏍️ Bike <span>Rs {{ VEHICLE_FEES.bike }}</span>
+              </button>
+              <button type="button" class="cart-vehicle-opt" *ngIf="allowedVehiclesFor(item).includes('car')" [class.active]="item.vehicleType === 'car'"
+                (click)="onVehicleChange(item, 'car')" [disabled]="busyItemId === item.id">
+                🚗 Car <span>Rs {{ VEHICLE_FEES.car }}</span>
+              </button>
+              <button type="button" class="cart-vehicle-opt" *ngIf="allowedVehiclesFor(item).includes('van')" [class.active]="item.vehicleType === 'van'"
+                (click)="onVehicleChange(item, 'van')" [disabled]="busyItemId === item.id">
+                🚐 Van <span>Rs {{ VEHICLE_FEES.van }}</span>
+              </button>
+            </div>
+            <label class="cart-input-label" for="addr-{{item.id}}">Delivery address</label>
+            <textarea id="addr-{{item.id}}" class="cart-addr-input" placeholder="House #, street, area, city"
+              [ngModel]="item.deliveryAddress || ''" (ngModelChange)="item.deliveryAddress = $event"
+              [ngModelOptions]="{standalone: true}" (blur)="onAddressBlur(item, item.deliveryAddress || '')" maxlength="300" rows="2"></textarea>
+            <label class="cart-input-label" for="phone-{{item.id}}">Contact number</label>
+            <input id="phone-{{item.id}}" type="tel" class="cart-addr-input" placeholder="03XXXXXXXXX"
+              [ngModel]="item.deliveryPhone || ''" (ngModelChange)="item.deliveryPhone = $event"
+              [ngModelOptions]="{standalone: true}" (blur)="onPhoneBlur(item, item.deliveryPhone || '')" maxlength="11"/>
+
+            <p class="cart-incomplete-warning" *ngIf="isIncompleteDelivery(item)">
+              ⚠ Add a full address and phone number above to include this item at checkout.
+            </p>
+          </div>
+
+          <!-- Per-line pricing breakdown -->
+          <div class="cart-line-pricing" *ngIf="item.pricing">
+            <div class="cart-line-row">
+              <span>Rs {{ item.listing.price | number }} × {{ item.pricing.days }} day{{ item.pricing.days !== 1 ? 's' : '' }}</span>
+              <span>Rs {{ item.pricing.subtotal | number }}</span>
+            </div>
+            <div class="cart-line-row cart-line-muted">
+              <span>Service fee</span>
+              <span>Rs {{ item.pricing.serviceFee | number }}</span>
+            </div>
+            <div class="cart-line-row" *ngIf="item.pricing.deliveryFee > 0">
+              <span>Delivery fee</span>
+              <span>Rs {{ item.pricing.deliveryFee | number }}</span>
+            </div>
+            <div class="cart-line-row" *ngIf="item.pricing.depositAmount > 0">
+              <span>Security deposit <em>(refundable)</em></span>
+              <span>Rs {{ item.pricing.depositAmount | number }}</span>
+            </div>
+            <div class="cart-line-row cart-line-total">
+              <span>Subtotal</span>
+              <span>Rs {{ item.pricing.totalAmount | number }}</span>
+            </div>
+            <div class="cart-line-advance">
+              Pay now ({{ item.pricing.advancePercent }}%): <strong>Rs {{ item.pricing.advanceAmount | number }}</strong>
+              <span *ngIf="item.pricing.remainingAmount > 0"> · Due on delivery: Rs {{ item.pricing.remainingAmount | number }}</span>
+            </div>
+          </div>
+
+          <div class="cart-item-busy" *ngIf="busyItemId === item.id">Updating…</div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary sidebar -->
+    <div class="cart-summary-col">
+      <div class="cart-summary-card">
+        <h3 class="cart-summary-title">Order Summary</h3>
+
+        <div class="cart-summary-row">
+          <span>Selected items</span>
+          <span>{{ selectedCount }} of {{ validCount }}</span>
+        </div>
+
+        <div class="cart-summary-divider"></div>
+
+        <div class="cart-summary-row">
+          <span>Subtotal</span>
+          <span>Rs {{ selectedTotals.subtotal | number }}</span>
+        </div>
+        <div class="cart-summary-row cart-summary-muted">
+          <span>Service charges</span>
+          <span>Rs {{ selectedTotals.serviceFee | number }}</span>
+        </div>
+        <div class="cart-summary-row cart-summary-muted" *ngIf="selectedTotals.deliveryFee > 0">
+          <span>Delivery fees</span>
+          <span>Rs {{ selectedTotals.deliveryFee | number }}</span>
+        </div>
+        <div class="cart-summary-row cart-summary-muted" *ngIf="selectedTotals.deposit > 0">
+          <span>Security deposits</span>
+          <span>Rs {{ selectedTotals.deposit | number }}</span>
+        </div>
+
+        <div class="cart-summary-divider"></div>
+
+        <div class="cart-summary-row cart-summary-grand">
+          <span>Grand Total</span>
+          <span>Rs {{ selectedTotals.total | number }}</span>
+        </div>
+
+        <div class="cart-summary-advance" *ngIf="selectedCount > 0">
+          <div class="cart-summary-row">
+            <span>Pay now (advance)</span>
+            <span class="cart-advance-val">Rs {{ selectedTotals.advance | number }}</span>
+          </div>
+          <div class="cart-summary-row" *ngIf="selectedTotals.remaining > 0">
+            <span>Due on delivery</span>
+            <span>Rs {{ selectedTotals.remaining | number }}</span>
+          </div>
+        </div>
+
+        <p class="cart-checkout-error" *ngIf="checkoutError">{{ checkoutError }}</p>
+        <p class="cart-checkout-error" *ngIf="!checkoutError && hasIncompleteSelectedItems">
+          Add a delivery address and phone number to the highlighted item(s) above before checking out.
+        </p>
+
+        <button class="cart-checkout-btn" [disabled]="!canCheckout" (click)="checkout()">
+          {{ checkingOut ? 'Processing…' : 'Proceed to Checkout' }}
+        </button>
+
+        <p class="cart-summary-hint">
+          You'll choose a payment method (JazzCash, Easypaisa, bank transfer, or cash on delivery) for each booking after checkout.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CLEAR CART CONFIRM MODAL ══ -->
+  <div class="cart-modal-overlay" *ngIf="cartClearConfirm" (click)="cartClearConfirm = false">
+    <div class="cart-modal" (click)="$event.stopPropagation()">
+      <h3>Clear your cart?</h3>
+      <p>All items will be removed. This cannot be undone.</p>
+      <div class="cart-modal-btns">
+        <button class="cart-cancel-sm" (click)="cartClearConfirm = false">Cancel</button>
+        <button class="cart-remove-sm" (click)="doClearCart()">Clear Cart</button>
+      </div>
+    </div>
+  </div>
+
+</div>

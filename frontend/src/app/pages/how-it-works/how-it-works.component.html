@@ -1,0 +1,147 @@
+<div class="hiw-root">
+
+  <!-- ══ HERO ══ -->
+  <div class="hiw-hero">
+    <div class="hiw-hero-left">
+      <h1 class="hiw-title">How It Works</h1>
+      <p class="hiw-sub">Renting made simple. Follow these easy steps to get started with Rentify.</p>
+      <div class="hiw-tabs">
+        <button class="hiw-tab" [class.active]="activeTab==='renters'" (click)="setTab('renters')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          For Renters
+        </button>
+        <button class="hiw-tab" [class.active]="activeTab==='owners'" (click)="setTab('owners')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          For Owners
+        </button>
+        <button class="hiw-tab" [class.active]="activeTab==='riders'" (click)="setTab('riders')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          For Riders
+        </button>
+      </div>
+    </div>
+    <div class="hiw-hero-right">
+      <img src="/hiw-steps.png" alt="How It Works" class="hiw-agent-img"/>
+    </div>
+  </div>
+
+  <!-- ══ STEPS SECTION ══ -->
+  <div class="hiw-steps-section">
+
+    <!-- Renters -->
+    <div *ngIf="activeTab==='renters'">
+      <h2 class="hiw-steps-title">For Renters</h2>
+      <div class="hiw-steps-grid">
+        <div class="hiw-step-card" *ngFor="let s of renterSteps; let i = index; let last = last">
+          <div class="hiw-step-top">
+            <div class="hiw-step-ic" [ngSwitch]="s.icon">
+              <svg *ngSwitchCase="'search'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <svg *ngSwitchCase="'calendar'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <svg *ngSwitchCase="'check'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+              <svg *ngSwitchCase="'wallet'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><circle cx="17" cy="14" r="1.2"/></svg>
+              <svg *ngSwitchCase="'box'"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8l-9-5-9 5v8l9 5z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>
+              <svg *ngSwitchCase="'star'"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+            </div>
+            <div class="hiw-arrow" *ngIf="!last">
+              <svg width="28" height="12" viewBox="0 0 28 12" fill="none"><path d="M0 6h24M20 2l6 4-6 4" stroke="#1F5435" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="hiw-step-num">{{ s.num }}</div>
+          <h3 class="hiw-step-title">{{ s.title }}</h3>
+          <p class="hiw-step-desc">{{ s.desc }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Owners -->
+    <div *ngIf="activeTab==='owners'">
+      <h2 class="hiw-steps-title">For Owners</h2>
+      <div class="hiw-steps-grid">
+        <div class="hiw-step-card" *ngFor="let s of ownerSteps; let i = index; let last = last">
+          <div class="hiw-step-top">
+            <div class="hiw-step-ic" [ngSwitch]="s.icon">
+              <svg *ngSwitchCase="'edit'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+              <svg *ngSwitchCase="'shield'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+              <svg *ngSwitchCase="'bell'"   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+              <svg *ngSwitchCase="'wallet'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><circle cx="17" cy="14" r="1.2"/></svg>
+              <svg *ngSwitchCase="'repeat'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </div>
+            <div class="hiw-arrow" *ngIf="!last">
+              <svg width="28" height="12" viewBox="0 0 28 12" fill="none"><path d="M0 6h24M20 2l6 4-6 4" stroke="#1F5435" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="hiw-step-num">{{ s.num }}</div>
+          <h3 class="hiw-step-title">{{ s.title }}</h3>
+          <p class="hiw-step-desc">{{ s.desc }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Riders -->
+    <div *ngIf="activeTab==='riders'">
+      <h2 class="hiw-steps-title">For Riders</h2>
+      <div class="hiw-steps-grid">
+        <div class="hiw-step-card" *ngFor="let s of riderSteps; let i = index; let last = last">
+          <div class="hiw-step-top">
+            <div class="hiw-step-ic" [ngSwitch]="s.icon">
+              <svg *ngSwitchCase="'signup'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              <svg *ngSwitchCase="'cnic'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h4M5 16c.5-1.5 2-2 3-2s2.5.5 3 2"/></svg>
+              <svg *ngSwitchCase="'duty'"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <svg *ngSwitchCase="'assign'"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+              <svg *ngSwitchCase="'qr'"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M14 14v4h4v-4z"/></svg>
+              <svg *ngSwitchCase="'deliver'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="hiw-arrow" *ngIf="!last">
+              <svg width="28" height="12" viewBox="0 0 28 12" fill="none"><path d="M0 6h24M20 2l6 4-6 4" stroke="#1F5435" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="hiw-step-num">{{ s.num }}</div>
+          <h3 class="hiw-step-title">{{ s.title }}</h3>
+          <p class="hiw-step-desc">{{ s.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WHY SAFE ══ -->
+  <div class="hiw-safe-section">
+    <h2 class="hiw-safe-title">Why Rentify is Safe</h2>
+    <p class="hiw-safe-sub">Built on trust, verification, and protection.</p>
+    <div class="hiw-safe-grid">
+      <div class="hiw-safe-card" *ngFor="let t of trustItems">
+        <div class="hiw-safe-ic" [ngSwitch]="t.icon">
+          <svg *ngSwitchCase="'lock'"    viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg *ngSwitchCase="'shield'"  viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          <svg *ngSwitchCase="'support'" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg *ngSwitchCase="'guard'"   viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+          <svg *ngSwitchCase="'star'"    viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2-6.3-4.6L5.7 21l2.3-7.2-6-4.4h7.6z"/></svg>
+          <svg *ngSwitchCase="'pin'"     viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <h3 class="hiw-safe-card-title">{{ t.title }}</h3>
+          <p class="hiw-safe-card-desc">{{ t.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ══ STILL HAVE A QUESTION ══ -->
+  <div class="hiw-question-bar">
+    <div class="hiw-q-left">
+      <div class="hiw-q-ic">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <h3>Still have a question?</h3>
+        <p>Our support team is here to help you.</p>
+      </div>
+    </div>
+    <a routerLink="/help" class="hiw-q-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Contact Support
+    </a>
+  </div>
+
+</div>

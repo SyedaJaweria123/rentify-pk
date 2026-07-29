@@ -1,0 +1,69 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Cookie Policy</h1>
+      <p class="hp-hero-sub">How Rentify PK keeps you signed in and remembers your preferences.</p>
+      <p class="hp-updated">Last updated: {{ lastUpdated }}</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/cookies-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="hp-section">
+    <p class="hp-intro">
+      This page explains how we keep you signed in — and, honestly, it's mostly
+      <strong>local storage</strong> rather than traditional cookies.
+    </p>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">1</span>What We Actually Use</h2>
+      <p class="hp-p">
+        Rentify PK primarily uses your browser's <strong>local storage</strong> (not cookies) to
+        keep you logged in. When you sign in, we store:
+      </p>
+      <ul class="hp-ul">
+        <li>An access token and refresh token, so you don't have to log in on every visit.</li>
+        <li>Your basic profile info (name, role) so the interface can load instantly.</li>
+      </ul>
+      <p class="hp-p">This data stays in your browser and is only sent to our own servers — it's not third-party ad tracking.</p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">2</span>Third-Party Cookies</h2>
+      <p class="hp-p">Some features rely on third-party services that may set their own cookies when you use them, including:</p>
+      <ul class="hp-ul">
+        <li><strong>Google / Facebook Sign-In</strong> — if you choose to log in with Google or Facebook.</li>
+        <li><strong>Voice &amp; video calling</strong> — our in-app calling feature may use session cookies to maintain a call.</li>
+      </ul>
+      <p class="hp-p">We don't control these third-party cookies directly; they're governed by each provider's own privacy policy.</p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">3</span>Why We Use This</h2>
+      <ul class="hp-ul">
+        <li><strong>Keeping you logged in</strong> — so you don't have to re-enter your password every time.</li>
+        <li><strong>Security</strong> — detecting suspicious login activity.</li>
+        <li><strong>Preferences</strong> — remembering small things like your last-used filters.</li>
+      </ul>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">4</span>Controlling This Data</h2>
+      <p class="hp-p">
+        Logging out of Rentify PK clears your stored tokens from that browser. You can also clear
+        your browser's local storage and cookies manually at any time through your browser
+        settings — you'll just need to log in again afterward.
+      </p>
+    </div>
+
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Questions about how we store data?</span>
+      <a [href]="'mailto:' + settings.contactEmail()" class="hp-cta-btn">Contact Us</a>
+    </div>
+  </div>
+
+</div>

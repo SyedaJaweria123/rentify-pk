@@ -1,0 +1,57 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Trust &amp; Safety</h1>
+      <p class="hp-hero-sub">The real mechanisms built into Rentify PK to keep every rental safe, fair, and accountable.</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/trust-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ PILLARS ══ -->
+  <div class="hp-section">
+    <h2 class="hp-section-title">How We Keep Rentify PK Safe</h2>
+    <div class="hp-topics-grid">
+      <div class="hp-topic-card" *ngFor="let p of pillars">
+        <div class="hp-topic-ic">{{ p.icon }}</div>
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.text }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REAL STATS ══ -->
+  <div class="hp-section" *ngIf="settings.stats() as st">
+    <h2 class="hp-section-title">Real Numbers, Real Trust</h2>
+    <div class="hp-stats-row">
+      <div>
+        <p class="hp-stat-val">{{ st.activeListings }}+</p>
+        <p class="hp-stat-label">Active Listings</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.citiesCovered }}+</p>
+        <p class="hp-stat-label">Cities Covered</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.verifiedOwners }}+</p>
+        <p class="hp-stat-label">Verified Owners</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.avgRating || '—' }}</p>
+        <p class="hp-stat-label">Average Rating</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CTA ══ -->
+  <div class="hp-section">
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Noticed something that doesn't look right? Let us know immediately.</span>
+      <a [href]="'mailto:' + settings.contactEmail()" class="hp-cta-btn">Report an Issue</a>
+    </div>
+  </div>
+
+</div>

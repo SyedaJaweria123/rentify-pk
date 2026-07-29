@@ -1,0 +1,142 @@
+<div class="rd2-root">
+
+  <!-- Hero header -->
+  <div class="rd2-hero">
+    <div class="rd2-hero-left">
+      <h1 class="rd2-title">My Deliveries</h1>
+      <p class="rd2-sub">Full history of your delivery and return assignments</p>
+      <div class="rd2-total-pill" *ngIf="!loading()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        {{ counts().all }} total
+      </div>
+    </div>
+    <div class="rd2-hero-illus">
+      <img src="/rider-illustration.png" alt="My Deliveries" class="rd2-illus-img">
+    </div>
+  </div>
+
+  <!-- Focused view: arrived here from a notification -->
+  <div class="rd2-focus-bar" *ngIf="isFocused">
+    <span>Showing the assignment from your notification.</span>
+    <button type="button" (click)="clearHighlight()">Show all deliveries</button>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="rd2-filters" *ngIf="!isFocused">
+    <button class="rd2-filter-btn" [class.active]="filter()==='all'" (click)="setFilter('all')">
+      All <span class="rd2-count">{{ counts().all }}</span>
+    </button>
+    <button class="rd2-filter-btn" [class.active]="filter()==='active'" (click)="setFilter('active')">
+      Active <span class="rd2-count">{{ counts().active }}</span>
+    </button>
+    <button class="rd2-filter-btn" [class.active]="filter()==='completed'" (click)="setFilter('completed')">
+      Completed <span class="rd2-count">{{ counts().completed }}</span>
+    </button>
+    <button class="rd2-filter-btn" [class.active]="filter()==='cancelled'" (click)="setFilter('cancelled')">
+      Cancelled <span class="rd2-count">{{ counts().cancelled }}</span>
+    </button>
+    <button class="rd2-filter-btn" [class.active]="filter()==='declined'" (click)="setFilter('declined')">
+      Declined <span class="rd2-count">{{ counts().declined }}</span>
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="rd2-search-row" *ngIf="!isFocused">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search by item, city, or address…" [value]="search()" (input)="onSearch($any($event.target).value)">
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="rd2-loading"><mat-spinner diameter="44"></mat-spinner></div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading() && filtered().length === 0" class="rd2-empty">
+    <div class="rd2-empty-icon">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <p>No deliveries match this filter</p>
+    <span>Try a different filter or search term</span>
+  </div>
+
+  <!-- List -->
+  <div *ngIf="!loading() && filtered().length > 0" class="rd2-list">
+    <div class="rd2-card" *ngFor="let a of paginated(); let i = index"
+      [style.animation-delay]="(i * 0.04) + 's'"
+      [class.rd2-s-assigned]="a.status==='assigned'"
+      [class.rd2-s-accepted]="a.status==='accepted'"
+      [class.rd2-s-picked]="a.status==='picked_up'"
+      [class.rd2-s-delivered]="a.status==='delivered'"
+      [class.rd2-s-completed]="a.status==='completed'"
+      [class.rd2-s-cancelled]="a.status==='cancelled'"
+      [class.rd2-s-declined]="a.status==='declined'">
+
+      <!-- Left: thumbnail -->
+      <div class="rd2-thumb">
+        <img *ngIf="a.booking?.listing?.images?.[0]?.url" [src]="a.booking.listing.images[0].url" alt="">
+        <div *ngIf="!a.booking?.listing?.images?.[0]?.url" class="rd2-thumb-ph">📦</div>
+      </div>
+
+      <!-- Middle: details -->
+      <div class="rd2-body">
+        <div class="rd2-badges">
+          <span class="rd2-type-badge" [class.return]="a.type === 'return'">
+            {{ a.type === 'return' ? '↩ Return' : '→ Delivery' }}
+          </span>
+          <span class="rd2-status-badge" [ngClass]="statusClass(a.status)">{{ statusLabel(a.status) }}</span>
+        </div>
+
+        <h3 class="rd2-card-title">{{ a.booking?.listing?.title || 'Item' }}</h3>
+
+        <div class="rd2-meta-row">
+          <span class="rd2-meta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ a.booking?.listing?.city || '—' }}
+          </span>
+          <span class="rd2-meta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {{ a.pickupAddress || a.booking?.owner?.name || '—' }}
+          </span>
+          <span class="rd2-meta" *ngIf="a.createdAt">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {{ a.createdAt | date:'MMM d, h:mm a' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Right: earnings + actions -->
+      <div class="rd2-right">
+        <div class="rd2-earn">
+          <span class="rd2-earn-label">Earnings</span>
+          <span class="rd2-earn-val">Rs. {{ a.earnings || 0 }}</span>
+        </div>
+
+        <div class="rd2-actions" *ngIf="['assigned','accepted','picked_up','delivered'].includes(a.status)">
+          <button *ngIf="a.status === 'assigned'" (click)="accept(a)" [disabled]="busyId()===a._id" class="rd2-btn rd2-btn-accept">Accept</button>
+          <button *ngIf="a.status === 'assigned'" (click)="decline(a)" [disabled]="busyId()===a._id" class="rd2-btn rd2-btn-decline">Decline</button>
+          <button *ngIf="a.status === 'accepted'" (click)="goScanFor(a)" [disabled]="busyId()===a._id" class="rd2-btn rd2-btn-scan">Scan &amp; Pick Up</button>
+          <button *ngIf="a.status === 'picked_up'" (click)="deliver(a)" [disabled]="busyId()===a._id" class="rd2-btn rd2-btn-deliver">Mark Delivered</button>
+          <button *ngIf="a.status === 'delivered'" (click)="complete(a)" [disabled]="busyId()===a._id" class="rd2-btn rd2-btn-complete">Complete</button>
+          <mat-spinner *ngIf="busyId()===a._id" diameter="18"></mat-spinner>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading() && totalPages() > 1" class="rd2-pagination">
+    <button class="rd2-page-nav" (click)="prevPage()" [disabled]="currentPage() === 1">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <button *ngFor="let p of pageNumbers()" class="rd2-page-num"
+      [class.active]="p === currentPage()" (click)="goToPage(p)">
+      {{ p }}
+    </button>
+
+    <button class="rd2-page-nav" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+</div>

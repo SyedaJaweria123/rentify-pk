@@ -1,0 +1,110 @@
+<app-rider-layout *ngIf="isRider">
+  <ng-container *ngTemplateOutlet="inspContent"></ng-container>
+</app-rider-layout>
+
+<app-owner-layout *ngIf="!isRider && isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="inspContent"></ng-container>
+</app-owner-layout>
+
+<app-renter-layout *ngIf="!isRider && !isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="inspContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #inspContent>
+<div class="ip-root">
+  <div class="ip-container">
+
+    <!-- Hero -->
+    <div class="ip-hero">
+      <div class="ip-hero-left">
+        <h1 class="ip-title">Inspections &amp; Proofs</h1>
+        <p class="ip-sub">Delivery and return condition reports across your bookings.</p>
+      </div>
+      <div class="ip-hero-stat" *ngIf="!loading && pagination">
+        <p class="ip-hero-stat-val">{{ pagination.total || 0 }}</p>
+        <p class="ip-hero-stat-label">Total Reports</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="ip-filters" *ngIf="!loading && reports.length > 0">
+      <button class="ip-filter-btn" *ngFor="let t of typeTabs" [class.active]="typeFilter === t.value" (click)="typeFilter = t.value">
+        {{ t.label }}
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="ip-loading" *ngIf="loading">
+      <div class="ip-spin"></div><p>Loading your inspections…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="ip-alert" *ngIf="!loading && error">{{ error }}</div>
+
+    <!-- Empty -->
+    <div class="ip-empty" *ngIf="!loading && !error && reports.length === 0">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <p class="ip-empty-title">No inspection reports yet</p>
+      <p class="ip-empty-sub">Delivery and return photo proofs will show up here once submitted on a booking.</p>
+    </div>
+
+    <!-- Reports grid -->
+    <div class="ip-grid" *ngIf="!loading && !error && filteredReports.length > 0">
+      <div class="ip-card" *ngFor="let r of filteredReports; let i = index" [style.animation-delay]="(i * 0.05) + 's'">
+
+        <div class="ip-card-thumb">
+          <img *ngIf="listingImage(r)" [src]="listingImage(r)" [alt]="listingTitle(r)">
+          <div *ngIf="!listingImage(r)" class="ip-thumb-placeholder">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
+          </div>
+          <span class="ip-type-badge" [class.tp-delivery]="r.type === 'delivery'" [class.tp-return]="r.type === 'return'">
+            {{ r.type === 'delivery' ? '📦 Delivery' : '↩️ Return' }}
+          </span>
+          <span class="ip-photo-count" *ngIf="r.photos?.length">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            {{ r.photos.length }}
+          </span>
+        </div>
+
+        <div class="ip-card-body">
+          <p class="ip-card-title">{{ listingTitle(r) }}</p>
+          <p class="ip-card-role">{{ r.myRole === 'owner' ? 'You are the Owner' : 'You are the Renter' }}<span *ngIf="r.conductedBy?.name"> · Conducted by {{ r.conductedBy.name }}</span></p>
+
+          <div class="ip-condition-row">
+            <span class="ip-condition-badge" [ngClass]="conditionTone(r.overallCondition)">{{ conditionLabel(r.overallCondition) }}</span>
+            <span class="ip-issue-flag" *ngIf="hasIssues(r)">⚠ {{ r.aiAnalysis.detectedIssues.length }} issue(s) detected</span>
+          </div>
+
+          <div class="ip-scores" *ngIf="r.aiAnalysis?.conditionScore !== null && r.aiAnalysis?.conditionScore !== undefined">
+            <div class="ip-score">
+              <span class="ip-score-label">Condition</span>
+              <div class="ip-score-bar"><div class="ip-score-fill ip-fill-good" [style.width]="r.aiAnalysis.conditionScore + '%'"></div></div>
+              <span class="ip-score-val">{{ r.aiAnalysis.conditionScore }}%</span>
+            </div>
+            <div class="ip-score" *ngIf="r.aiAnalysis?.damageScore">
+              <span class="ip-score-label">Damage</span>
+              <div class="ip-score-bar"><div class="ip-score-fill ip-fill-bad" [style.width]="r.aiAnalysis.damageScore + '%'"></div></div>
+              <span class="ip-score-val">{{ r.aiAnalysis.damageScore }}%</span>
+            </div>
+          </div>
+
+          <p class="ip-date">{{ r.submittedAt | date:'mediumDate' }}</p>
+
+          <div class="ip-card-actions">
+            <a [routerLink]="['/inspection', r.type, r.booking?._id]" class="ip-action-btn">View Report →</a>
+            <a [routerLink]="['/inspection/compare', r.booking?._id]" class="ip-action-btn ip-action-outline">AI Comparison</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ip-pagination" *ngIf="!loading && pagination && pagination.totalPages > 1">
+      <button class="ip-page-btn" [disabled]="page <= 1" (click)="changePage(page - 1)">← Prev</button>
+      <span class="ip-page-info">Page {{ page }} of {{ pagination.totalPages }}</span>
+      <button class="ip-page-btn" [disabled]="page >= pagination.totalPages" (click)="changePage(page + 1)">Next →</button>
+    </div>
+
+  </div>
+</div>
+</ng-template>

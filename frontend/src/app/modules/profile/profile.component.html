@@ -1,0 +1,188 @@
+<app-owner-layout *ngIf="isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="profileContent"></ng-container>
+</app-owner-layout>
+
+<app-renter-layout *ngIf="!isOwner" [showNavbar]="true">
+  <ng-container *ngTemplateOutlet="profileContent"></ng-container>
+</app-renter-layout>
+
+<ng-template #profileContent>
+<div class="pf-root">
+  <div class="pf-container">
+
+    <h1 class="pf-page-title">My Profile</h1>
+
+    <div class="pf-grid">
+
+      <!-- ══ Sidebar column ══ -->
+      <div class="pf-side">
+
+        <!-- Avatar card -->
+        <div class="pf-card pf-avatar-card">
+          <div class="pf-avatar-wrap">
+            <div class="pf-avatar">
+              <img *ngIf="avatarPreview || user?.avatar" [src]="avatarPreview || user?.avatar" alt="Avatar">
+              <span *ngIf="!avatarPreview && !user?.avatar">{{ (user?.name || 'U').charAt(0).toUpperCase() }}</span>
+            </div>
+            <label for="avatarInput" class="pf-avatar-edit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </label>
+            <input id="avatarInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+          </div>
+          <p class="pf-name">{{ user?.name }}</p>
+          <p class="pf-email">{{ user?.email }}</p>
+          <span class="pf-role-pill" [class.owner]="isOwner">{{ user?.role }}</span>
+          <button class="pf-save-photo" *ngIf="avatarFile" [disabled]="uploadingAvatar" (click)="uploadAvatar()">
+            {{ uploadingAvatar ? 'Uploading…' : 'Save Photo' }}
+          </button>
+        </div>
+
+        <!-- Verification status -->
+        <div class="pf-card">
+          <h3 class="pf-card-title">Verification Status</h3>
+          <div class="pf-verify-row">
+            <span class="pf-verify-label">Email</span>
+            <span class="pf-verify-badge" [class.ok]="user?.isEmailVerified" [class.pending]="!user?.isEmailVerified">
+              {{ user?.isEmailVerified ? '✓ Verified' : 'Pending' }}
+            </span>
+          </div>
+          <div class="pf-verify-row">
+            <span class="pf-verify-label">CNIC</span>
+            <span class="pf-verify-badge" [class.ok]="user?.cnicVerified" [class.review]="!user?.cnicVerified">
+              {{ user?.cnicVerified ? '✓ Verified' : 'Under Review' }}
+            </span>
+          </div>
+          <div class="pf-verify-row" *ngIf="isOwner">
+            <span class="pf-verify-label">Owner Approval</span>
+            <span class="pf-verify-badge" [class.ok]="user?.ownerApproved" [class.pending]="!user?.ownerApproved">
+              {{ user?.ownerApproved ? '✓ Approved' : 'Pending' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Member since -->
+        <div class="pf-card">
+          <p class="pf-member-label">Member Since</p>
+          <p class="pf-member-val">{{ memberSince }}</p>
+        </div>
+
+      </div>
+
+      <!-- ══ Main column ══ -->
+      <div class="pf-main">
+
+        <!-- Personal information -->
+        <div class="pf-card pf-section">
+          <div class="pf-section-head">
+            <span class="pf-section-ic">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <h2>Personal Information</h2>
+          </div>
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="pf-form">
+            <div class="pf-row">
+              <div class="pf-field">
+                <label>Full Name <span class="req">*</span></label>
+                <input formControlName="name" type="text" placeholder="Your full name">
+                <span class="pf-err" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">Name is required.</span>
+              </div>
+              <div class="pf-field">
+                <label>Phone</label>
+                <input formControlName="phone" type="tel" placeholder="+92 3XX XXXXXXX">
+              </div>
+            </div>
+
+            <div class="pf-field">
+              <label>Email</label>
+              <input [value]="user?.email" type="email" disabled class="pf-disabled">
+              <span class="pf-hint">Email cannot be changed.</span>
+            </div>
+
+            <div class="pf-field" *ngIf="isOwner">
+              <label>Pickup Address</label>
+              <textarea formControlName="address" rows="2" placeholder="House #, street, area, city — where the rider picks up your items"></textarea>
+              <span class="pf-hint">This is shown to the rider for pickup. Be specific.</span>
+            </div>
+
+            <div class="pf-form-foot">
+              <span class="pf-err" *ngIf="profileError">{{ profileError }}</span>
+              <button type="submit" class="pf-submit" [disabled]="profileForm.invalid || savingProfile">
+                {{ savingProfile ? 'Saving…' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Change password -->
+        <div class="pf-card pf-section">
+          <div class="pf-section-head">
+            <span class="pf-section-ic">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <h2>Change Password</h2>
+          </div>
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="pf-form">
+            <div class="pf-field">
+              <label>Current Password <span class="req">*</span></label>
+              <input formControlName="currentPassword" type="password" placeholder="Enter current password">
+            </div>
+            <div class="pf-row">
+              <div class="pf-field">
+                <label>New Password <span class="req">*</span></label>
+                <input formControlName="newPassword" type="password" placeholder="Min. 8 characters">
+              </div>
+              <div class="pf-field">
+                <label>Confirm New Password <span class="req">*</span></label>
+                <input formControlName="confirmPassword" type="password" placeholder="Repeat new password">
+              </div>
+            </div>
+            <span class="pf-err" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched">Passwords do not match.</span>
+
+            <div class="pf-form-foot">
+              <span class="pf-err" *ngIf="passwordError">{{ passwordError }}</span>
+              <button type="submit" class="pf-submit pf-submit-dark" [disabled]="passwordForm.invalid || changingPassword">
+                {{ changingPassword ? 'Changing…' : 'Change Password' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Biometric login -->
+        <div class="pf-card pf-section">
+          <div class="pf-section-head">
+            <span class="pf-section-ic">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 11v3m0 5v.5M7.5 4.2A8 8 0 0 1 20 11v2M4 11a8 8 0 0 1 1.1-4.1M6 19.5A8 8 0 0 1 4 14v-1M9 21.5A8 8 0 0 1 6.5 18M16.5 19a8 8 0 0 0 1.5-2"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0v1a8 8 0 0 1-1 4"/></svg>
+            </span>
+            <div>
+              <h2>Biometric Login</h2>
+              <p class="pf-section-sub">Use fingerprint or Face ID instead of your password on this device.</p>
+            </div>
+          </div>
+
+          <div class="pf-bio-body">
+            <button class="pf-bio-btn" *ngIf="biometricSupported" type="button" [disabled]="registeringBiometric" (click)="registerThisDevice()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 11v3m0 5v.5M7.5 4.2A8 8 0 0 1 20 11v2M4 11a8 8 0 0 1 1.1-4.1M6 19.5A8 8 0 0 1 4 14v-1M9 21.5A8 8 0 0 1 6.5 18M16.5 19a8 8 0 0 0 1.5-2"/><path d="M8.5 11a3.5 3.5 0 0 1 7 0v1a8 8 0 0 1-1 4"/></svg>
+              {{ registeringBiometric ? 'Setting up…' : 'Enable biometric login on this device' }}
+            </button>
+            <p class="pf-hint" *ngIf="!biometricSupported">This browser/device doesn't support biometric login.</p>
+            <p class="pf-err" *ngIf="biometricError">{{ biometricError }}</p>
+            <p class="pf-success" *ngIf="biometricSuccess">{{ biometricSuccess }}</p>
+
+            <div class="pf-devices" *ngIf="biometricDevices.length > 0">
+              <p class="pf-devices-label">Registered devices</p>
+              <div class="pf-device-row" *ngFor="let d of biometricDevices; let i = index" [style.animation-delay]="(i * 0.05) + 's'">
+                <div>
+                  <p class="pf-device-name">{{ d.deviceLabel }}</p>
+                  <p class="pf-device-meta">Added {{ d.addedAt | date:'mediumDate' }}<span *ngIf="d.lastUsedAt"> · last used {{ d.lastUsedAt | date:'mediumDate' }}</span></p>
+                </div>
+                <button type="button" class="pf-device-remove" (click)="removeDevice(d.credentialId)">Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</ng-template>

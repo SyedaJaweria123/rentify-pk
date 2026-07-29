@@ -1,0 +1,108 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Privacy Policy</h1>
+      <p class="hp-hero-sub">What we collect, how we use it, and the choices you have — explained plainly.</p>
+      <p class="hp-updated">Last updated: {{ lastUpdated }}</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/privacy-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="hp-section">
+    <p class="hp-intro">
+      This policy explains what information Rentify PK collects, how we use it, and the choices
+      you have. By using Rentify PK, you agree to the practices described here.
+    </p>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">1</span>Information We Collect</h2>
+      <p class="hp-p"><strong>Account details:</strong> name, email, phone number, and a securely hashed password (we never store your password in plain text).</p>
+      <p class="hp-p"><strong>Identity verification:</strong> when you verify your CNIC, we collect a photo of your CNIC and a selfie, which are processed to confirm your identity and are not shared publicly.</p>
+      <p class="hp-p"><strong>Listing &amp; booking data:</strong> photos and descriptions you upload for listings, booking history, delivery addresses, and any inspection photos submitted during handovers.</p>
+      <p class="hp-p"><strong>Location data:</strong> approximate location for showing nearby listings, and live location for riders during an active delivery.</p>
+      <p class="hp-p"><strong>Payments &amp; wallet:</strong> your wallet balance and transaction history within the app. We do not store raw card numbers on our servers.</p>
+      <p class="hp-p"><strong>Communications:</strong> messages, calls, and notifications sent through the platform between renters, owners, and riders.</p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">2</span>How We Use Your Information</h2>
+      <ul class="hp-ul">
+        <li>To create and secure your account, and verify your identity for trust and safety.</li>
+        <li>To process bookings, payments, escrow releases, and refunds.</li>
+        <li>To connect renters, owners, and riders for deliveries and communication.</li>
+        <li>To calculate trust scores and badges based on your real activity and reviews.</li>
+        <li>To detect fraud, resolve disputes, and enforce our Terms of Service.</li>
+        <li>To send booking updates, delivery status, and (if you opt in) newsletter emails.</li>
+      </ul>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">3</span>Who We Share It With</h2>
+      <p class="hp-p">
+        We share only what's necessary to complete a booking — for example, a renter's delivery
+        address is shared with the assigned rider, and an owner sees the renter's name and rating
+        once a booking is confirmed. We do not sell your personal information to advertisers or
+        third parties.
+      </p>
+      <p class="hp-p">
+        Some data is processed by trusted service providers on our behalf, including image
+        hosting, voice/video calling infrastructure, and identity-verification tooling — each only
+        receives what it needs to perform its specific function.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">4</span>Data Retention</h2>
+      <p class="hp-p">
+        We keep your account and booking records for as long as your account is active, and for a
+        reasonable period afterward to meet legal, tax, and dispute-resolution obligations. CNIC
+        images are retained only as long as needed for verification and fraud prevention.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">5</span>Your Rights</h2>
+      <ul class="hp-ul">
+        <li>You can view and update most of your profile information from your account settings at any time.</li>
+        <li>You can request a copy of your data or ask us to delete your account by contacting support.</li>
+        <li>You can unsubscribe from marketing emails at any time using the link in those emails.</li>
+      </ul>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">6</span>Security</h2>
+      <p class="hp-p">
+        We use industry-standard measures — encrypted passwords, secure sessions, and access
+        controls — to protect your information. No system is 100% secure, so we also encourage you
+        to use a strong password and avoid sharing your login with anyone.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">7</span>Children's Privacy</h2>
+      <p class="hp-p">
+        Rentify PK is intended for users who are at least 18 years old (in line with CNIC
+        eligibility). We do not knowingly collect information from minors.
+      </p>
+    </div>
+
+    <div class="hp-block">
+      <h2 class="hp-h2"><span class="hp-h2-num">8</span>Changes to This Policy</h2>
+      <p class="hp-p">
+        We may update this policy as the platform evolves. We'll update the "Last updated" date
+        above, and significant changes will be communicated through the app or by email.
+      </p>
+    </div>
+
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Questions about your privacy? We're happy to help.</span>
+      <a [href]="'mailto:' + settings.contactEmail()" class="hp-cta-btn">Contact Us</a>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,67 @@
+<div class="pg">
+  <div class="pg-head"><h1 class="pg-title">Settings</h1></div>
+
+  <div class="state" *ngIf="loading()"><div class="spin"></div><p>Loading settings…</p></div>
+  <div class="state state-error" *ngIf="error() && !loading()"><p>{{ error() }}</p><button class="btn" (click)="load()">Retry</button></div>
+
+  <div class="settings-card" *ngIf="!loading() && !error()">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab" [class.tab-active]="activeTab() === 'general'"    (click)="setTab('general')">General</button>
+      <button class="tab" [class.tab-active]="activeTab() === 'commission'" (click)="setTab('commission')">Commission</button>
+      <button class="tab" [class.tab-active]="activeTab() === 'cms'"        (click)="setTab('cms')">CMS</button>
+      <button class="tab" [class.tab-active]="activeTab() === 'security'"   (click)="setTab('security')">Security</button>
+    </div>
+
+    <div class="success-banner" *ngIf="successMsg()">✓ {{ successMsg() }}</div>
+
+    <!-- General -->
+    <div class="tab-body" *ngIf="activeTab() === 'general'">
+      <label class="fld-label">Site Name</label>
+      <input class="fld" type="text" [(ngModel)]="s.siteName"/>
+      <label class="fld-label">Contact Email</label>
+      <input class="fld" type="email" [(ngModel)]="s.contactEmail"/>
+      <label class="toggle-row">
+        <input type="checkbox" [(ngModel)]="s.maintenanceMode"/>
+        <span>Maintenance Mode <small>(site shows a maintenance notice)</small></span>
+      </label>
+    </div>
+
+    <!-- Commission -->
+    <div class="tab-body" *ngIf="activeTab() === 'commission'">
+      <label class="fld-label">Platform Fee: <b>{{ s.serviceFeePercent }}%</b></label>
+      <input class="slider" type="range" min="0" max="30" step="0.5" [(ngModel)]="s.serviceFeePercent"/>
+      <div class="preview-box">
+        On a <b>Rs 1,000</b> booking, platform earns <b>Rs {{ feePreview() }}</b>
+      </div>
+      <label class="fld-label">Currency</label>
+      <input class="fld" type="text" [(ngModel)]="s.currency"/>
+    </div>
+
+    <!-- CMS -->
+    <div class="tab-body" *ngIf="activeTab() === 'cms'">
+      <label class="fld-label">Homepage Banner Text</label>
+      <textarea class="fld fld-area" rows="3" [(ngModel)]="s.homeBannerText"></textarea>
+      <label class="fld-label">About Page Text</label>
+      <textarea class="fld fld-area" rows="5" [(ngModel)]="s.aboutPageText"></textarea>
+    </div>
+
+    <!-- Security -->
+    <div class="tab-body" *ngIf="activeTab() === 'security'">
+      <label class="fld-label">Admin IP Whitelist <small>(comma separated)</small></label>
+      <textarea class="fld fld-area" rows="3" [(ngModel)]="ipInput" placeholder="e.g. 103.x.x.x, 39.x.x.x"></textarea>
+      <div class="danger-zone">
+        <p class="dz-title">⚠ Danger Zone</p>
+        <button class="dz-btn" (click)="forceLogout()">🚪 Force Logout All Users</button>
+      </div>
+    </div>
+
+    <!-- Save (not on security tab where actions are immediate) -->
+    <div class="save-bar" *ngIf="activeTab() !== 'security'">
+      <button class="save-btn" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save Changes' }}</button>
+    </div>
+    <div class="save-bar" *ngIf="activeTab() === 'security'">
+      <button class="save-btn" (click)="save()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save IP Whitelist' }}</button>
+    </div>
+  </div>
+</div>

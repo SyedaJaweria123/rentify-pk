@@ -1,0 +1,98 @@
+<div class="fq-page">
+
+  <!-- ══ HERO CARD ══ -->
+  <div class="fq-hero-card">
+    <div class="fq-hero-left">
+      <h1 class="fq-hero-title">FAQ</h1>
+      <p class="fq-hero-sub">Find answers to the most commonly asked questions.</p>
+      <div class="fq-search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search questions..." [(ngModel)]="searchQuery"/>
+        <button class="fq-clear-btn" *ngIf="searchQuery" (click)="searchQuery=''; openKey=null">✕</button>
+      </div>
+    </div>
+    <div class="fq-hero-right">
+      <img src="/faq-agent.png" alt="FAQ Agent" class="fq-agent-img"/>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <div class="fq-main">
+
+    <!-- Categories row -->
+    <div class="fq-cats-section">
+      <h2 class="fq-cats-label">Categories</h2>
+      <div class="fq-cats-row">
+        <button class="fq-cat-card" [class.active]="activeCategory==='all'" (click)="setCategory('all')">
+          <span class="fq-cat-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          </span>
+          <span class="fq-cat-name">All Questions</span>
+          <span class="fq-cat-count">{{ totalCount }}</span>
+        </button>
+        <button class="fq-cat-card" *ngFor="let c of faqCategories"
+          [class.active]="activeCategory===c.id"
+          (click)="setCategory(c.id)">
+          <span class="fq-cat-ic" [ngSwitch]="c.id">
+            <svg *ngSwitchCase="'general'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+            <svg *ngSwitchCase="'account'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <svg *ngSwitchCase="'earnings'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M16 14h2"/></svg>
+            <span *ngSwitchCase="'withdrawals'" style="font-size:13px;font-weight:700;color:inherit">Rs</span>
+            <svg *ngSwitchCase="'renting'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h3l2.6 13h11l2.4-9H6"/></svg>
+            <svg *ngSwitchDefault width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          </span>
+          <span class="fq-cat-name">{{ c.label }}</span>
+          <span class="fq-cat-count">{{ c.items.length }}</span>
+        </button>
+      </div>
+
+    <!-- FAQ List -->
+    <div class="fq-list-section">
+      <h2 class="fq-list-title">Frequently Asked Questions</h2>
+
+      <!-- No results -->
+      <div class="fq-empty" *ngIf="visibleItems.length === 0">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+        <p>No results for "<strong>{{ searchQuery }}</strong>"</p>
+      </div>
+
+      <!-- Items -->
+      <div class="fq-accordion">
+        <div class="fq-acc-item" *ngFor="let f of visibleItems; let i = index"
+             [class.open]="openKey === i">
+          <button class="fq-acc-q" (click)="toggle(i)">
+            <span class="fq-acc-num">{{ i + 1 }}.</span>
+            <span class="fq-acc-text">{{ f.q }}</span>
+            <div class="fq-acc-chev" [class.rotated]="openKey === i">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </div>
+          </button>
+          <div class="fq-acc-a" *ngIf="openKey === i">
+            <p>{{ f.a }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Still have a question -->
+      <div class="fq-cta-bar" *ngIf="visibleItems.length > 0">
+        <div class="fq-cta-left">
+          <div class="fq-cta-ic">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <strong>Still have a question?</strong>
+            <p>Our support team is here to help you.</p>
+          </div>
+        </div>
+        <a routerLink="/help" class="fq-contact-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Contact Support
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

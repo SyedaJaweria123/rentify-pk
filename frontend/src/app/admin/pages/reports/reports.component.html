@@ -1,0 +1,55 @@
+<div class="pg">
+  <div class="pg-head"><h1 class="pg-title">Reports</h1></div>
+
+  <!-- Controls -->
+  <div class="report-controls">
+    <div class="ctrl">
+      <label>Report Type</label>
+      <select [(ngModel)]="reportType">
+        <option *ngFor="let t of types" [value]="t.value">{{ t.label }}</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>From</label>
+      <input type="date" [(ngModel)]="fromDate"/>
+    </div>
+    <div class="ctrl">
+      <label>To</label>
+      <input type="date" [(ngModel)]="toDate"/>
+    </div>
+    <button class="gen-btn" (click)="generate()">Generate Report</button>
+  </div>
+
+  <!-- States -->
+  <div class="state" *ngIf="loading()"><div class="spin"></div><p>Generating…</p></div>
+  <div class="state state-error" *ngIf="error() && !loading()"><p>{{ error() }}</p><button class="btn" (click)="generate()">Retry</button></div>
+
+  <!-- Preview -->
+  <div class="preview" *ngIf="generated() && !loading()">
+    <div class="preview-head">
+      <span class="preview-count">{{ rows().length }} rows</span>
+      <div class="export-btns" *ngIf="rows().length > 0">
+        <button class="exp exp-csv" (click)="exportCsv()">⬇ Export CSV</button>
+        <button class="exp exp-pdf" (click)="exportPdf()">🖨 Export PDF</button>
+      </div>
+    </div>
+
+    <div class="state" *ngIf="rows().length === 0"><span class="state-icon">📄</span><p>No data for this range</p></div>
+
+    <div class="table-wrap" *ngIf="rows().length > 0">
+      <table class="tbl" id="report-table">
+        <thead>
+          <tr><th *ngFor="let c of columns()">{{ colLabel(c) }}</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rows()">
+            <td *ngFor="let c of columns()">
+              <span *ngIf="isDateCol(c)">{{ r[c] | date:'mediumDate' }}</span>
+              <span *ngIf="!isDateCol(c)">{{ r[c] }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

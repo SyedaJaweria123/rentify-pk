@@ -1,0 +1,56 @@
+<div class="hp-page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hp-hero">
+    <div class="hp-hero-left">
+      <h1 class="hp-hero-title">Press &amp; Media</h1>
+      <p class="hp-hero-sub">Company facts and how to reach us for media inquiries.</p>
+    </div>
+    <div class="hp-hero-right">
+      <img src="/press-hero.png" alt="" class="hp-agent-img">
+    </div>
+  </div>
+
+  <!-- ══ STATS ══ -->
+  <div class="hp-section" *ngIf="settings.stats() as st">
+    <h2 class="hp-section-title">Rentify PK by the Numbers</h2>
+    <div class="hp-stats-row">
+      <div>
+        <p class="hp-stat-val">{{ st.activeListings }}+</p>
+        <p class="hp-stat-label">Active Listings</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.citiesCovered }}+</p>
+        <p class="hp-stat-label">Cities Covered</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.verifiedOwners }}+</p>
+        <p class="hp-stat-label">Verified Owners</p>
+      </div>
+      <div>
+        <p class="hp-stat-val">{{ st.avgRating || '—' }}</p>
+        <p class="hp-stat-label">Average Rating</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ABOUT ══ -->
+  <div class="hp-section">
+    <h2 class="hp-section-title">About Rentify PK</h2>
+    <p class="hp-p">
+      Rentify PK is a peer-to-peer rental marketplace built for Pakistan — connecting people who
+      own items (electronics, furniture, vehicles, and more) with people who need them
+      temporarily. The platform is built around CNIC-verified identities, escrow-protected
+      payments, and rider-assisted delivery to make renting between strangers safe and simple.
+    </p>
+  </div>
+
+  <!-- ══ CTA ══ -->
+  <div class="hp-section">
+    <div class="hp-cta-box">
+      <span class="hp-cta-text">Working on a story about Rentify PK? We'd love to help.</span>
+      <a [href]="'mailto:' + settings.contactEmail() + '?subject=Media Inquiry'" class="hp-cta-btn">Media Inquiries</a>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,243 @@
+<div class="chat-page">
+
+  <!-- ══ Conversations Sidebar ══ -->
+  <div class="chat-sidebar" [class.hidden-mobile]="!!activeConversationId() && isMobile()">
+    <div class="chat-sidebar-head">
+      <h2>Messages</h2>
+    </div>
+
+    <div class="chat-sidebar-body">
+      <div class="chat-loading" *ngIf="loadingConvs()">
+        <div class="chat-spin"></div>
+      </div>
+
+      <div class="chat-empty" *ngIf="!loadingConvs() && sidebarList().length === 0">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c4d4c8" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <p>No conversations yet</p>
+      </div>
+
+      <div class="convo-item"
+           *ngFor="let conv of sidebarList()"
+           [class.active]="activeConversationId() === conv._id"
+           (click)="openConversation(conv)">
+        <div class="convo-avatar">
+          <img *ngIf="conv.otherParticipant?.avatar" [src]="conv.otherParticipant.avatar"/>
+          <span *ngIf="!conv.otherParticipant?.avatar">{{ (conv.otherParticipant?.name || 'U')[0] | uppercase }}</span>
+        </div>
+        <div class="convo-body">
+          <div class="convo-top">
+            <span class="convo-name">{{ conv.otherParticipant?.name }}</span>
+            <span class="convo-time" *ngIf="conv.lastMessageAt">{{ conv.lastMessageAt | date:'shortTime' }}</span>
+          </div>
+          <p class="convo-last">{{ conv.lastMessage || 'No messages yet' }}</p>
+        </div>
+        <span class="convo-unread" *ngIf="conv.myUnreadCount > 0">{{ conv.myUnreadCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Message Area ══ -->
+  <div class="chat-main" [class.hidden-mobile]="!activeConversationId() && isMobile()">
+
+    <div class="chat-empty-state" *ngIf="!activeConversationId()">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c4d4c8" stroke-width="1.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p>Select a conversation to start chatting</p>
+    </div>
+
+    <ng-container *ngIf="activeConversationId()">
+
+      <!-- Header -->
+      <div class="chat-header">
+        <button class="chat-back-btn" *ngIf="isMobile()" (click)="activeConversationId.set(null)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="chat-header-avatar">
+          <img *ngIf="activeConv()?.otherParticipant?.avatar" [src]="activeConv()!.otherParticipant.avatar"/>
+          <span *ngIf="!activeConv()?.otherParticipant?.avatar">{{ (activeConv()?.otherParticipant?.name || 'U')[0] | uppercase }}</span>
+        </div>
+        <div class="chat-header-info">
+          <p class="chat-header-name">{{ activeConv()?.otherParticipant?.name }}</p>
+        </div>
+        <button class="chat-call-btn" (click)="startVoiceCall()" title="Voice Call shuru karein">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.36 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.34 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </button>
+        <button class="chat-video-btn" (click)="startVideoCall()" title="Video Call shuru karein">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </button>
+        <div class="chat-more-wrap">
+          <button class="chat-more-btn" (click)="moreMenuOpen.set(!moreMenuOpen())" title="More options">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+          <div class="chat-more-menu" *ngIf="moreMenuOpen()">
+            <button (click)="goToListing(activeConv()?.listing); moreMenuOpen.set(false)" *ngIf="activeConv()?.listing?.title">
+              View listing
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listing card — what this conversation is about -->
+      <button class="chat-listing-card" *ngIf="activeConv()?.listing?.title" (click)="goToListing(activeConv()!.listing)">
+        <div class="chat-listing-img">
+          <img *ngIf="activeConv()?.listing?.images?.length" [src]="activeConv()!.listing.images[0]?.url" alt=""/>
+          <div class="chat-listing-noimg" *ngIf="!activeConv()?.listing?.images?.length">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+        </div>
+        <div class="chat-listing-info">
+          <span class="chat-listing-title">{{ activeConv()!.listing.title }}</span>
+          <span class="chat-listing-price" *ngIf="activeConv()?.listing?.price">
+            PKR {{ activeConv()!.listing.price | number }} {{ getPriceUnitLabel(activeConv()!.listing.priceUnit) }}
+          </span>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <!-- Messages -->
+      <div #messageContainer class="chat-messages">
+        <div class="chat-loading" *ngIf="loadingMessages()">
+          <div class="chat-spin"></div>
+        </div>
+
+        <div class="msg-row" *ngFor="let msg of messages()" [class.own]="isMyMessage(msg)">
+          <div class="msg-bubble"
+               [class.own]="isMyMessage(msg)"
+               [class.audio-bubble]="!msg.isDeleted && msg.type === 'audio'"
+               [class.media-bubble]="!msg.isDeleted && (msg.type === 'image' || msg.type === 'video')"
+               [class.deleted-bubble]="msg.isDeleted"
+               (contextmenu)="onMsgRightClick($event, msg)">
+
+            <span *ngIf="msg.isDeleted" class="msg-deleted">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              This message was deleted
+            </span>
+
+            <ng-container *ngIf="!msg.isDeleted">
+              <div class="reply-quote" *ngIf="msg.replyTo">
+                <span class="reply-quote-text">{{ replyPreviewText(msg.replyTo) }}</span>
+              </div>
+
+              <ng-container *ngIf="msg.type === 'audio'">
+                <audio [src]="msg.audioUrl" controls class="voice-msg-player"></audio>
+              </ng-container>
+
+              <ng-container *ngIf="msg.type === 'image'">
+                <img [src]="msg.imageUrl" class="chat-img-msg" (click)="openLightbox(msg.imageUrl)" alt="Photo"/>
+              </ng-container>
+
+              <ng-container *ngIf="msg.type === 'video'">
+                <video [src]="msg.videoUrl" [poster]="msg.videoThumbUrl" controls class="chat-video-msg"></video>
+              </ng-container>
+
+              <ng-container *ngIf="msg.type === 'location'">
+                <div class="location-card" (click)="openLocationInMaps(msg)">
+                  <div class="location-card-map">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F5435" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div class="location-card-info">
+                    <span class="location-card-title">📍 Location Shared</span>
+                    <span class="location-card-sub">Maps mein kholne ke liye tap karein</span>
+                  </div>
+                </div>
+              </ng-container>
+
+              <span *ngIf="msg.type !== 'audio' && msg.type !== 'image' && msg.type !== 'video' && msg.type !== 'location'">{{ msg.content }}</span>
+            </ng-container>
+          </div>
+          <span class="msg-time" [class.own]="isMyMessage(msg)">{{ msg.createdAt | date:'shortTime' }}</span>
+        </div>
+      </div>
+
+      <!-- Reply Preview Bar (shown when replying to a message) -->
+      <div class="reply-preview-bar" *ngIf="replyingTo()">
+        <div class="reply-preview-content">
+          <span class="reply-preview-label">Reply karen:</span>
+          <span class="reply-preview-text">{{ msgPreviewText(replyingTo()) }}</span>
+        </div>
+        <button class="reply-preview-close" (click)="cancelReply()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-row" *ngIf="!isRecording()">
+        <div class="attach-wrapper">
+          <button class="chat-attach-btn" (click)="toggleAttachMenu()"
+                  [disabled]="uploadingImage() || uploadingVideo() || sendingLocation()" title="Attach">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+
+          <div class="attach-menu" *ngIf="showAttachMenu()">
+            <button (click)="triggerImagePicker(imageInput)">
+              <span class="attach-menu-icon attach-icon-image">🖼️</span> Photo
+            </button>
+            <button (click)="triggerVideoPicker(videoInput)">
+              <span class="attach-menu-icon attach-icon-video">🎥</span> Video
+            </button>
+            <button (click)="shareLocation()">
+              <span class="attach-menu-icon attach-icon-location">📍</span> Location
+            </button>
+          </div>
+          <div class="attach-overlay" *ngIf="showAttachMenu()" (click)="closeAttachMenu()"></div>
+        </div>
+
+        <input #imageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+        <input #videoInput type="file" accept="video/*" hidden (change)="onVideoSelected($event)" />
+
+        <button class="chat-mic-btn" (click)="startRecording()" [disabled]="uploadingVoice()" title="Voice message record karein">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <textarea class="chat-input" [(ngModel)]="newMessage" placeholder="Type a message..."
+                  rows="1" (keydown.enter)="onEnterKey($event)"></textarea>
+        <button class="chat-send-btn" [disabled]="!newMessage.trim() || sending()" (click)="send()">
+          <span *ngIf="!uploadingVoice() && !uploadingImage() && !uploadingVideo() && !sendingLocation()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </span>
+          <span *ngIf="uploadingVoice() || uploadingImage() || uploadingVideo() || sendingLocation()" class="chat-spin-sm"></span>
+        </button>
+      </div>
+
+      <!-- Recording UI -->
+      <div class="chat-recording-row" *ngIf="isRecording()">
+        <button class="chat-cancel-rec-btn" (click)="cancelRecording()" title="Cancel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="rec-indicator">
+          <span class="rec-dot"></span>
+          <span class="rec-time">{{ formatRecordTime(recordSeconds()) }}</span>
+          <span class="rec-label">Recording voice message...</span>
+        </div>
+        <button class="chat-send-rec-btn" (click)="stopAndSendRecording()" title="Send">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+
+  <!-- Image Lightbox (WhatsApp-style in-page preview) -->
+  <div class="img-lightbox" *ngIf="lightboxUrl()" (click)="closeLightbox()">
+    <button class="img-lightbox-close" (click)="closeLightbox()" title="Close">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img [src]="lightboxUrl()" (click)="$event.stopPropagation()" class="img-lightbox-content" alt="Photo"/>
+  </div>
+
+  <!-- Right-click message menu: Reply / Copy / Delete for Me / Delete for Everyone -->
+  <div class="ctx-overlay" *ngIf="ctxMenu().show" (click)="closeCtxMenu()" (contextmenu)="closeCtxMenu(); $event.preventDefault()"></div>
+  <div class="ctx-menu" *ngIf="ctxMenu().show" [style.left.px]="ctxMenu().x" [style.top.px]="ctxMenu().y">
+    <button (click)="startReply()">↩️ Reply</button>
+    <button (click)="copyMsgText()" *ngIf="ctxMenu().msg?.type !== 'image' && ctxMenu().msg?.type !== 'video' && ctxMenu().msg?.type !== 'audio'">📋 Copy</button>
+    <button (click)="deleteForMe()">🗑️ Delete for Me</button>
+    <button (click)="deleteForEveryone()" *ngIf="isMyMessage(ctxMenu().msg)" class="ctx-danger">🚫 Delete for Everyone</button>
+  </div>
+
+  <!-- NOTE: Video call modals are intentionally NOT rendered here.
+       They live ONLY in main-layout.component.html (global, app-wide),
+       so they render exactly once regardless of which page the user is on.
+       Rendering them here too caused a duplicate joinRoom() / "joinRoom
+       repeat" + server error 50120, because both this component's modal
+       AND the main-layout's global modal were reacting to the same
+       socketSvc.callState() signal and trying to join the same room. -->
+
+</div>

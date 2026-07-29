@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rentify PK</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <!-- Google One Tap — enable on production domain only -->
+  <!-- <script src="https://accounts.google.com/gsi/client" async defer></script> -->
+  <!-- Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <!-- Chart.js 4.4.3 — used by admin dashboard & analytics charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- GSAP + ScrollTrigger — self-hosted locally (public/) for the horizontal-scroll section -->
+  <script src="/gsap.min.js"></script>
+  <script src="/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+</head>
+<body>
+  <app-root></app-root>
+
+  <!-- Custom cursor (ring trails the mouse + precise dot). Vanilla, self-contained,
+       mouse-devices only. Remove this <script> + the .rz-cursor CSS to disable. -->
+  <script>
+    (function () {
+      if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+      var dot = document.createElement('div'); dot.className = 'rz-cursor-dot';
+      var ring = document.createElement('div'); ring.className = 'rz-cursor-ring';
+      document.body.appendChild(dot); document.body.appendChild(ring);
+
+      var sel = 'a, button, input, textarea, select, label, [role="button"], .cursor-pointer, [routerLink], .clickable';
+      var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+      var dx = mx, dy = my;   // dot (fast, smoothed)
+      var rx = mx, ry = my;   // ring (slow trail)
+      var shown = false;
+
+      window.addEventListener('mousemove', function (e) {
+        mx = e.clientX; my = e.clientY;
+        if (!shown) { shown = true; dot.style.opacity = '1'; ring.style.opacity = '1'; }
+        // reliably grow the ring whenever the cursor is over any interactive element
+        var over = e.target && e.target.closest && e.target.closest(sel);
+        document.body.classList.toggle('rz-cursor-hover', !!over);
+      });
+
+      (function loop() {
+        // both ease toward the mouse — dot catches up fast, ring trails for a smooth floaty feel
+        dx += (mx - dx) * 0.35;
+        dy += (my - dy) * 0.35;
+        rx += (mx - rx) * 0.13;
+        ry += (my - ry) * 0.13;
+        dot.style.transform  = 'translate(' + dx + 'px,' + dy + 'px) translate(-50%,-50%)';
+        ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
+        requestAnimationFrame(loop);
+      })();
+
+      document.addEventListener('mousedown', function () { document.body.classList.add('rz-cursor-down'); });
+      document.addEventListener('mouseup', function () { document.body.classList.remove('rz-cursor-down'); });
+      document.addEventListener('mouseleave', function () { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+      document.addEventListener('mouseenter', function () { dot.style.opacity = '1'; ring.style.opacity = '1'; });
+    })();
+  </script>
+</body>
+</html>

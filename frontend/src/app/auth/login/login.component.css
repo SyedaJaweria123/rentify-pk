@@ -1,0 +1,176 @@
+/* ═══ LOGIN POPUP ═══ */
+.lp-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: bdIn .2s ease;
+}
+@keyframes bdIn { from{opacity:0} to{opacity:1} }
+
+.lp-modal {
+  background: #fff; border-radius: 22px;
+  padding: 28px 26px 24px;
+  width: 100%; max-width: 400px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,.2);
+  animation: modalIn .25s cubic-bezier(.34,1.36,.64,1);
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.93) translateY(14px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.lp-modal::-webkit-scrollbar { display: none; }
+
+/* Close */
+.lp-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid #e5e7eb; background: #fff;
+  color: #9ca3af; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .18s;
+}
+.lp-close:hover { border-color: #1F5435; color: #1F5435; }
+
+/* Voice Guide — sits just left of the close button (54px = 16px close-button
+   offset + 30px close-button width + 8px gap) so the two never overlap. */
+.voice-btn {
+  position: absolute; top: 16px; right: 54px;
+  display: flex; align-items: center; gap: 6px;
+  background: #fafafa; border: 1.5px solid #e5e7eb;
+  border-radius: 99px; padding: 6px 11px;
+  cursor: pointer; font-size: 13px;
+  transition: all 0.15s;
+}
+.voice-btn.active { background: #EAF3DE; border-color: #1F5435; }
+.voice-waves { display: inline-flex; gap: 2px; align-items: center; }
+.voice-waves span {
+  width: 3px; height: 12px; background: #1F5435;
+  border-radius: 2px; animation: voiceWave 0.8s infinite ease-in-out;
+}
+.voice-waves span:nth-child(2) { animation-delay: 0.2s; }
+.voice-waves span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes voiceWave { 0%,100% { height: 6px; } 50% { height: 14px; } }
+
+/* Icon */
+.lp-icon-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: #EAF3DE;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+
+/* Title */
+.lp-title { font-size: 1.5rem; font-weight: 800; color: #111827; margin-bottom: 4px; }
+.lp-sub   { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+
+/* Error */
+.lp-error {
+  background: #FEF2F2; border: 1px solid #FECACA;
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12.5px; color: #dc2626;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.lp-resend { color: #1F5435; font-weight: 600; text-decoration: none; margin-left: auto; }
+
+/* Fields */
+.lp-field { margin-bottom: 12px; }
+.lp-field label { display: block; font-size: 12.5px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.lp-input-wrap {
+  display: flex; align-items: center; gap: 9px;
+  border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 0 12px; background: #fafafa; transition: border-color .18s;
+}
+.lp-input-wrap.err { border-color: #dc2626; }
+.lp-input-wrap:focus-within { border-color: #1F5435; background: #fff; }
+.lp-input-wrap input {
+  flex: 1; border: none; background: transparent;
+  padding: 11px 0; font-size: 13.5px; outline: none;
+  color: #111827; font-family: inherit;
+}
+.lp-eye { background: none; border: none; cursor: pointer; padding: 2px; display: flex; }
+.lp-err { display: block; font-size: 11.5px; color: #dc2626; margin-top: 3px; }
+
+/* Row */
+.lp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.lp-remember { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #6b7280; cursor: pointer; }
+.lp-remember input { accent-color: #1F5435; width: 15px; height: 15px; }
+.lp-forgot { font-size: 12.5px; font-weight: 600; color: #1F5435; text-decoration: none; }
+.lp-forgot:hover { text-decoration: underline; }
+
+/* Button */
+.lp-btn {
+  width: 100%; padding: 13px; background: #1F5435; color: #fff;
+  border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background .18s;
+  display: flex; align-items: center; justify-content: center;
+}
+.lp-btn:hover:not(:disabled) { background: #143524; }
+.lp-btn:disabled { opacity: .7; cursor: not-allowed; }
+
+/* Biometric login */
+.lp-biometric-btn {
+  width: 100%; padding: 12px; margin-top: 10px; background: #fff; color: #1F5435;
+  border: 1.5px solid #1F5435; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .18s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.lp-biometric-btn:hover:not(:disabled) { background: #EAF3DE; }
+.lp-biometric-btn:disabled { opacity: .6; cursor: not-allowed; }
+.lp-biometric-btn .lp-spin { border-color: rgba(31,84,53,.3); border-top-color: #1F5435; }
+.lp-biometric-error { font-size: 12px; color: #dc2626; text-align: center; margin: 8px 0 0; }
+
+/* Spinner */
+.lp-spin {
+  width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* Divider */
+.lp-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 14px 0; font-size: 12px; color: #9ca3af;
+}
+.lp-divider::before, .lp-divider::after {
+  content: ''; flex: 1; height: 1px; background: #e5e7eb;
+}
+
+/* Social */
+.lp-social { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.lp-social-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px; border: 1.5px solid #e5e7eb; border-radius: 10px;
+  background: #fff; font-size: 13px; font-weight: 600; color: #374151;
+  cursor: pointer; font-family: inherit; transition: all .18s;
+}
+.lp-social-btn:hover { border-color: #1F5435; background: #f8faf8; }
+
+/* Switch */
+.lp-switch { text-align: center; font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+.lp-switch a { color: #1F5435; font-weight: 700; text-decoration: none; }
+.lp-switch a:hover { text-decoration: underline; }
+
+/* Trust */
+.lp-trust {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  border-top: 1px solid #f0f0f0; padding-top: 14px;
+}
+.lp-trust-item { display: flex; align-items: center; gap: 7px; }
+.lp-trust-ic {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #EAF3DE; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.lp-trust-item strong { display: block; font-size: 10.5px; color: #111827; font-weight: 700; }
+.lp-trust-item p { font-size: 9.5px; color: #9ca3af; margin: 0; }
+
+/* Mobile */
+@media(max-width:480px) {
+  .lp-modal { padding: 22px 18px 20px; }
+  .lp-trust { grid-template-columns: 1fr; gap: 6px; }
+  .voice-btn { padding: 5px 9px; font-size: 12px; right: 50px; }
+  .lp-close { width: 28px; height: 28px; }
+}
