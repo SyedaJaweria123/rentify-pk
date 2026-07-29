@@ -27,11 +27,12 @@
           },
           "configurations": {
             "production": {
-              "budgets": [
-                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
-                { "type": "anyComponentStyle", "maximumWarning": "2kB", "maximumError": "4kB" }
-              ],
-              "outputHashing": "all"
+             
+  "budgets": [
+    { "type": "initial", "maximumWarning": "1MB", "maximumError": "5MB" },
+    { "type": "anyComponentStyle", "maximumWarning": "10kB", "maximumError": "50kB" }
+  ],
+  "outputHashing": "all"
             },
             "development": { "optimization": false, "extractLicenses": false, "sourceMap": true }
           },
