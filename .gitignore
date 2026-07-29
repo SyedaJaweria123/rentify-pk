@@ -4,4 +4,4 @@ backend/.env
 frontend/.env
 dist/
 .angular/
-*.log
+*.logrentanything_jc/ 
