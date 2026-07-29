@@ -1,7 +1,8 @@
-node_modules/
-.env
-backend/.env
-frontend/.env
-dist/
-.angular/
-*.logrentanything_jc/ 
+node_modules/ 
+.env 
+backend/.env 
+frontend/.env 
+dist/ 
+.angular/ 
+*.log 
+rentanything_jc/
