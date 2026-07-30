@@ -1,1 +1,4 @@
 https://rentify-backend-h7mv.onrender.com             //backend hosting link
+
+
+https://rentify-pk-eight.vercel.app/     //forend hosting link
