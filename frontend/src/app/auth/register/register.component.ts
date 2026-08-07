@@ -243,8 +243,32 @@ export class RegisterComponent implements OnDestroy {
     this.scanSide = side;
     this.scanError = ''; this.scanning = true; this.scanFeedback = '';
     try {
-      const facingMode = side === 'selfie' ? 'user' : 'environment';
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
+      const isSelfie = side === 'selfie';
+      const facingMode = isSelfie ? 'user' : 'environment';
+
+      // High-quality constraints — the default `{ video: { facingMode } }`
+      // gave the browser no hint, so it picked the lowest quality available.
+      // For CNIC OCR the camera must be sharp: prefer 1920×1080 (Full HD) and
+      // fall back gracefully when the device can't reach it.
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: { ideal: facingMode },
+          width:  { ideal: 1920, min: 640 },
+          height: { ideal: 1080, min: 480 },
+          // Ask for the highest possible frame-rate so the quality monitor
+          // can collect stable frames quickly.
+          frameRate: { ideal: 30, min: 15 },
+          // On supported browsers, disable any software post-processing that
+          // softens the image — we need raw sharpness for OCR.
+          ...(isSelfie ? {} : {
+            focusMode:       'continuous' as any,
+            exposureMode:    'continuous' as any,
+            whiteBalanceMode:'continuous' as any,
+          }),
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       this.cameraStream = stream;
       setTimeout(() => {
         if (this.videoEl?.nativeElement) {
@@ -337,10 +361,15 @@ export class RegisterComponent implements OnDestroy {
     const ctx = canvas.getContext('2d');
     if (!ctx || video.videoWidth === 0) return;
 
-    const w = 640, h = Math.round((video.videoHeight / video.videoWidth) * 640);
+    // Capture at the camera's native resolution — the old 640 px cap meant
+    // CNIC text was too small for Gemini Vision to read reliably, and 0.7
+    // JPEG quality introduced blur artifacts on fine text. Full resolution +
+    // high quality gives the OCR the detail it needs.
+    const w = Math.max(video.videoWidth, 1280);
+    const h = Math.round((video.videoHeight / video.videoWidth) * w);
     canvas.width = w; canvas.height = h;
     ctx.drawImage(video, 0, 0, w, h);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
     this.detecting = true;
     this.lastDetectAt = Date.now();
